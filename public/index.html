@@ -192,9 +192,23 @@ td.neg{color:var(--negative)} td.pos{color:var(--accent-hover)}
 .tbl-note{font-size:12px;color:var(--text-muted);padding:10px 14px;border-top:1px solid var(--backdrop)}
 .tbl-note.warn{color:var(--warning);background:#f9f1e6}
 .fallback-fig img{width:100%;height:auto;display:block;border:1px solid var(--border-subtle);border-radius:var(--r)}
-.formula{font-family:var(--font-mono);font-size:13px;background:var(--bg-zebra);border:1px solid var(--border-subtle);border-radius:var(--r);padding:10px 12px;display:inline-block;margin:6px 0 2px}
-.method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
-.method-grid p{color:var(--text-muted);margin:4px 0 0}
+/* reference: how the curves are generated */
+.method-list{border:1px solid var(--border-subtle);border-radius:var(--r);overflow:hidden}
+.method-item{display:grid;grid-template-columns:200px minmax(0,1fr);border-bottom:1px solid var(--border-subtle)}
+.method-item:last-child{border-bottom:0}
+.method-title{margin:0;padding:16px 20px;font-size:15px;font-weight:600;background:var(--bg-zebra);border-right:1px solid var(--border-subtle);border-left:3px solid var(--accent)}
+.method-content{padding:16px 20px;color:var(--text-muted)}
+.method-content p{margin:0 0 6px}
+.method-content p:last-child{margin-bottom:0}
+.method-content strong{color:var(--text);font-weight:600}
+.formula-container{margin:0 0 12px}
+.formula{display:inline-block;font-family:var(--font-mono);font-size:15px;color:var(--text);background:var(--accent-muted);border:1px solid #b5d5ec;border-radius:var(--r);padding:10px 16px}
+.formula sup{font-size:.72em}
+.variable-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.variable-list li{position:relative;padding-left:16px}
+.variable-list li::before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;border-radius:1px;background:var(--accent)}
+.variable-list strong{font-family:var(--font-mono)}
+@media (max-width:700px){.method-item{grid-template-columns:minmax(0,1fr)}.method-title{border-right:0;border-bottom:1px solid var(--border-subtle);padding:12px 16px}.method-content{padding:14px 16px}}
 footer{background:var(--dark);color:var(--dark-text);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:24px}
 footer b{color:#fff;font-weight:600}
@@ -232,8 +246,7 @@ footer b{color:#fff;font-weight:600}
   <div class="wrap">
     <p class="kicker">Bridge asset analytics</p>
     <h1>Element-level deterioration curves</h1>
-    <p class="lede">Perform the following in sequence: (1) Select a state, (2) an element type, and (3) an element ID to see its fitted deterioration curve!</p>
-    <p class="lede">The analysis uses the element ID's inspection history to perform an interval-by-interval fitting analysis, followed by forecasting its poor (CS3) and severe (CS4) condition from the latest inspection date.</p>
+    <p class="lede">Select a state, an element type and an element ID to see its fitted deterioration curve: inspection history, interval-by-interval fit, and a 20-year forecast of poor and severe condition from the latest inspection.</p>
     <div class="hero-actions">
       <button class="btn cta lg" data-go="state">Browse curves</button>
       <button class="btn ghost lg" data-go="method">How to read a curve</button>
@@ -344,12 +357,52 @@ footer b{color:#fff;font-weight:600}
 
   <section class="panel" id="method" aria-labelledby="h-method">
     <div class="panel-head"><div><p class="eyebrow">Reference</p><h2 id="h-method">How the curves are generated</h2><p class="sub">Every chart, table and figure on this page is computed in your browser from the element's inspection records (<span class="mono">observations.csv</span>).</p></div></div>
-    <div class="method-grid">
-      <div><b>Model</b><br><span class="formula">b(t) = 1 − (1 − b₀) · e<sup>−r·t</sup></span><p>b is the share of the element's quantity in poor or severe condition (condition states 3 and 4), b₀ is the share at the start, t is in years and r is the element-ID deterioration rate per year.</p></div>
-      <div><b>Intervals</b><p>Consecutive inspections used in the fit form an interval. An interval is excluded when the element's total quantity changes between its two inspections. Each remaining interval gets an equal weight.</p></div>
-      <div><b>Fitting</b><p>r ≥ 0 minimises the weighted squared error between each interval's predicted and observed end share. Fitting RMSE is reported in percentage points next to a persistence baseline (no change). It is a fitting measure, not out-of-sample validation.</p></div>
-      <div><b>Forecast</b><p>The curve starts at the latest inspection and runs for the selected horizon, assuming no intervention. All reported figures are rounded to 3 significant figures.</p></div>
+<div class="method-list">
+  <!-- Model Section -->
+  <section class="method-item">
+    <h3 class="method-title">Model</h3>
+    <div class="method-content">
+      <div class="formula-container">
+        <span class="formula">b(t) = 1 − (1 − b₀) · e<sup>−r·t</sup></span>
+      </div>
+      <ul class="variable-list">
+        <li><strong>b:</strong> The share of the element's quantity in poor or severe condition (condition states 3 and 4).</li>
+        <li><strong>b₀:</strong> The share at the start.</li>
+        <li><strong>t:</strong> Time in years.</li>
+        <li><strong>r:</strong> The element-ID deterioration rate per year.</li>
+      </ul>
     </div>
+  </section>
+
+  <!-- Intervals Section -->
+  <section class="method-item">
+    <h3 class="method-title">Intervals</h3>
+    <div class="method-content">
+      <p>Consecutive inspections used in the fit form an interval.</p>
+      <p>An interval is excluded when the element's total quantity changes between its two inspections.</p>
+      <p>Each remaining interval gets an equal weight.</p>
+    </div>
+  </section>
+
+  <!-- Fitting Section -->
+  <section class="method-item">
+    <h3 class="method-title">Fitting</h3>
+    <div class="method-content">
+      <p><strong>r ≥ 0</strong> minimizes the weighted squared error between each interval's predicted and observed end share.</p>
+      <p>Fitting RMSE is reported in percentage points next to a persistence baseline (no change).</p>
+      <p>This is a fitting measure, not out-of-sample validation.</p>
+    </div>
+  </section>
+
+  <!-- Forecast Section -->
+  <section class="method-item">
+    <h3 class="method-title">Forecast</h3>
+    <div class="method-content">
+      <p>The curve starts at the latest inspection and runs for the selected horizon, assuming no intervention.</p>
+      <p>All reported figures are rounded to 3 significant figures.</p>
+    </div>
+  </section>
+</div>
   </section>
 
 </main>
@@ -618,7 +671,7 @@ function renderDetail() {
   $("#prevBtn").disabled = i === 0;
   $("#nextBtn").disabled = i === els.length - 1;
   $("#h-detail").innerHTML = `Element <span class="mono">${esc(e.id)}</span>`;
-  // $("#downloads").innerHTML = `<span class="lbl">Source files</span>` +
+  $("#downloads").innerHTML = `<span class="lbl">Source files</span>` +
     e.files.map((f) => `<a href="${esc(f.href)}" download>${esc(f.name)}${f.href === e.image ? " (pipeline figure)" : ""}</a>`).join("");
 
   const R = modelFor(e, horizon);
