@@ -343,51 +343,12 @@ footer b{color:#fff;font-weight:600}
   </section>
 
   <section class="panel" id="method" aria-labelledby="h-method">
-    <div class="method-list">
-      <!-- Model Section -->
-      <section class="method-item">
-        <h3 class="method-title">Model</h3>
-        <div class="method-content">
-          <div class="formula-container">
-            <span class="formula">b(t) = 1 − (1 − b₀) · e<sup>−r·t</sup></span>
-          </div>
-          <ul class="variable-list">
-            <li><strong>b:</strong> The share of the element's quantity in poor or severe condition (condition states 3 and 4).</li>
-            <li><strong>b₀:</strong> The share at the start.</li>
-            <li><strong>t:</strong> Time in years.</li>
-            <li><strong>r:</strong> The element-ID deterioration rate per year.</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- Intervals Section -->
-      <section class="method-item">
-        <h3 class="method-title">Intervals</h3>
-        <div class="method-content">
-          <p>Consecutive inspections used in the fit form an interval.</p>
-          <p>An interval is excluded when the element's total quantity changes between its two inspections.</p>
-          <p>Each remaining interval gets an equal weight.</p>
-        </div>
-      </section>
-
-      <!-- Fitting Section -->
-      <section class="method-item">
-        <h3 class="method-title">Fitting</h3>
-        <div class="method-content">
-          <p><strong>r ≥ 0</strong> minimizes the weighted squared error between each interval's predicted and observed end share.</p>
-          <p>Fitting RMSE is reported in percentage points next to a persistence baseline (no change).</p>
-          <p>This is a fitting measure, not out-of-sample validation.</p>
-        </div>
-      </section>
-
-      <!-- Forecast Section -->
-      <section class="method-item">
-        <h3 class="method-title">Forecast</h3>
-        <div class="method-content">
-          <p>The curve starts at the latest inspection and runs for the selected horizon, assuming no intervention.</p>
-          <p>All reported figures are rounded to 3 significant figures.</p>
-        </div>
-      </section>
+    <div class="panel-head"><div><p class="eyebrow">Reference</p><h2 id="h-method">How the curves are generated</h2><p class="sub">Every chart, table and figure on this page is computed in your browser from the element's inspection records (<span class="mono">observations.csv</span>).</p></div></div>
+    <div class="method-grid">
+      <div><b>Model</b><br><span class="formula">b(t) = 1 − (1 − b₀) · e<sup>−r·t</sup></span><p>b is the share of the element's quantity in poor or severe condition (condition states 3 and 4), b₀ is the share at the start, t is in years and r is the element-ID deterioration rate per year.</p></div>
+      <div><b>Intervals</b><p>Consecutive inspections used in the fit form an interval. An interval is excluded when the element's total quantity changes between its two inspections. Each remaining interval gets an equal weight.</p></div>
+      <div><b>Fitting</b><p>r ≥ 0 minimises the weighted squared error between each interval's predicted and observed end share. Fitting RMSE is reported in percentage points next to a persistence baseline (no change). It is a fitting measure, not out-of-sample validation.</p></div>
+      <div><b>Forecast</b><p>The curve starts at the latest inspection and runs for the selected horizon, assuming no intervention. All reported figures are rounded to 3 significant figures.</p></div>
     </div>
   </section>
 
