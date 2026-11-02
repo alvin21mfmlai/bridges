@@ -1,0 +1,2 @@
+element_id,element_name,scope,forecast_years,status,rate_per_year,n_bridges,n_elements,n_intervals,rmse_pp,persistence_rmse_pp,at_upper_bound,observations_total,observations_used,forecast_ready_bridges,forecast_blocked_bridges,worsening_intervals,unchanged_intervals,improving_intervals,loss_slope_at_zero
+x5000,Steel Open Girder/Beam,one_bridge_only,20.0,fitted,0.024225552828999915,1,1,4,4.865348158151239,6.25,False,5,5,1,0,1,3,0,-0.1300479123887748

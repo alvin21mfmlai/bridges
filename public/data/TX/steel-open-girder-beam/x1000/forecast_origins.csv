@@ -1,0 +1,2 @@
+bridge_id,element_id,forecast_origin_date,forecast_initial_share,total_quantity,forecast_status,forecast_reason,n_history_intervals,rate_per_year
+1000,x1000,2026-02-10,0.11631663974151858,1238.0,ready,,5,0.01754980347770636
