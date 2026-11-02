@@ -232,7 +232,8 @@ footer b{color:#fff;font-weight:600}
   <div class="wrap">
     <p class="kicker">Bridge asset analytics</p>
     <h1>Element-level deterioration curves</h1>
-    <p class="lede">Select a state, an element type and an element ID to see its fitted deterioration curve: inspection history, interval-by-interval fit, and a 20-year forecast of poor and severe condition from the latest inspection.</p>
+    <p class="lede">Perform the following in sequence: (1) Select a state, (2) an element type, and (3) an element ID to see its fitted deterioration curve!</p>
+    <p class="lede">The analysis uses the element ID's inspection history to perform an interval-by-interval fitting analysis, followed by forecasting its poor (CS3) and severe (CS4) condition from the latest inspection date.</p>
     <div class="hero-actions">
       <button class="btn cta lg" data-go="state">Browse curves</button>
       <button class="btn ghost lg" data-go="method">How to read a curve</button>
@@ -617,7 +618,7 @@ function renderDetail() {
   $("#prevBtn").disabled = i === 0;
   $("#nextBtn").disabled = i === els.length - 1;
   $("#h-detail").innerHTML = `Element <span class="mono">${esc(e.id)}</span>`;
-  $("#downloads").innerHTML = `<span class="lbl">Source files</span>` +
+  // $("#downloads").innerHTML = `<span class="lbl">Source files</span>` +
     e.files.map((f) => `<a href="${esc(f.href)}" download>${esc(f.name)}${f.href === e.image ? " (pipeline figure)" : ""}</a>`).join("");
 
   const R = modelFor(e, horizon);
