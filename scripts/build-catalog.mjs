@@ -1,10 +1,10 @@
 // Builds public/catalog.js from the folder tree under public/data.
 //
-//   public/data/<STATE>/<element-type-folder>/<element-id>/curve.png
-//                                                          model.csv            (optional, recommended)
-//                                                          forecast_origins.csv (optional)
-//                                                          curve.csv            (optional)
-//                                                          ...any other files   (offered as downloads)
+//   public/data/<STATE>/<element-type-folder>/<element-id>/observations.csv  (required: inspection history)
+//                                                          model.csv         (optional: pipeline values for cross-checking)
+//                                                          ...any other files (offered as downloads)
+//
+// The site fits and draws every curve in the browser from observations.csv.
 //
 // <STATE> is the two-letter USPS code (TX, CA, ...). The element-type display
 // name comes from model.csv `element_name`; if absent, from the folder name.
@@ -60,49 +60,50 @@ for (const state of dirs(dataDir).sort()) {
       const dir = join(dataDir, state, typeDir, id);
       const files = readdirSync(dir).filter((f) => !f.startsWith(".") && statSync(join(dir, f)).isFile()).sort();
       const png = files.find((f) => f.toLowerCase() === "curve.png") || files.find((f) => /\.(png|jpe?g|svg|webp)$/i.test(f));
-      if (!png) { console.warn(`skip ${state}/${typeDir}/${id}: no curve image`); continue; }
 
       const m = readCSV(join(dir, "model.csv"))[0] || {};
-      const o = readCSV(join(dir, "forecast_origins.csv"))[0] || {};
-      const curve = readCSV(join(dir, "curve.csv"));
+      const obsRows = readCSV(join(dir, "observations.csv"));
       if (!typeName && m.element_name) typeName = m.element_name;
+      if (!typeName) { const sc = (obsRows[0]?.scope || "").match(/'([^']+)'/); if (sc) typeName = sc[1]; }
+      if (!png && !obsRows.length) { console.warn(`skip ${state}/${typeDir}/${id}: no observations.csv or image`); continue; }
 
-      // forecast series sampled once a year for the card sparkline
-      const series = curve
-        .map((r) => [num(r.horizon_years), num(r.poor_severe_percent)])
-        .filter(([h, v]) => h != null && v != null && Math.abs(h - Math.round(h)) < 1e-6)
-        .map(([h, v]) => [Math.round(h), +v.toFixed(3)]);
-      const last = curve[curve.length - 1];
+      // Raw inspection records; the browser builds intervals, fits the rate and draws the curves.
+      const truthy = (v) => /^(true|1|yes)$/i.test(String(v).trim());
+      const obs = obsRows
+        .filter((r) => r.date)
+        .map((r) => {
+          const cs = ["cs1", "cs2", "cs3", "cs4"].map((k) => num(r[k]));
+          const total = num(r.total);
+          let b = num(r.b);
+          if (b == null && total && cs[2] != null && cs[3] != null) b = (cs[2] + cs[3]) / total;
+          return {
+            d: r.date.slice(0, 10), b, total, cs,
+            used: r.used_in_fit === undefined ? b != null : truthy(r.used_in_fit),
+            latest: truthy(r.is_latest),
+            insp: r.inspection_id || null, report: r.report_type_id || null,
+            maint: r.maintenance_completion_date || null,
+          };
+        })
+        .sort((x, y) => x.d.localeCompare(y.d));
 
       const base = `data/${state}/${typeDir}/${id}/`;
       elements.push({
         id,
-        bridgeId: o.bridge_id || null,
-        image: base + png,
+        bridgeId: obsRows[0]?.bridge_id || null,
+        image: png ? base + png : null,
         files: files.map((f) => ({ name: f, href: base + f })),
-        model: {
+        obs,
+        // values reported by the modelling pipeline, used only to cross-check the in-browser fit
+        pipeline: {
           status: m.status || null,
           ratePerYear: num(m.rate_per_year),
+          rmsePP: num(m.rmse_pp),
+          persistenceRmsePP: num(m.persistence_rmse_pp),
           forecastYears: num(m.forecast_years),
           nBridges: num(m.n_bridges),
           nIntervals: num(m.n_intervals),
-          rmsePP: num(m.rmse_pp),
-          persistenceRmsePP: num(m.persistence_rmse_pp),
-          observationsUsed: num(m.observations_used),
-          observationsTotal: num(m.observations_total),
-          worsening: num(m.worsening_intervals),
-          unchanged: num(m.unchanged_intervals),
-          improving: num(m.improving_intervals),
-          scope: m.scope || null,
+          atUpperBound: m.at_upper_bound ? truthy(m.at_upper_bound) : null,
         },
-        latest: {
-          date: o.forecast_origin_date || null,
-          pct: num(o.forecast_initial_share) == null ? null : num(o.forecast_initial_share) * 100,
-          quantity: num(o.total_quantity),
-        },
-        forecast: last
-          ? { date: (last.date || "").slice(0, 10), years: num(last.horizon_years), pct: num(last.poor_severe_percent), series }
-          : null,
       });
       count++;
     }
