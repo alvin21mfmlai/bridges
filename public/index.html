@@ -412,7 +412,7 @@ footer b{color:#fff;font-weight:600}
 
 <footer>
   <div class="wrap">
-    <span><b>Bentley Systems</b> · Bridge Deterioration Curves · Prototype using demonstration data</span>
+    <span><b>Bentley Systems</b> · Bridge Deterioration Curves Prototype using Synthetic Data</span>
     <span id="genAt"></span>
   </div>
 </footer>
@@ -824,7 +824,7 @@ $("#nextBtn").addEventListener("click", () => { const els = elementsOf(), i = el
 document.querySelectorAll("[data-go]").forEach((s) => s.addEventListener("click", () => jump({ state: "#panel-state", type: "#panel-type", element: "#panel-element", method: "#method" }[s.dataset.go])));
 window.addEventListener("hashchange", () => { readHash(); render(); });
 
-if (CAT.generatedAt) $("#genAt").textContent = `Data catalog updated ${CAT.generatedAt.slice(0, 10)}`;
+// if (CAT.generatedAt) $("#genAt").textContent = `Data catalog updated ${CAT.generatedAt.slice(0, 10)}`;
 readHash(); render();
 if (sel.el) jump("#panel-detail");
 })();
