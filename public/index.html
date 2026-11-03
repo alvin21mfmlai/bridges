@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bridge Deterioration Curves | Bentley Systems</title>
-<meta name="description" content="Element-level bridge deterioration curves, filtered by state, element type and element ID.">
+<title>Bridge Deterioration Model | Bentley Systems</title>
+<meta name="description" content="Element-level bridge deterioration model, filtered by state, element type and element ID.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -219,14 +219,14 @@ footer b{color:#fff;font-weight:600}
 
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#/" aria-label="Bridge Deterioration Curves home">
+    <a class="brand" href="#/" aria-label="Bridge Deterioration Model home">
       <span class="logo" id="logoBox">
         <!-- Header logo: public/assets/BentleySystemsBlackLogo.png -->
         <img src="assets/BentleySystemsBlackLogo.png" alt="Bentley Systems" onerror="this.parentNode.classList.add('fallback')">
         <span class="logo-text">Bentley Systems</span>
       </span>
       <span class="divider" aria-hidden="true"></span>
-      <span class="app-name">Bridge Deterioration Curves</span>
+      <span class="app-name">Bridge Deterioration Model</span>
     </a>
     <div class="top-crumbs" id="topCrumbs" aria-live="polite"></div>
   </div>
@@ -412,7 +412,7 @@ footer b{color:#fff;font-weight:600}
 
 <footer>
   <div class="wrap">
-    <span><b>Bentley Systems</b> · Bridge Deterioration Curves Prototype using Synthetic Data</span>
+    <span><b>Bentley Systems</b> · Bridge Deterioration Model Prototype using Synthetic Data</span>
     <span id="genAt"></span>
   </div>
 </footer>
@@ -793,7 +793,7 @@ function renderChrome() {
   const cur = done.indexOf(false);
   steps.forEach((s, i) => { s.classList.toggle("done", done[i]); s.classList.toggle("current", i === cur); });
   $("#topCrumbs").innerHTML = [sName, tName, sel.el].filter(Boolean).map((x) => `<b>${esc(x)}</b>`).join('<span aria-hidden="true">/</span>');
-  document.title = sel.el ? `${sel.el} · ${tName} · ${sName} | Bridge Deterioration Curves` : "Bridge Deterioration Curves | Bentley Systems";
+  document.title = sel.el ? `${sel.el} · ${tName} · ${sName} | Bridge Deterioration Model` : "Bridge Deterioration Model | Bentley Systems";
 }
 
 function render() { renderStates(); renderTypes(); renderElements(); renderDetail(); renderChrome(); }
