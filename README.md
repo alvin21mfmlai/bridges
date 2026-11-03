@@ -28,8 +28,8 @@ the data folders.
 public/
   index.html                 the site (HTML, CSS, charts and UI)
   model.js                   the deterioration model: interval building, rate fit, forecast, 3 s.f. formatting
-  catalog.js                 generated: element index + raw inspection records (committed, so the site also works without a build)
-  assets/bentley-logo.svg    ← put the official logo file here
+  catalog.js                 generated: element index + shared source datasets (committed, so the site also works without a build)
+  assets/BentleySystemsBlackLogo.png   header logo
   data/
     TX/                                  two-letter USPS state code
       steel-open-girder-beam/            one folder per element type (any slug)
@@ -37,7 +37,8 @@ public/
           observations.csv               inspection history (required): date, total, b, cs1–cs4, used_in_fit, is_latest
           model.csv                      pipeline outputs, used only to cross-check the browser fit (optional)
           curve.png, *.csv               any other files are offered as downloads
-scripts/build-catalog.mjs    walks public/data and writes public/catalog.js
+scripts/build-catalog.mjs    walks public/data, applies synthetic.config.json, writes public/catalog.js
+synthetic.config.json        synthetic coverage: which states and element types reuse the demonstration data
 vercel.json
 ```
 
@@ -45,6 +46,22 @@ The element-type display name comes from `element_name` in `model.csv`. If that 
 is missing, the name is taken from the folder name. A state lights up on the map as soon
 as it has at least one element folder containing `observations.csv`. An element with fewer
 than two usable inspections falls back to showing its `curve.png`, if there is one.
+
+## Synthetic coverage (`synthetic.config.json`)
+
+The prototype reuses the Texas Steel Open Girder/Beam demonstration data for **every state
+(50 + DC)** and for **six element types**: Steel Open Girder/Beam, Prestressed Concrete
+Open Girder/Beam, Reinforced Concrete Open Girder/Beam, Reinforced Concrete Deck,
+Reinforced Concrete Column and Reinforced Concrete Abutment. Nothing is copied on disk.
+The build script lists the copies in the catalog, and they all point at the same four
+source datasets (`catalog.sources`). Pages for copied data show a "Synthetic data" tag.
+
+- To add or rename element types, edit `types` (the `slug` is used in the URL, the `name`
+  is what the page shows).
+- To limit coverage, replace `"states": "all"` with a list such as `["TX", "CA"]`.
+- Real data always wins: a folder at `public/data/<STATE>/<type-slug>/` replaces the
+  synthetic copy for that state and type.
+- Set `"enabled": false` to show real folders only.
 
 ## Adding data
 
@@ -54,9 +71,8 @@ than two usable inspections falls back to showing its `curve.png`, if there is o
 
 ## Logo
 
-The header loads `public/assets/bentley-logo.svg`. Use the official file from the Bentley
-brand resources. A PNG works too: change the `src` in `index.html`. Until the file is
-there, the header shows the text "Bentley Systems" on the white logo pill instead.
+The header loads `public/assets/BentleySystemsBlackLogo.png`. If the file is missing,
+the header shows the text "Bentley Systems" instead.
 
 ## Run locally
 
