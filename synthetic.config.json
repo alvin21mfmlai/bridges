@@ -1,0 +1,14 @@
+{
+  "_about": "Synthetic coverage for the prototype. Every listed state x element type reuses the element folders of `source`. A real folder at public/data/<STATE>/<type-slug>/ always takes priority over the synthetic copy. Set enabled to false to show real folders only.",
+  "enabled": true,
+  "source": { "state": "TX", "type": "steel-open-girder-beam" },
+  "states": "all",
+  "types": [
+    { "slug": "steel-open-girder-beam", "name": "Steel Open Girder/Beam" },
+    { "slug": "prestressed-concrete-open-girder-beam", "name": "Prestressed Concrete Open Girder/Beam" },
+    { "slug": "reinforced-concrete-open-girder-beam", "name": "Reinforced Concrete Open Girder/Beam" },
+    { "slug": "reinforced-concrete-deck", "name": "Reinforced Concrete Deck" },
+    { "slug": "reinforced-concrete-column", "name": "Reinforced Concrete Column" },
+    { "slug": "reinforced-concrete-abutment", "name": "Reinforced Concrete Abutment" }
+  ]
+}

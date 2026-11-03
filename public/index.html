@@ -221,7 +221,7 @@ footer b{color:#fff;font-weight:600}
   <div class="wrap">
     <a class="brand" href="#/" aria-label="Bridge Deterioration Curves home">
       <span class="logo" id="logoBox">
-        <!-- Official logo file goes in public/assets/bentley-logo.svg -->
+        <!-- Header logo: public/assets/BentleySystemsBlackLogo.png -->
         <img src="assets/BentleySystemsBlackLogo.png" alt="Bentley Systems" onerror="this.parentNode.classList.add('fallback')">
         <span class="logo-text">Bentley Systems</span>
       </span>
@@ -357,7 +357,7 @@ footer b{color:#fff;font-weight:600}
   </section>
 
   <section class="panel" id="method" aria-labelledby="h-method">
-    <div class="panel-head"><div><p class="eyebrow">Reference</p><h2 id="h-method">How the curves are generated</h2></p></div></div>
+    <div class="panel-head"><div><p class="eyebrow">Reference</p><h2 id="h-method">How the curves are generated</h2></div></div>
 <div class="method-list">
   <!-- Model Section -->
   <section class="method-item">
@@ -422,7 +422,10 @@ footer b{color:#fff;font-weight:600}
 <script>
 (() => {
 "use strict";
-const CAT = window.BRIDGE_CATALOG || { states: {} };
+const CAT = window.BRIDGE_CATALOG || { states: {}, sources: {} };
+/* Elements reference a shared source dataset (synthetic copies all point at one); attach its data. */
+for (const st of Object.values(CAT.states)) for (const t of Object.values(st.types)) for (const e of t.elements)
+  if (e.src && CAT.sources && CAT.sources[e.src]) Object.assign(e, CAT.sources[e.src]);
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -452,7 +455,7 @@ let horizon = 20;
 
 const cache = new Map();
 function modelFor(e, h = CARD_H) {
-  const key = `${sel.state}/${sel.type}/${e.id}@${h}`;
+  const key = `${e.src || `${sel.state}/${sel.type}/${e.id}`}@${h}`;
   if (!cache.has(key)) cache.set(key, e.obs && e.obs.length >= 2 ? MODEL.run(e.obs, { horizonYears: h, steps: Math.max(100, h * 10) }) : null);
   return cache.get(key);
 }
@@ -497,7 +500,17 @@ function renderStates() {
 }
 
 /* ---------- step 2: element types ---------- */
-const TYPE_ICON = `<svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true"><path d="M3 12h28M3 22h28" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><path d="M17 12v10M8 12v10M26 12v10" stroke="#00568f" stroke-width="2.2" stroke-linecap="round"/><path d="M3 12l5 10M8 12l9 10M17 12l9 10M26 12l5 10" stroke="#008ae0" stroke-width="1.4" stroke-linecap="round" opacity=".8"/></svg>`;
+const ICONS = {
+  girder: `<path d="M3 12h28M3 22h28" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><path d="M17 12v10M8 12v10M26 12v10" stroke="#00568f" stroke-width="2.2" stroke-linecap="round"/><path d="M3 12l5 10M8 12l9 10M17 12l9 10M26 12l5 10" stroke="#008ae0" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>`,
+  deck: `<rect x="3" y="12" width="28" height="8" rx="1" stroke="#0071b8" stroke-width="2.4"/><circle cx="9" cy="16" r="1.4" fill="#008ae0"/><circle cx="15" cy="16" r="1.4" fill="#008ae0"/><circle cx="21" cy="16" r="1.4" fill="#008ae0"/><circle cx="27" cy="16" r="1.4" fill="#008ae0"/><path d="M3 25h28" stroke="#00568f" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2 3"/>`,
+  column: `<path d="M8 7h18" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><rect x="13" y="9" width="8" height="18" rx="1" stroke="#00568f" stroke-width="2.2"/><path d="M9 29h16" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><path d="M15.5 12v12M18.5 12v12" stroke="#008ae0" stroke-width="1.2" stroke-linecap="round"/>`,
+  abutment: `<path d="M4 9h12v20H4" stroke="#00568f" stroke-width="2.2" stroke-linejoin="round"/><path d="M16 9h15" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><path d="M16 29l14-12" stroke="#008ae0" stroke-width="1.6" stroke-linecap="round"/><path d="M19 29l3-3M24 29l3-3M29 29l2-2" stroke="#008ae0" stroke-width="1.2" stroke-linecap="round"/>`,
+};
+function typeIcon(name) {
+  const n = String(name).toLowerCase();
+  const k = /deck|slab/.test(n) ? "deck" : /column|pier|pile/.test(n) ? "column" : /abutment|wall/.test(n) ? "abutment" : "girder";
+  return `<svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">${ICONS[k]}</svg>`;
+}
 function renderTypes() {
   const panel = $("#panel-type");
   if (!sel.state) { panel.classList.add("locked"); $("#typeSub").textContent = "Select a state first."; $("#typeCards").innerHTML = ""; return; }
@@ -505,11 +518,9 @@ function renderTypes() {
   const types = CAT.states[sel.state].types;
   $("#typeSub").textContent = `${Object.keys(types).length} element type(s) with curves in ${NAME[sel.state] || sel.state}.`;
   $("#typeCards").innerHTML = Object.entries(types).map(([slug, t]) => {
-    const saved = sel.type; sel.type = slug;
     const rates = t.elements.map((e) => modelFor(e)?.r).filter((v) => v != null);
-    sel.type = saved;
     return `<button class="card type-card" data-type="${esc(slug)}" aria-pressed="${sel.type === slug}">
-      <span class="ico">${TYPE_ICON}</span>
+      <span class="ico">${typeIcon(t.name)}</span>
       <span style="min-width:0"><span class="k">Element type</span><br><span class="t">${esc(t.name)}</span><br>
       <span class="sub">${t.elements.length} element ID${t.elements.length === 1 ? "" : "s"}${rates.length ? ` · rate ${sig3(Math.min(...rates))} to ${sig3(Math.max(...rates))} /yr` : ""}</span></span>
     </button>`;
@@ -677,6 +688,7 @@ function renderDetail() {
 
   const R = modelFor(e, horizon);
   const tags = [`<span class="tag">${esc(NAME[sel.state] || sel.state)}</span>`, `<span class="tag">${esc(t.name)}</span>`, e.bridgeId ? `<span class="tag">Bridge ${esc(e.bridgeId)}</span>` : ""];
+  if (t.synthetic) tags.push(`<span class="tag" title="Synthetic copy of the ${esc(e.src.split("/")[0])} demonstration data">Synthetic data</span>`);
   if (!R || !R.origin || R.used.length < 2) {
     current = null;
     $("#computed").hidden = true;
