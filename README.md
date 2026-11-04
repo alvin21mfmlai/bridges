@@ -28,11 +28,14 @@ the data folders.
 public/
   index.html                 the site (HTML, CSS, charts and UI)
   model.js                   the deterioration model: interval building, rate fit, forecast, 3 s.f. formatting
+  profile.js                 condition-state profile: per-bridge age and CS% binning
+  profile3d.js               3D bar chart renderer (SVG, drag to rotate)
   catalog.js                 generated: element index + shared source datasets (committed, so the site also works without a build)
   assets/BentleySystemsBlackLogo.png   header logo
   data/
     TX/                                  two-letter USPS state code
       steel-open-girder-beam/            one folder per element type (any slug)
+        _profile/                        condition-state profile: members.csv, model.csv, bins.csv, bridges.csv, excluded.csv
         x1000/                           one folder per element ID
           observations.csv               inspection history (required): date, total, b, cs1–cs4, used_in_fit, is_latest
           model.csv                      pipeline outputs, used only to cross-check the browser fit (optional)
@@ -46,6 +49,26 @@ The element-type display name comes from `element_name` in `model.csv`. If that 
 is missing, the name is taken from the folder name. A state lights up on the map as soon
 as it has at least one element folder containing `observations.csv`. An element with fewer
 than two usable inspections falls back to showing its `curve.png`, if there is one.
+
+## Condition-state profile (`public/profile.js`, `public/profile3d.js`)
+
+After Step 2 (element type), the page shows four 3D bar charts, one per condition state
+(CS1 Good, CS2 Fair, CS3 Poor, CS4 Severe). The browser builds them from
+`public/data/<STATE>/<type>/_profile/members.csv`:
+
+- Included members are summed per bridge into CS1–CS4 quantities. Bridge age = profile
+  year − year built (`model.csv` `profile_year`).
+- Floor axes: bridge age in 5-year bins (1–5 … 96–100), and the CS share
+  (CSk quantity / total × 100) in 5% bins ([0,5], (5,10] … (95,100]).
+- Bar height and colour show the total deck area of the bridges in each cell, on one colour
+  scale for all four figures. Each bridge counts its full deck area once per figure.
+- Drag any figure to rotate all four. Hover a bar to see its cell, total area and bridges;
+  the same bridges are highlighted in the other three figures and in the bridge table.
+- `bins.csv` is used only as a cross-check. The page shows "Bins match pipeline" when the
+  browser's cells equal its non-empty rows. If `members.csv` is missing, `bridges.csv`
+  is used instead.
+- Synthetic element types share the source type's profile.
+- Figures are shown to 3 significant figures (for example 8,977 sq ft is shown as 8,980).
 
 ## Synthetic coverage (`synthetic.config.json`)
 

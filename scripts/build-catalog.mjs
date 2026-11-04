@@ -1,5 +1,7 @@
 // Builds public/catalog.js from the folder tree under public/data.
 //
+//   public/data/<STATE>/<element-type-folder>/_profile/members.csv  (optional: condition-state profile of the type;
+//                                                     model.csv, bins.csv, bridges.csv alongside)
 //   public/data/<STATE>/<element-type-folder>/<element-id>/observations.csv  (required: inspection history)
 //                                                          model.csv         (optional: pipeline values for cross-checking)
 //                                                          ...any other files (offered as downloads)
@@ -24,7 +26,7 @@ const dataDir = join(root, "public", "data");
 const outFile = join(root, "public", "catalog.js");
 
 const dirs = (p) =>
-  existsSync(p) ? readdirSync(p).filter((n) => !n.startsWith(".") && statSync(join(p, n)).isDirectory()) : [];
+  existsSync(p) ? readdirSync(p).filter((n) => !n.startsWith(".") && !n.startsWith("_") && statSync(join(p, n)).isDirectory()) : [];
 const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
 
 function parseCSV(text) {
@@ -54,7 +56,41 @@ const num = (v) => (v === "" || v == null || isNaN(+v) ? null : +v);
 const titleCase = (s) => s.replace(/[-_]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 
 const ALL_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
-const catalog = { generatedAt: new Date().toISOString(), states: {}, sources: {} };
+const catalog = { generatedAt: new Date().toISOString(), states: {}, sources: {}, profiles: {} };
+const truthy = (v) => /^(true|1|yes)$/i.test(String(v).trim());
+
+/* Condition-state profile of an element type (public/data/<STATE>/<type>/_profile/). The browser
+   bins the bridges itself; bins.csv is kept only to cross-check the result. */
+function readProfile(dir, key) {
+  const m = readCSV(join(dir, "model.csv"))[0] || {};
+  let members = readCSV(join(dir, "members.csv")).map((r) => ({
+    bridge: r.bridge_id, element: r.element_id, date: (r.date || "").slice(0, 10), total: num(r.total),
+    cs: ["cs1", "cs2", "cs3", "cs4"].map((k) => num(r[k])), yearBuilt: num(r.year_built), deckArea: num(r.deck_area_sq_ft),
+    status: r.profile_status || "included",
+  }));
+  if (!members.length) // fall back to the per-bridge table
+    members = readCSV(join(dir, "bridges.csv")).map((r) => ({
+      bridge: r.bridge_id, element: r.element_ids, date: r.latest_condition_date, total: num(r.total_element_quantity),
+      cs: [1, 2, 3, 4].map((k) => num(r[`cs${k}_quantity`])), yearBuilt: num(r.year_built), deckArea: num(r.deck_area_sq_ft), status: "included",
+    }));
+  if (!members.length) return null;
+  const pipelineBins = existsSync(join(dir, "bins.csv"))
+    ? readCSV(join(dir, "bins.csv")).filter((r) => num(r.total_deck_area_sq_ft) > 0).map((r) => ({
+        cs: r.condition_state, ageLower: num(r.age_bin_lower), csLower: num(r.cs_percent_lower), area: num(r.total_deck_area_sq_ft), n: num(r.n_bridges),
+      }))
+    : null;
+  const files = readdirSync(dir).filter((f) => !f.startsWith(".") && statSync(join(dir, f)).isFile()).sort();
+  catalog.profiles[key] = {
+    meta: {
+      elementName: m.element_name || null, profileYear: num(m.profile_year) ?? new Date().getFullYear(), cutoffDate: m.cutoff_date || null,
+      ageRange: m.age_range || "1-100 years", ageBinWidth: num(m.age_bin_width_years) || 5, csBinWidth: num(m.cs_bin_width_percent) || 5,
+      areaBasis: m.area_basis || null, conditionBasis: m.condition_basis || null, status: m.status || null,
+    },
+    members, pipelineBins,
+    files: files.map((f) => ({ name: f, href: `data/${key}/_profile/${f}` })),
+  };
+  return key;
+}
 let count = 0;
 
 for (const state of dirs(dataDir).sort()) {
@@ -75,7 +111,6 @@ for (const state of dirs(dataDir).sort()) {
       if (!png && !obsRows.length) { console.warn(`skip ${state}/${typeDir}/${id}: no observations.csv or image`); continue; }
 
       // Raw inspection records; the browser builds intervals, fits the rate and draws the curves.
-      const truthy = (v) => /^(true|1|yes)$/i.test(String(v).trim());
       const obs = obsRows
         .filter((r) => r.date)
         .map((r) => {
@@ -115,7 +150,8 @@ for (const state of dirs(dataDir).sort()) {
       elements.push({ id, src });
       count++;
     }
-    if (elements.length) types[typeDir] = { name: typeName || titleCase(typeDir), elements };
+    const profile = existsSync(join(dataDir, state, typeDir, "_profile")) ? readProfile(join(dataDir, state, typeDir, "_profile"), `${code}/${typeDir}`) : null;
+    if (elements.length) types[typeDir] = { name: typeName || titleCase(typeDir), elements, ...(profile ? { profile } : {}) };
   }
   if (Object.keys(types).length) catalog.states[code] = { types };
 }
@@ -138,6 +174,7 @@ if (existsSync(cfgFile)) {
           name: t.name,
           synthetic: true,
           elements: srcType.elements.map((e) => ({ id: e.id, src: e.src })),
+          ...(srcType.profile ? { profile: srcType.profile } : {}),
         };
         synthetic += srcType.elements.length;
       }
@@ -157,4 +194,4 @@ if (existsSync(cfgFile)) {
 
 writeFileSync(outFile, `/* generated by scripts/build-catalog.mjs — do not edit */\nwindow.BRIDGE_CATALOG = ${JSON.stringify(catalog)};\n`);
 const nTypes = new Set(Object.values(catalog.states).flatMap((s) => Object.keys(s.types))).size;
-console.log(`catalog.js: ${Object.keys(catalog.states).length} state(s), ${nTypes} element type(s), ${realCount} real + ${synthetic} synthetic element(s), ${Object.keys(catalog.sources).length} source dataset(s)`);
+console.log(`catalog.js: ${Object.keys(catalog.states).length} state(s), ${nTypes} element type(s), ${realCount} real + ${synthetic} synthetic element(s), ${Object.keys(catalog.sources).length} source dataset(s), ${Object.keys(catalog.profiles).length} profile(s)`);
