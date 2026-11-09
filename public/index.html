@@ -571,7 +571,8 @@ function renderMap() {
   const opts = Object.entries(IDX.states).sort((a, b) => a[1].name.localeCompare(b[1].name));
   $("#stateSelect").innerHTML = `<option value="">Or choose from the list…</option>` + opts.map(([st, s]) => `<option value="${st}">${esc(s.name)} (${st})</option>`).join("");
   const missing = Object.keys(ALL_NAMES).filter((st) => !IDX.states[st] && !["PR", "GU"].includes(st));
-  $("#methodCoverage").textContent = `This release covers ${Object.keys(IDX.states).length} states and territories from ${Math.min(...Object.values(IDX.states).map((s) => s.years[0]))} to ${Math.max(...Object.values(IDX.states).map((s) => s.years[s.years.length - 1]))}.` + (missing.length ? ` There is no data for ${missing.slice(0, -1).map(nameOf).join(", ")}${missing.length > 1 ? " or " : ""}${nameOf(missing[missing.length - 1])}.` : "");
+  // the Method notes section can be hidden (commented out), so only fill it if it is there
+  if ($("#methodCoverage")) $("#methodCoverage").textContent = `This release covers ${Object.keys(IDX.states).length} states and territories from ${Math.min(...Object.values(IDX.states).map((s) => s.years[0]))} to ${Math.max(...Object.values(IDX.states).map((s) => s.years[s.years.length - 1]))}.` + (missing.length ? ` There is no data for ${missing.slice(0, -1).map(nameOf).join(", ")}${missing.length > 1 ? " or " : ""}${nameOf(missing[missing.length - 1])}.` : "");
   updateStateInfo(null);
 }
 function updateStateInfo(hoverSt) {
@@ -627,7 +628,7 @@ function renderYears() {
   const maxN = Math.max(...Object.values(stIdx.bridgesPerYear));
   $("#yearbars").innerHTML = span.map((y) => {
     const n = stIdx.bridgesPerYear[y] || 0, inW = win && y >= win.start && y <= win.end, has = ys.includes(y);
-    return `<button class="yb${inW ? " in" : ""}" data-y="${y}" ${has && !fixed ? "" : "disabled"} aria-pressed="${inW}" aria-label="${y}: ${int(n)} bridges${inW ? ", in period" : ""}">
+    return `<button class="yb${inW ? " in" : ""}" data-y="${y}" ${has ? "" : "disabled"} aria-pressed="${inW}" aria-label="${y}: ${int(n)} bridges${inW ? ", in period" : ""}">
       <span class="n">${n ? compact(n) : ""}</span><span class="bar" style="height:${Math.max(2, (n / maxN) * 140)}px"></span><span class="y"><span class="yl">${y}</span><span class="ys">’${String(y).slice(2)}</span></span></button>`;
   }).join("");
   // every start and end year that some valid period uses; picking one moves the other end if needed
@@ -915,16 +916,31 @@ function showErr(panel, e) {
 }
 
 /* ---------- events ---------- */
+// A state picked on the map, a button or the list starts afresh: the period goes back to the
+// latest five years, no element type is selected, and the element search, category filter,
+// z-axis setting and analysis tab return to their defaults. (Links that name a period and
+// element, such as #/TX/2016-2025/107, still open exactly that.)
+function resetFilters() {
+  catFilter = "all"; $("#elSearch").value = "";
+  mode = "abs"; $("#normBy").value = "tot";
+  $$("#normSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.norm === "raw")));
+  $("#normByWrap").hidden = true;
+  if (tab !== "insights") setTab("insights", { hash: false });
+}
+function pickState(st) {
+  resetFilters();
+  selectState(st, { scroll: true });
+}
 const mapBox = $("#usmap");
-mapBox.addEventListener("click", (ev) => { const p = ev.target.closest(".st"); if (p && IDX.states[p.dataset.st]) selectState(p.dataset.st); });
-mapBox.addEventListener("keydown", (ev) => { const p = ev.target.closest(".st"); if (p && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); selectState(p.dataset.st); } });
+mapBox.addEventListener("click", (ev) => { const p = ev.target.closest(".st"); if (p && IDX.states[p.dataset.st]) pickState(p.dataset.st); });
+mapBox.addEventListener("keydown", (ev) => { const p = ev.target.closest(".st"); if (p && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); pickState(p.dataset.st); } });
 mapBox.addEventListener("mousemove", (ev) => { const p = ev.target.closest(".st"); if (p) { showTip(stateTip(p.dataset.st), ev.clientX, ev.clientY); updateStateInfo(p.dataset.st); } else { hideTip(); } });
 mapBox.addEventListener("mouseleave", () => { hideTip(); updateStateInfo(null); });
 mapBox.addEventListener("focusin", (ev) => { const p = ev.target.closest(".st"); if (p) updateStateInfo(p.dataset.st); });
-$("#smallStates").addEventListener("click", (ev) => { const c = ev.target.closest(".chip"); if (c && !c.disabled) selectState(c.dataset.st); });
+$("#smallStates").addEventListener("click", (ev) => { const c = ev.target.closest(".chip"); if (c && !c.disabled) pickState(c.dataset.st); });
 $("#smallStates").addEventListener("mousemove", (ev) => { const c = ev.target.closest(".chip"); if (c) { showTip(stateTip(c.dataset.st), ev.clientX, ev.clientY); updateStateInfo(c.dataset.st); } else hideTip(); });
 $("#smallStates").addEventListener("mouseleave", () => { hideTip(); updateStateInfo(null); });
-$("#stateSelect").addEventListener("change", (ev) => ev.target.value && selectState(ev.target.value));
+$("#stateSelect").addEventListener("change", (ev) => ev.target.value && pickState(ev.target.value));
 $("#yearbars").addEventListener("click", (ev) => {
   const b = ev.target.closest(".yb"); if (!b || b.disabled || !stIdx || stIdx.windows.length === 1) return;
   const y = +b.dataset.y, w = curWin();

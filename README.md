@@ -15,6 +15,11 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
    Earlier/Later, or use the Latest 5 years / All years buttons. The default is the latest
    5 years. A state with 5 or fewer data years uses all of them. The bar chart shows how
    many bridges have records in each year.
+   **Switching state starts afresh.** Picking a state on the map, a button or the list
+   resets the period to the latest 5 years, clears the element type, the element search and
+   the category filter, and returns the z-axis to Non-normalized and the analysis to Basic
+   Insights (`resetFilters()` in `index.html`). Links that name a period and element, such
+   as `/#/TX/2016-2025/107`, still open exactly that.
 3. **Element type.** Every element type with records in that state and period, grouped by
    category, with a search box and the number of bridges.
 4. **Analysis**, in three tabs:
