@@ -305,7 +305,7 @@ table.data tr.hl td{background:var(--accent-muted)}
     <div class="panel-body years">
       <div>
         <div class="yearbars" id="yearbars" role="group" aria-label="Data years"></div>
-        <p class="note-inline" style="margin:10px 0 0">Bars show how many bridges were inspected each year. Click a year to move the nearer end of the period to it.</p>
+        <p class="note-inline" style="margin:10px 0 0">Bars show how many bridges were inspected each year. Click the above bar with the year tagging to add or remove their respective inclusion.</p>
       </div>
       <div class="year-ctl">
         <div class="period-badge" id="periodBadge"></div>
@@ -374,9 +374,11 @@ table.data tr.hl td{background:var(--accent-muted)}
           <div class="chart-card"><h3>CS3 (Poor)</h3><p class="csub">Share of the element quantity in condition state 3</p><div class="prof-box" id="prof2"></div></div>
           <div class="chart-card"><h3>CS4 (Severe)</h3><p class="csub">Share of the element quantity in condition state 4</p><div class="prof-box" id="prof3"></div></div>
         </div>
-        <p class="prof-note">Each bar is one age band and CS% band. Every bridge appears once in each chart, with its full deck area. Drag any chart to rotate all four, or hover a bar to see its numbers and pick out that age band in the other charts.</p>
+        <p class="prof-note">Each bar represents one age band and CS% band.</p>
+        <p class="prof-note">Every bridge appears once in each chart, with its full deck area. .</p>
+        <p class="prof-note">Drag any chart to rotate all four, or hover a bar to see its numbers and pick out that age band in the other charts.</p>
         <details class="prof-tbl">
-          <summary id="bandTitle">Bridges and deck area by age band</summary>
+          <summary id="bandTitle">Bridges and deck area by age band (same for all condition states)</summary>
           <div class="tbl-wrap"><table class="data" id="bandTable"></table></div>
           <div class="tbl-note" id="exclNote"></div>
         </details>
@@ -458,7 +460,7 @@ table.data tr.hl td{background:var(--accent-muted)}
 
 <footer>
   <div class="wrap">
-    <span>Bridge Deterioration Model, prototype. Bentley Systems.</span>
+    <span>Bridge Deterioration Model Prototype. Bentley Systems.</span>
     <span>Source: <a href="https://www.fhwa.dot.gov/bridge/nbi.cfm">FHWA National Bridge Inventory</a> element data<span id="genAt"></span></span>
   </div>
 </footer>
