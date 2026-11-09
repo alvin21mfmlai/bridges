@@ -41,22 +41,21 @@ header.top .wrap{display:flex;align-items:center;gap:20px;height:64px}
 .logo.fallback img{display:none}.logo.fallback .logo-text{display:block}
 .divider{width:1px;height:28px;background:var(--border-subtle);flex:none}
 .app-name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top-crumbs{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text-muted);min-width:0;overflow:hidden;white-space:nowrap}
-.top-crumbs b{color:var(--text);font-weight:600}
+.top-crumbs{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:13px;color:var(--text-muted);min-width:0;overflow:hidden;white-space:nowrap}
+.top-crumbs button{border:0;background:none;padding:0;font:inherit;color:var(--text);cursor:pointer;overflow:hidden;text-overflow:ellipsis}
+.top-crumbs button:hover{color:var(--accent);text-decoration:underline}
 @media (max-width:820px){.top-crumbs{display:none}}
 @media (max-width:480px){.divider,.app-name{display:none}}
 
-/* ---------- hero ---------- */
-.hero{position:relative;overflow:hidden;background:var(--dark);color:#fff}
-.hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:40px 40px}
-.hero .wrap{position:relative;z-index:2;padding-top:64px;padding-bottom:64px}
-.kicker{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#94befa;margin:0}
-.hero h1{font-size:clamp(30px,4.2vw,48px);line-height:1.12;font-weight:700;letter-spacing:-.01em;margin:12px 0 16px;max-width:18ch}
-.hero p.lede{font-size:18px;color:var(--dark-text);max-width:60ch;margin:0 0 28px}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
-.bridge-art{position:absolute;right:0;bottom:0;width:min(700px,62vw);z-index:1;pointer-events:none}
-@media (max-width:820px){.bridge-art{opacity:.3}}
-
+/* ---------- intro ---------- */
+.intro{background:#fff;border-bottom:1px solid var(--border-subtle)}
+.intro .wrap{padding-top:36px;padding-bottom:30px}
+.intro h1{font-size:clamp(26px,3.2vw,34px);line-height:1.2;font-weight:600;margin:0 0 10px}
+.intro p{font-size:16px;color:#3d3d3d;max-width:72ch;margin:0 0 10px}
+.intro p.source{font-size:13px;color:var(--text-muted);margin:0}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);font:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:hover{color:var(--accent-hover)}
+.top-link{flex:none;margin-left:18px}
 /* ---------- buttons ---------- */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 16px;border-radius:var(--r);border:1px solid var(--border-fg);background:#fff;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;color:var(--text);transition:background .2s,border-color .2s}
 .btn:hover{background:var(--bg-hover);border-color:#6b6b6b}
@@ -67,32 +66,17 @@ header.top .wrap{display:flex;align-items:center;gap:20px;height:64px}
 .btn.ghost:hover{background:rgba(255,255,255,.08);border-color:#fff}
 .btn.lg{height:44px;padding:0 22px;font-size:15px}
 
-/* ---------- stepper ---------- */
-.stepper-bar{background:#fff;border-bottom:1px solid var(--border-subtle)}
-.stepper{display:flex;margin:0;padding:0;list-style:none}
-.stepper li{flex:1;min-width:0}
-.step{width:100%;display:flex;align-items:center;gap:12px;padding:16px 16px 14px 0;background:none;border:0;border-bottom:3px solid transparent;cursor:pointer;text-align:left;color:var(--text-muted)}
-.step:hover{color:var(--text)}
-.step .n{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--border-fg);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--text-muted);background:#fff}
-.step .lbl{display:flex;flex-direction:column;min-width:0;line-height:1.3}
-.step .lbl span{font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.step .lbl b{font-size:14px;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.step.done .n{background:var(--accent);border-color:var(--accent);color:#fff}
-.step.current{border-bottom-color:var(--accent);color:var(--text)}
-.step.current .n{border-color:var(--accent);color:var(--accent)}
-@media (max-width:600px){.step .lbl b{display:none}.step{gap:8px}}
-
 /* ---------- sections ---------- */
 main.wrap{padding-top:32px;padding-bottom:56px}
 .panel{background:var(--bg);border:1px solid var(--border-subtle);border-radius:var(--r);box-shadow:0 1px 2px rgba(0,0,0,.06);padding:24px;margin-bottom:24px}
 .panel-head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--backdrop)}
-.panel-head .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 2px}
+.panel-head h2 .num{display:inline-block;min-width:1.4em;color:var(--text-muted);font-weight:400}
 .panel-head h2{margin:0;font-size:24px;font-weight:600;line-height:1.25}
 .panel-head p.sub{margin:4px 0 0;color:var(--text-muted)}
 .panel-head .tools{margin-left:auto}
 .panel.locked .panel-head{border-bottom:0;margin-bottom:0;padding-bottom:0}
 .panel.locked h2{color:var(--text-disabled)}
-.panel.locked .eyebrow{color:var(--text-disabled)}
+.panel.locked h2 .num{color:var(--text-disabled)}
 .panel.locked .panel-body,.panel.locked .tools{display:none}
 select{font:inherit;font-size:14px;height:36px;padding:0 36px 0 12px;border-radius:var(--r);border:1px solid var(--border-fg);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23363636' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;-webkit-appearance:none;color:var(--text);min-width:220px;cursor:pointer}
 select:hover{border-color:#6b6b6b}
@@ -100,7 +84,6 @@ select:hover{border-color:#6b6b6b}
 /* condition-state profile (after step 2) */
 .prof-facts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin-bottom:14px;font-size:13px;color:var(--text-muted)}
 .prof-facts b{color:var(--text);font-weight:600}
-.prof-facts .tags{margin-left:auto}
 .colorbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .colorbar .lbl{font-size:12px;font-weight:600;color:var(--text-muted)}
 .colorbar .bar{position:relative;flex:1;min-width:220px;max-width:520px;height:12px;border-radius:2px;border:1px solid var(--border-subtle);background:linear-gradient(90deg,#0d0887,#7e03a8 25%,#cc4778 50%,#f89540 75%,#f0f921)}
@@ -117,7 +100,6 @@ select:hover{border-color:#6b6b6b}
 .prof-grid.hovering .bar3d.dim{opacity:.22}
 .prof-grid .bar3d.hl polygon{stroke:#00568f;stroke-width:1.8}
 .prof-note{font-size:12.5px;color:var(--text-muted);margin:14px 0 0}
-.prof-note b{color:var(--text)}
 details.prof-tbl{margin-top:16px;border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff}
 details.prof-tbl summary{cursor:pointer;padding:12px 14px;font-weight:600;font-size:14px}
 details.prof-tbl[open] summary{border-bottom:1px solid var(--border-subtle)}
@@ -126,7 +108,7 @@ table.data tr.hl td{background:var(--accent-muted)}
 .method-list{border:1px solid var(--border-subtle);border-radius:var(--r);overflow:hidden}
 .method-item{display:grid;grid-template-columns:200px minmax(0,1fr);border-bottom:1px solid var(--border-subtle)}
 .method-item:last-child{border-bottom:0}
-.method-title{margin:0;padding:16px 20px;font-size:15px;font-weight:600;background:var(--bg-zebra);border-right:1px solid var(--border-subtle);border-left:3px solid var(--accent)}
+.method-title{margin:0;padding:16px 20px;font-size:15px;font-weight:600;background:var(--bg-zebra);border-right:1px solid var(--border-subtle)}
 .method-content{padding:16px 20px;color:var(--text-muted)}
 .method-content p{margin:0 0 6px}
 .method-content p:last-child{margin-bottom:0}
@@ -136,12 +118,12 @@ table.data tr.hl td{background:var(--accent-muted)}
 .formula sup{font-size:.72em}
 .variable-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .variable-list li{position:relative;padding-left:16px}
-.variable-list li::before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;border-radius:1px;background:var(--accent)}
-.variable-list strong{font-family:var(--font-mono)}
+.variable-list li::before{content:"";position:absolute;left:3px;top:.65em;width:5px;height:5px;border-radius:50%;background:var(--text-muted)}
+
 @media (max-width:700px){.method-item{grid-template-columns:minmax(0,1fr)}.method-title{border-right:0;border-bottom:1px solid var(--border-subtle);padding:12px 16px}.method-content{padding:14px 16px}}
-footer{background:var(--dark);color:var(--dark-text);font-size:13px}
+footer{background:#fff;border-top:1px solid var(--border-subtle);color:var(--text-muted);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:24px}
-footer b{color:#fff;font-weight:600}
+footer a{color:var(--text-muted)}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 @media (max-width:600px){.panel{padding:16px}.wrap{padding:0 16px}select{min-width:0;width:100%}.panel-head .tools{margin-left:0;width:100%}}
 .tools{display:flex;gap:8px;flex-wrap:wrap}
@@ -153,9 +135,9 @@ footer b{color:#fff;font-weight:600}
 @media (max-width:980px){.map-layout{grid-template-columns:minmax(0,1fr)}}
 .usmap{position:relative;min-width:0}
 .usmap svg{display:block;width:100%;height:auto;overflow:visible}
-.usmap .st{stroke:#fff;stroke-width:.9;stroke-linejoin:round;cursor:pointer;transition:fill .18s,filter .18s;outline:none}
-.usmap .st:hover,.usmap .st:focus-visible{stroke:#242b2e;stroke-width:1.6;filter:drop-shadow(0 3px 6px rgba(0,40,80,.35)) brightness(1.06)}
-.usmap .st.sel{fill:#f28c28!important;stroke:#242b2e;stroke-width:2;filter:drop-shadow(0 4px 10px rgba(160,70,0,.45))}
+.usmap .st{stroke:#fff;stroke-width:.9;stroke-linejoin:round;cursor:pointer;transition:fill .15s;outline:none}
+.usmap .st:hover,.usmap .st:focus-visible{stroke:#242b2e;stroke-width:1.4}
+.usmap .st.sel{fill:#e8892b!important;stroke:#242b2e;stroke-width:1.6}
 .usmap .st.nodata{fill:url(#hatch);cursor:not-allowed}
 .usmap .st.nodata:hover{filter:none;stroke:#fff;stroke-width:.9}
 .usmap .lbl{font-size:11px;font-weight:600;pointer-events:none;text-anchor:middle;dominant-baseline:central;letter-spacing:.02em}
@@ -163,8 +145,8 @@ footer b{color:#fff;font-weight:600}
 .chips-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
 .chips-row .note-inline{margin-right:4px}
 .chip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:30px;padding:0 10px;border-radius:var(--r);border:1px solid rgba(0,0,0,.08);font-weight:600;font-size:12.5px;cursor:pointer;transition:filter .15s,box-shadow .15s}
-.chip:hover{filter:brightness(1.06);box-shadow:0 2px 6px rgba(0,40,80,.3)}
-.chip[aria-pressed="true"]{background:#f28c28!important;color:#fff!important;box-shadow:0 0 0 2px #242b2e}
+.chip:hover{border-color:#242b2e}
+.chip[aria-pressed="true"]{background:#e8892b!important;color:#fff!important;border-color:#242b2e}
 .chip[disabled]{background:repeating-linear-gradient(45deg,#eef0f1 0 4px,#e2e5e7 4px 8px)!important;color:var(--text-disabled)!important;cursor:not-allowed;box-shadow:none}
 .map-side h3{margin:0 0 4px;font-size:15px}
 .ramp{height:12px;border-radius:2px;border:1px solid var(--border-subtle)}
@@ -182,11 +164,11 @@ footer b{color:#fff;font-weight:600}
 @media (max-width:900px){.years{grid-template-columns:minmax(0,1fr)}}
 .yearbars{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;align-items:end;height:190px;padding:0 2px;position:relative}
 .yb{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;border:0;background:none;padding:0;cursor:pointer;min-width:0}
-.yb .bar{border-radius:3px 3px 0 0;background:#c9d6df;transition:background .18s,height .3s;min-height:3px}
+.yb .bar{border-radius:2px 2px 0 0;background:#c9d6df;transition:background .18s,height .3s;min-height:3px}
 .yb .n{font-size:10.5px;color:var(--text-muted);text-align:center;margin-bottom:3px;white-space:nowrap;overflow:hidden}
 .yb .y{font-size:12px;font-weight:600;text-align:center;padding-top:6px;border-top:1px solid var(--border-subtle);color:var(--text-muted)}
-.yb.in .bar{background:linear-gradient(180deg,#3aa0e8,#0071b8)}
-.yb.in .y{color:var(--accent);border-top:3px solid var(--accent);padding-top:4px}
+.yb.in .bar{background:#0071b8}
+.yb.in .y{color:var(--text);border-top:2px solid var(--accent);padding-top:5px}
 .yb:hover .bar{filter:brightness(1.08)}
 .yb[disabled]{cursor:not-allowed}
 .yb[disabled] .bar{background:repeating-linear-gradient(45deg,#eef0f1 0 4px,#e2e5e7 4px 8px)}
@@ -195,43 +177,51 @@ footer b{color:#fff;font-weight:600}
 .year-ctl{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .year-ctl select{min-width:0;width:100%}
 .year-ctl .shift{grid-column:1/-1;display:flex;gap:8px}
-.year-ctl .shift .btn{flex:1}
-.period-badge{grid-column:1/-1;font-size:20px;font-weight:600;color:var(--accent)}
+.year-ctl .shift .btn{flex:1;padding:0 10px}
+.year-ctl .shift .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:#f0f7fc}
+.period-badge{grid-column:1/-1;font-size:20px;font-weight:600;color:var(--text)}
 .period-badge small{display:block;font-size:12.5px;font-weight:400;color:var(--text-muted)}
 
 /* ---------- step 3: element types ---------- */
 .el-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
 .search{flex:1;min-width:220px;max-width:420px;height:36px;padding:0 12px 0 34px;border:1px solid var(--border-fg);border-radius:var(--r);font:inherit;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Ccircle cx='6' cy='6' r='4.6' fill='none' stroke='%23595959' stroke-width='1.6'/%3E%3Cpath d='M9.5 9.5l3.5 3.5' stroke='%23595959' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat 11px center}
-.cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.cat-chips button{height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--border-subtle);background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--text-muted)}
-.cat-chips button:hover{border-color:var(--accent);color:var(--accent)}
-.cat-chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-.cat-chips .c{font-weight:400;opacity:.8;margin-left:4px}
+#catSelect{min-width:200px}
 .el-group{margin-bottom:18px}
-.el-group h3{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted)}
-.el-group h3 i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.el-group h3{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--text)}
+.el-group h3 small{font-weight:400;color:var(--text-muted);margin-left:6px}
 .el-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
-.el{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px 12px;border:1px solid var(--border-subtle);border-left:4px solid var(--gc,#0071b8);border-radius:var(--r);background:#fff;cursor:pointer;transition:box-shadow .15s,border-color .15s;min-width:0}
-.el:hover{box-shadow:var(--shadow-2);border-color:var(--gc,#0071b8)}
-.el[aria-pressed="true"]{background:#f5fafd;box-shadow:inset 0 0 0 1px var(--accent);border-color:var(--accent)}
-.el .nm{font-weight:600;font-size:13.5px;line-height:1.3;padding-right:20px}
+.el{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff;cursor:pointer;transition:border-color .15s,background .15s;min-width:0}
+.el:hover{border-color:#6b6b6b;background:var(--bg-hover)}
+.el[aria-pressed="true"]{background:var(--accent-muted);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.el .nm{font-weight:600;font-size:13.5px;line-height:1.3}
 .el .mt{font-size:12px;color:var(--text-muted)}
-.el .cnt{font-family:var(--font-mono);font-size:12px;color:var(--text)}
-.el .meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--backdrop)}
-.el .meter b{display:block;height:100%;background:var(--gc,#0071b8);opacity:.75}
-.el[aria-pressed="true"]::after{content:"";position:absolute;top:10px;right:10px;width:16px;height:16px;border-radius:50%;background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='7' viewBox='0 0 9 7'%3E%3Cpath d='M1 3.5l2.3 2.3L8 1' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat center}
+.el .cnt{font-size:12px;color:var(--text)}
+
+/* ---------- step 4: analysis tabs ---------- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border-subtle);margin:-4px 0 20px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 16px 9px;font:inherit;font-size:14.5px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button:hover{color:var(--text)}
+.tabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--accent)}
+.pane-head{display:flex;align-items:flex-start;gap:12px 16px;flex-wrap:wrap;margin-bottom:12px}
+.pane-head .tools{margin-left:auto}
+.pane-title{margin:0 0 6px;font-size:18px;font-weight:600}
+.norm-by{display:inline-flex;align-items:center;gap:8px}
+.norm-by[hidden]{display:none}
+.norm-by select{min-width:240px;height:32px}
+.placeholder{border:1px dashed var(--border);border-radius:var(--r);padding:28px 24px;background:var(--bg-zebra);color:var(--text-muted)}
+.placeholder p{margin:0 0 4px}
+.placeholder b{color:var(--text);font-weight:600}
+@media (max-width:600px){.tabs{gap:0;overflow:visible}.tabs button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.25;padding:9px 6px 8px;font-size:13px;text-align:center}.norm-by{width:100%}.norm-by select{min-width:0;flex:1}.pane-head .tools{margin-left:0}}
 
 /* ---------- step 4: profiles ---------- */
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--border-subtle);background:var(--bg-zebra);color:var(--text)}
-.tag.warn{border-color:#d9b46a;background:#f9f1e6;color:var(--warning)}
+.warn-text{color:var(--warning)}
 .seg{display:inline-flex;border:1px solid var(--border-fg);border-radius:var(--r);overflow:hidden;flex-wrap:wrap}
 .seg button{border:0;background:#fff;height:32px;padding:0 12px;font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid var(--border-subtle)}
 .seg button:last-child{border-right:0}
 .seg button:hover{background:var(--bg-hover)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .mode-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:12px}
-.mode-row .lbl{font-size:12px;font-weight:600;color:var(--text-muted)}
+.mode-row .lbl{font-size:12px;font-weight:600;color:var(--text-muted);margin:0}
 .mode-help{font-size:12.5px;color:var(--text-muted);margin:-4px 0 14px}
 .chart-card{border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff;padding:14px 14px 8px;min-width:0}
 .chart-card h3{margin:0;font-size:15px;font-weight:600}
@@ -267,49 +257,24 @@ table.data tr.hl td{background:var(--accent-muted)}
       <span class="divider" aria-hidden="true"></span>
       <span class="app-name">Bridge Deterioration Model</span>
     </a>
-    <div class="top-crumbs" id="topCrumbs" aria-live="polite"></div>
+    <nav class="top-crumbs" id="topCrumbs" aria-label="Current selection" aria-live="polite"></nav>
+    <button class="linkbtn top-link" data-go="method">Method notes</button>
   </div>
 </header>
 
-<section class="hero">
-  <svg class="bridge-art" viewBox="0 0 700 240" aria-hidden="true">
-    <g fill="none" stroke="#9cbdd8" stroke-linecap="round" opacity=".55">
-      <path d="M0 160 H700" stroke-width="3"/>
-      <path d="M30 160 Q180 40 330 160 M330 160 Q480 40 630 160" stroke-width="2"/>
-      <path d="M68 160V122M105 160V96M143 160V79M180 160V72M218 160V79M255 160V96M293 160V122M368 160V122M405 160V96M443 160V79M480 160V72M518 160V79M555 160V96M593 160V122" stroke-width="1.2"/>
-      <path d="M30 160V240M330 160V240M630 160V240" stroke-width="5"/>
-    </g>
-    <path d="M330 176 C 420 182, 520 196, 700 214" fill="none" stroke="#f9b371" stroke-width="2.5" stroke-dasharray="6 6"/>
-    <circle cx="330" cy="176" r="5" fill="#f9b371"/>
-  </svg>
+<section class="intro">
   <div class="wrap">
-    <p class="kicker">Bridge asset analytics</p>
-    <h1>Element condition profiles by bridge age</h1>
-    <p class="lede">Perform the following in sequence: (1) Select a state, (2) Select a 5-year period, (3) Select an element type, and (4) Explore how its condition states are spread across bridge ages!</p>
-    <p class="lede">Built from National Bridge Inventory element data. Each bridge counts once, at its latest inspection record within the selected period, weighted by its deck area.</p>
-    <div class="hero-actions">
-      <button class="btn cta lg" data-go="state">Start with a state</button>
-      <button class="btn ghost lg" data-go="method">How the profiles are computed</button>
-    </div>
+    <h1>Bridge element condition by age</h1>
+    <p>See how the condition of a bridge element varies with bridge age. Choose a state, a period of five years or more and an element type, and the charts at the bottom of the page show where the deck area sits for each condition state.</p>
+    <p class="source">Data: FHWA National Bridge Inventory element data, 2016 to 2025. Each bridge is counted once, using its most recent inspection in the period, and weighted by its deck area.</p>
   </div>
 </section>
-
-<div class="stepper-bar">
-  <div class="wrap">
-    <ol class="stepper" aria-label="Filter steps">
-      <li><button class="step" data-go="state"><span class="n">1</span><span class="lbl"><span>State</span><b id="stepState">Not selected</b></span></button></li>
-      <li><button class="step" data-go="years"><span class="n">2</span><span class="lbl"><span>Period</span><b id="stepYears">Not selected</b></span></button></li>
-      <li><button class="step" data-go="type"><span class="n">3</span><span class="lbl"><span>Element type</span><b id="stepType">Not selected</b></span></button></li>
-      <li><button class="step" data-go="profile"><span class="n">4</span><span class="lbl"><span>Profiles</span><b id="stepProf">Waiting</b></span></button></li>
-    </ol>
-  </div>
-</div>
 
 <main class="wrap">
 
   <section class="panel" id="panel-state" aria-labelledby="h-state">
     <div class="panel-head">
-      <div><p class="eyebrow">Step 1</p><h2 id="h-state">Select a state</h2><p class="sub">Colour shows how many bridges have element inspection records. Hover a state for details; select it to continue.</p></div>
+      <div><h2 id="h-state"><span class="num">1</span>Choose a state</h2><p class="sub">Darker blue means more bridges with element inspection data. Hatched states have no data in this release.</p></div>
     </div>
     <div class="panel-body map-layout">
       <div>
@@ -321,7 +286,7 @@ table.data tr.hl td{background:var(--accent-muted)}
         <div class="ramp" id="ramp"></div>
         <div class="ramp-ticks" id="rampTicks"></div>
         <div class="legend">
-          <span><i style="background:#f28c28;border-color:#242b2e"></i>Selected</span>
+          <span><i style="background:#e8892b;border-color:#242b2e"></i>Selected</span>
           <span><i style="background:repeating-linear-gradient(45deg,#eef0f1 0 3px,#d5dadd 3px 6px)"></i>No data in this release</span>
         </div>
         <dl class="kv" id="stateInfo"></dl>
@@ -332,73 +297,108 @@ table.data tr.hl td{background:var(--accent-muted)}
 
   <section class="panel locked" id="panel-years" aria-labelledby="h-years">
     <div class="panel-head">
-      <div><p class="eyebrow">Step 2</p><h2 id="h-years">Select a 5-year period</h2><p class="sub" id="yearsSub">Select a state first.</p></div>
+      <div><h2 id="h-years"><span class="num">2</span>Choose a period (at least five years)</h2><p class="sub" id="yearsSub">Choose a state first.</p></div>
     </div>
     <div class="panel-body years">
       <div>
         <div class="yearbars" id="yearbars" role="group" aria-label="Data years"></div>
-        <p class="note-inline" style="margin:10px 0 0">Bars show the number of bridges with records in each data year. Select a year to start the period there.</p>
+        <p class="note-inline" style="margin:10px 0 0">Bars show how many bridges were inspected each year. Click a year to move the nearer end of the period to it.</p>
       </div>
       <div class="year-ctl">
         <div class="period-badge" id="periodBadge"></div>
         <div><label class="field-label" for="yStart">Start year</label><select id="yStart"></select></div>
         <div><label class="field-label" for="yEnd">End year</label><select id="yEnd"></select></div>
-        <div class="shift"><button class="btn" id="yPrev">← Earlier</button><button class="btn" id="yNext">Later →</button></div>
+        <div class="shift"><button class="btn" id="yPrev" title="Move the whole period one year earlier">← Earlier</button><button class="btn" id="yNext" title="Move the whole period one year later">Later →</button></div>
+        <div class="shift"><button class="btn" id="yLast5" aria-pressed="false">Latest 5 years</button><button class="btn" id="yAll" aria-pressed="false">All years</button></div>
       </div>
     </div>
   </section>
 
   <section class="panel locked" id="panel-type" aria-labelledby="h-type">
     <div class="panel-head">
-      <div><p class="eyebrow">Step 3</p><h2 id="h-type">Select an element type</h2><p class="sub" id="typeSub">Select a period first.</p></div>
+      <div><h2 id="h-type"><span class="num">3</span>Choose an element type</h2><p class="sub" id="typeSub">Choose a period first.</p></div>
     </div>
     <div class="panel-body">
       <div class="el-tools">
-        <input type="search" class="search" id="elSearch" placeholder="Search element types or numbers…" aria-label="Search element types">
+        <input type="search" class="search" id="elSearch" placeholder="Search by name or number" aria-label="Search element types">
+        <select id="catSelect" aria-label="Category"></select>
         <span class="note-inline" id="elCount"></span>
       </div>
-      <div class="cat-chips" id="catChips" role="group" aria-label="Element categories"></div>
+      
       <div id="elList"></div>
     </div>
   </section>
 
   <section class="panel locked" id="panel-profile" aria-labelledby="h-prof">
     <div class="panel-head">
-      <div><p class="eyebrow">Step 4</p><h2 id="h-prof">Condition-state profiles by bridge age</h2><p class="sub" id="profSub">Select an element type first.</p></div>
-      <div class="tools"><button class="btn" id="profReset">Reset view</button><button class="btn" id="profCsv">Download data (CSV)</button></div>
+      <div><h2 id="h-prof"><span class="num">4</span>Analysis</h2><p class="sub" id="profSub">Choose an element type first.</p></div>
     </div>
     <div class="panel-body">
-      <div class="prof-facts" id="profFacts"></div>
-      <div class="mode-row">
-        <span class="lbl" id="modeLbl">Bar value</span>
-        <div class="seg" id="modeSeg" role="group" aria-labelledby="modeLbl">
-          <button data-mode="abs" aria-pressed="true">Deck area (sq ft)</button>
-          <button data-mode="tot" aria-pressed="false">% of total deck area</button>
-          <button data-mode="band" aria-pressed="false">% within age band</button>
+      <div class="tabs" role="tablist" aria-label="Analysis views">
+        <button role="tab" id="tab-insights" data-tab="insights" aria-controls="pane-insights" aria-selected="true">Basic Insights</button>
+        <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1">Basic Analytics</button>
+        <button role="tab" id="tab-advanced" data-tab="advanced" aria-controls="pane-advanced" aria-selected="false" tabindex="-1">Advanced Analytics</button>
+      </div>
+
+      <!-- Basic Insights: condition by bridge age (3D profiles) -->
+      <div class="tab-pane" role="tabpanel" id="pane-insights" aria-labelledby="tab-insights">
+        <div class="pane-head">
+          <div><h3 class="pane-title">Condition by bridge age</h3><div class="prof-facts" id="profFacts"></div></div>
+          <div class="tools"><button class="btn" id="profReset">Reset view</button><button class="btn" id="profCsv">Download CSV</button></div>
+        </div>
+        <div class="mode-row">
+          <span class="lbl" id="zLbl">Z-axis (deck area)</span>
+          <div class="seg" id="normSeg" role="group" aria-labelledby="zLbl">
+            <button data-norm="raw" aria-pressed="true">Non-normalized (sq ft)</button>
+            <button data-norm="norm" aria-pressed="false">Normalized (%)</button>
+          </div>
+          <span class="norm-by" id="normByWrap" hidden>
+            <label class="lbl" for="normBy">Normalize by</label>
+            <select id="normBy">
+              <option value="tot">All deck area in the profile</option>
+              <option value="band">Deck area in each age band</option>
+            </select>
+          </span>
+        </div>
+        <p class="mode-help" id="modeHelp"></p>
+        <div class="colorbar">
+          <span class="lbl" id="cbLabel">Deck area (sq ft)</span>
+          <div class="scale"><div class="bar"></div><div class="ticks" id="profTicks"></div></div>
+        </div>
+        <div class="prof-grid" id="profGrid">
+          <div class="chart-card"><h3>CS1 (Good)</h3><p class="csub">Share of the element quantity in condition state 1</p><div class="prof-box" id="prof0"></div></div>
+          <div class="chart-card"><h3>CS2 (Fair)</h3><p class="csub">Share of the element quantity in condition state 2</p><div class="prof-box" id="prof1"></div></div>
+          <div class="chart-card"><h3>CS3 (Poor)</h3><p class="csub">Share of the element quantity in condition state 3</p><div class="prof-box" id="prof2"></div></div>
+          <div class="chart-card"><h3>CS4 (Severe)</h3><p class="csub">Share of the element quantity in condition state 4</p><div class="prof-box" id="prof3"></div></div>
+        </div>
+        <p class="prof-note">Each bar is one age band and CS% band. Every bridge appears once in each chart, with its full deck area. Drag any chart to rotate all four, or hover a bar to see its numbers and pick out that age band in the other charts.</p>
+        <details class="prof-tbl">
+          <summary id="bandTitle">Bridges and deck area by age band</summary>
+          <div class="tbl-wrap"><table class="data" id="bandTable"></table></div>
+          <div class="tbl-note" id="exclNote"></div>
+        </details>
+      </div>
+
+      <!-- Basic Analytics: add content inside #analyticsBody. renderBasicAnalytics(ctx) in the script runs whenever the selection changes. -->
+      <div class="tab-pane" role="tabpanel" id="pane-analytics" aria-labelledby="tab-analytics" hidden>
+        <div class="pane-head"><div><h3 class="pane-title">Basic Analytics</h3></div></div>
+        <div id="analyticsBody">
+          <div class="placeholder"><p><b>This view is still being built.</b></p><p class="ctx" data-ctx></p></div>
         </div>
       </div>
-      <p class="mode-help" id="modeHelp"></p>
-      <div class="colorbar">
-        <span class="lbl" id="cbLabel">Deck area in cell (sq ft), same scale across CS1–CS4</span>
-        <div class="scale"><div class="bar"></div><div class="ticks" id="profTicks"></div></div>
+
+      <!-- Advanced Analytics: add content inside #advancedBody. renderAdvancedAnalytics(ctx) in the script runs whenever the selection changes. -->
+      <div class="tab-pane" role="tabpanel" id="pane-advanced" aria-labelledby="tab-advanced" hidden>
+        <div class="pane-head"><div><h3 class="pane-title">Advanced Analytics</h3></div></div>
+        <div id="advancedBody">
+          <div class="placeholder"><p><b>This view is still being built.</b></p><p class="ctx" data-ctx></p></div>
+        </div>
       </div>
-      <div class="prof-grid" id="profGrid">
-        <div class="chart-card"><h3>CS1 · Good</h3><p class="csub">Share of the element quantity in condition state 1</p><div class="prof-box" id="prof0"></div></div>
-        <div class="chart-card"><h3>CS2 · Fair</h3><p class="csub">Share of the element quantity in condition state 2</p><div class="prof-box" id="prof1"></div></div>
-        <div class="chart-card"><h3>CS3 · Poor</h3><p class="csub">Share of the element quantity in condition state 3</p><div class="prof-box" id="prof2"></div></div>
-        <div class="chart-card"><h3>CS4 · Severe</h3><p class="csub">Share of the element quantity in condition state 4</p><div class="prof-box" id="prof3"></div></div>
-      </div>
-      <p class="prof-note"><b>Each bar is one age band × CS% band cell.</b> Each bridge appears once in every figure, at its latest record in the period, with its full deck area. Drag a figure to rotate all four; hover a bar to see its values and highlight the same age band everywhere.</p>
-      <details class="prof-tbl">
-        <summary id="bandTitle">Age band summary</summary>
-        <div class="tbl-wrap"><table class="data" id="bandTable"></table></div>
-        <div class="tbl-note" id="exclNote"></div>
-      </details>
     </div>
   </section>
 
   <section class="panel" id="method" aria-labelledby="h-method">
-    <div class="panel-head"><div><p class="eyebrow">Reference</p><h2 id="h-method">How the profiles are computed</h2></div></div>
+    <div class="panel-head"><div><h2 id="h-method">Method notes</h2></div></div>
     <div class="method-list">
       <!-- Data Section -->
       <section class="method-item">
@@ -412,8 +412,8 @@ table.data tr.hl td{background:var(--accent-muted)}
       <section class="method-item">
         <h3 class="method-title">Period</h3>
         <div class="method-content">
-          <p>A period is 5 consecutive data years. A state with 5 or fewer data years uses all of them.</p>
-          <p>Each bridge counts once per element type: at its <strong>latest record</strong> within the period.</p>
+          <p>A period runs from any start year to any end year, as long as it holds at least five years of data. A state with five or fewer years of data uses all of them. Each bridge still counts once, at its latest inspection inside the period, so a longer period adds bridges that were not inspected recently but does not count any bridge twice.</p>
+          <p>Each bridge is counted once per element type, using its <strong>most recent inspection</strong> in the period.</p>
         </div>
       </section>
       <!-- Bins Section -->
@@ -423,7 +423,7 @@ table.data tr.hl td{background:var(--accent-muted)}
           <ul class="variable-list">
             <li><strong>Age:</strong> bridge age in the record's data year (data year − year built), in 5-year bands 1–5 … 96–100.</li>
             <li><strong>CS%:</strong> the element quantity in a condition state ÷ its total quantity × 100, in 5% bands [0,5], (5,10] … (95,100].</li>
-            <li><strong>CS1–CS4:</strong> Good, Fair, Poor and Severe condition states; each has its own figure.</li>
+            <li><strong>CS1–CS4:</strong> the Good, Fair, Poor and Severe condition states. Each has its own chart.</li>
           </ul>
         </div>
       </section>
@@ -433,8 +433,8 @@ table.data tr.hl td{background:var(--accent-muted)}
         <div class="method-content">
           <ul class="variable-list">
             <li><strong>Deck area:</strong> the total deck area (sq ft) of the bridges in the cell.</li>
-            <li><strong>% of total:</strong> the cell's deck area ÷ the deck area of all bridges in the profile. Each figure sums to 100%.</li>
-            <li><strong>% within age band:</strong> the cell's deck area ÷ the deck area of its age band. Each age band sums to 100% in each figure.</li>
+            <li><strong>% of total:</strong> the cell's deck area ÷ the deck area of all bridges in the profile. Each chart adds up to 100%.</li>
+            <li><strong>% within age band:</strong> the cell's deck area ÷ the deck area of its age band. Each age band adds up to 100%.</li>
           </ul>
         </div>
       </section>
@@ -442,7 +442,7 @@ table.data tr.hl td{background:var(--accent-muted)}
       <section class="method-item">
         <h3 class="method-title">Exclusions</h3>
         <div class="method-content">
-          <p>Records with no element quantity, a failed quantity check, no deck area, no year built, or an age outside 1–100 years are left out and counted under the profile.</p>
+          <p>Records with no element quantity, a failed quantity check, no deck area, no year built, or an age outside 1–100 years are left out. The number left out is shown with each profile.</p>
           <p>All reported figures are rounded to 3 significant figures.</p>
         </div>
       </section>
@@ -455,8 +455,8 @@ table.data tr.hl td{background:var(--accent-muted)}
 
 <footer>
   <div class="wrap">
-    <span><b>Bentley Systems</b> · Bridge Deterioration Model Prototype using NBI element data</span>
-    <span id="genAt"></span>
+    <span>Bridge Deterioration Model, prototype. Bentley Systems.</span>
+    <span>Source: <a href="https://www.fhwa.dot.gov/bridge/nbi.cfm">FHWA National Bridge Inventory</a> element data<span id="genAt"></span></span>
   </div>
 </footer>
 
@@ -483,6 +483,7 @@ function sig3(v) {
 }
 const pct = (v) => (v == null ? "—" : `${sig3(v)}%`);
 const int = (v) => Number(v).toLocaleString("en-US");
+const shortNum = (v) => v >= 1e9 ? `${+(v / 1e9).toPrecision(3)}B` : v >= 1e6 ? `${+(v / 1e6).toPrecision(3)}M` : v >= 1e3 ? `${+(v / 1e3).toPrecision(3)}k` : String(+v.toPrecision(3)); // axis labels
 const compact = (v) => v >= 1e9 ? `${sig3(v / 1e9)}B` : v >= 1e6 ? `${sig3(v / 1e6)}M` : v >= 1e3 ? `${sig3(v / 1e3)}k` : int(v);
 
 /* ---------- data ---------- */
@@ -553,7 +554,7 @@ function renderMap() {
     <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#eef0f1"/><line x1="0" y1="0" x2="0" y2="6" stroke="#d5dadd" stroke-width="3"/></pattern></defs>
     <g id="mapStates">${paths}</g><g>${labels}</g></svg>`;
   // small states and territories as chips
-  $("#smallStates").innerHTML = `<span class="note-inline">Small states &amp; territories:</span>` + SMALL.map((st) => {
+  $("#smallStates").innerHTML = `<span class="note-inline">Small states and territories:</span>` + SMALL.map((st) => {
     const has = !!IDX.states[st], col = has ? stateColor(st) : null;
     return `<button class="chip" data-st="${st}" ${has ? `style="background:${rgb(col)};color:${lum(col) > 0.55 ? "#1b2a3a" : "#fff"}"` : "disabled"} title="${esc(nameOf(st))}" aria-pressed="false">${st}</button>`;
   }).join("");
@@ -565,7 +566,7 @@ function renderMap() {
   const opts = Object.entries(IDX.states).sort((a, b) => a[1].name.localeCompare(b[1].name));
   $("#stateSelect").innerHTML = `<option value="">Or choose from the list…</option>` + opts.map(([st, s]) => `<option value="${st}">${esc(s.name)} (${st})</option>`).join("");
   const missing = Object.keys(ALL_NAMES).filter((st) => !IDX.states[st] && !["PR", "GU"].includes(st));
-  $("#methodCoverage").textContent = `This release covers ${Object.keys(IDX.states).length} jurisdictions with data years ${Math.min(...Object.values(IDX.states).map((s) => s.years[0]))}–${Math.max(...Object.values(IDX.states).map((s) => s.years[s.years.length - 1]))}` + (missing.length ? `; no data for ${missing.map(nameOf).join(", ")}.` : ".");
+  $("#methodCoverage").textContent = `This release covers ${Object.keys(IDX.states).length} states and territories from ${Math.min(...Object.values(IDX.states).map((s) => s.years[0]))} to ${Math.max(...Object.values(IDX.states).map((s) => s.years[s.years.length - 1]))}.` + (missing.length ? ` There is no data for ${missing.slice(0, -1).map(nameOf).join(", ")}${missing.length > 1 ? " or " : ""}${nameOf(missing[missing.length - 1])}.` : "");
   updateStateInfo(null);
 }
 function updateStateInfo(hoverSt) {
@@ -577,7 +578,7 @@ function updateStateInfo(hoverSt) {
     return;
   }
   const s = IDX.states[st];
-  $("#stateInfo").innerHTML = `<span class="ttl">${esc(nameOf(st))}${hoverSt && hoverSt !== sel.st ? "" : sel.st ? " · selected" : ""}</span>` +
+  $("#stateInfo").innerHTML = `<span class="ttl">${esc(nameOf(st))}${hoverSt && hoverSt !== sel.st ? "" : sel.st ? " (selected)" : ""}</span>` +
     (s ? kv("Bridges", int(s.bridges)) + kv("Data years", `${s.years[0]}–${s.years[s.years.length - 1]} (${s.years.length})`) + kv("Element types", s.elementTypes) : kv("Element data", "None in this release"));
 }
 function paintSelection() {
@@ -589,54 +590,78 @@ function paintSelection() {
 }
 
 /* ---------- step 2: years ---------- */
+const MIN_YEARS = 5;
+const winIdx = () => (stIdx ? stIdx.windows.findIndex((w) => w.key === sel.win) : -1);
+const curWin = () => (stIdx ? stIdx.windows.find((w) => w.key === sel.win) : null);
+const latestKey = (ys) => `${ys[Math.max(0, ys.length - MIN_YEARS)]}-${ys[ys.length - 1]}`;
+// Turn a requested start/end into a valid period. `keep` is the edge the user just set:
+// the other edge moves out (and, at the ends of the data, the whole period slides) until
+// the period holds at least MIN_YEARS data years.
+function fitPeriod(s, e, keep) {
+  const ys = stIdx.years, n = ys.length;
+  if (n <= MIN_YEARS) return `${ys[0]}-${ys[n - 1]}`;
+  const near = (y) => ys.reduce((b, x) => (Math.abs(x - y) < Math.abs(b - y) ? x : b), ys[0]);
+  let i = ys.indexOf(near(s)), j = ys.indexOf(near(e));
+  if (i > j) [i, j] = keep === "start" ? [i, i] : [j, j];
+  if (j - i + 1 < MIN_YEARS) {
+    if (keep === "start") { j = i + MIN_YEARS - 1; if (j > n - 1) { j = n - 1; i = j - MIN_YEARS + 1; } }
+    else { i = j - MIN_YEARS + 1; if (i < 0) { i = 0; j = MIN_YEARS - 1; } }
+  }
+  return `${ys[i]}-${ys[j]}`;
+}
 function renderYears() {
   const panel = $("#panel-years");
-  if (!stIdx) { panel.classList.add("locked"); $("#yearsSub").textContent = "Select a state first."; return; }
+  if (!stIdx) { panel.classList.add("locked"); $("#yearsSub").textContent = "Choose a state first."; return; }
   panel.classList.remove("locked");
-  const ys = stIdx.years, W = stIdx.windows, win = W.find((w) => w.key === sel.win);
-  const fixed = W.length === 1;
+  const ys = stIdx.years, win = curWin();
+  const fixed = stIdx.windows.length === 1;
   $("#yearsSub").textContent = fixed
-    ? `${stIdx.name} has ${ys.length} data year${ys.length === 1 ? "" : "s"} (${ys.join(", ")}), so all of them are used.`
-    : `${stIdx.name} has data for ${ys[0]}–${ys[ys.length - 1]}. Choose any 5 consecutive years; each bridge counts at its latest record in the period.`;
+    ? `${stIdx.name} only has data for ${ys.length === 2 ? ys.join(" and ") : ys.join(", ")}, so ${ys.length === 2 ? "both years are" : "all of its years are"} used.`
+    : `${stIdx.name} has data from ${ys[0]} to ${ys[ys.length - 1]}. Pick any start and end year, as long as the period covers at least five years.`;
   const span = []; for (let y = ys[0]; y <= ys[ys.length - 1]; y++) span.push(y);
   const maxN = Math.max(...Object.values(stIdx.bridgesPerYear));
   $("#yearbars").innerHTML = span.map((y) => {
     const n = stIdx.bridgesPerYear[y] || 0, inW = win && y >= win.start && y <= win.end, has = ys.includes(y);
-    return `<button class="yb${inW ? " in" : ""}" data-y="${y}" ${has && !fixed ? "" : has ? "" : "disabled"} aria-pressed="${inW}" aria-label="${y}: ${int(n)} bridges${inW ? ", in period" : ""}">
+    return `<button class="yb${inW ? " in" : ""}" data-y="${y}" ${has && !fixed ? "" : "disabled"} aria-pressed="${inW}" aria-label="${y}: ${int(n)} bridges${inW ? ", in period" : ""}">
       <span class="n">${n ? compact(n) : ""}</span><span class="bar" style="height:${Math.max(2, (n / maxN) * 140)}px"></span><span class="y"><span class="yl">${y}</span><span class="ys">’${String(y).slice(2)}</span></span></button>`;
   }).join("");
-  $("#yStart").innerHTML = W.map((w) => `<option value="${w.key}">${w.start}</option>`).join("");
-  $("#yEnd").innerHTML = W.map((w) => `<option value="${w.key}">${w.end}</option>`).join("");
-  $("#yStart").value = $("#yEnd").value = sel.win;
-  [$("#yStart"), $("#yEnd")].forEach((s) => (s.disabled = fixed));
-  const i = W.findIndex((w) => w.key === sel.win);
-  $("#yPrev").disabled = fixed || i <= 0; $("#yNext").disabled = fixed || i >= W.length - 1;
-  const nYears = win ? ys.filter((y) => y >= win.start && y <= win.end).length : 0;
-  $("#periodBadge").innerHTML = win ? `${win.start}–${win.end}<small>${nYears} data year${nYears === 1 ? "" : "s"}${fixed ? " · all available years" : " · 5-year period"}</small>` : "";
+  // every start and end year that some valid period uses; picking one moves the other end if needed
+  const starts = [...new Set(stIdx.windows.map((w) => w.start))], ends = [...new Set(stIdx.windows.map((w) => w.end))];
+  $("#yStart").innerHTML = starts.map((y) => `<option value="${y}">${y}</option>`).join("");
+  $("#yEnd").innerHTML = ends.map((y) => `<option value="${y}">${y}</option>`).join("");
+  $("#yStart").value = win.start; $("#yEnd").value = win.end;
+  ["#yStart", "#yEnd", "#yLast5", "#yAll"].forEach((id) => ($(id).disabled = fixed));
+  const i = ys.indexOf(win.start), j = ys.indexOf(win.end);
+  $("#yPrev").disabled = fixed || i <= 0; $("#yNext").disabled = fixed || j >= ys.length - 1;
+  $("#yLast5").setAttribute("aria-pressed", String(!fixed && sel.win === latestKey(ys)));
+  $("#yAll").setAttribute("aria-pressed", String(!fixed && i === 0 && j === ys.length - 1));
+  const nYears = ys.filter((y) => y >= win.start && y <= win.end).length;
+  $("#periodBadge").innerHTML = `${win.start} to ${win.end}<small>${nYears} year${nYears === 1 ? "" : "s"} of data${fixed ? ", all that is available" : ""}</small>`;
 }
 
 /* ---------- step 3: element types ---------- */
 function renderTypes() {
   const panel = $("#panel-type");
-  if (!stIdx || !sel.win) { panel.classList.add("locked"); $("#typeSub").textContent = "Select a period first."; return; }
+  if (!stIdx || !sel.win) { panel.classList.add("locked"); $("#typeSub").textContent = "Choose a period first."; return; }
   panel.classList.remove("locked");
-  const all = stIdx.elements.map((e) => ({ ...e, n: e.bridges[sel.win] || 0, cat: catOf(e.en) })).filter((e) => e.n > 0);
+  const all = stIdx.elements.map((e) => ({ ...e, n: e.bridges[winIdx()] || 0, cat: catOf(e.en) })).filter((e) => e.n > 0);
   const none = stIdx.elements.length - all.length;
-  $("#typeSub").textContent = `${all.length} element types have records in ${stIdx.name} for ${sel.win.replace("-", "–")}. The count is the number of bridges with that element.`;
+  const [ws, we] = sel.win.split("-");
+  $("#typeSub").textContent = `${all.length} element types were inspected in ${stIdx.name} between ${ws} and ${we}. The number under each is how many bridges have it.`;
   const counts = {}; all.forEach((e) => (counts[e.cat.id] = (counts[e.cat.id] || 0) + 1));
-  $("#catChips").innerHTML = `<button data-cat="all" aria-pressed="${catFilter === "all"}">All<span class="c">${all.length}</span></button>` +
-    CATS.filter((c) => counts[c.id]).map((c) => `<button data-cat="${c.id}" aria-pressed="${catFilter === c.id}">${esc(c.name)}<span class="c">${counts[c.id]}</span></button>`).join("");
   if (catFilter !== "all" && !counts[catFilter]) catFilter = "all";
+  $("#catSelect").innerHTML = `<option value="all">All categories (${all.length})</option>` +
+    CATS.filter((c) => counts[c.id]).map((c) => `<option value="${c.id}">${esc(c.name)} (${counts[c.id]})</option>`).join("");
+  $("#catSelect").value = catFilter;
   const q = $("#elSearch").value.trim().toLowerCase();
   const shown = all.filter((e) => (catFilter === "all" || e.cat.id === catFilter) && (!q || e.name.toLowerCase().includes(q) || String(e.en).includes(q)));
   const maxN = Math.max(1, ...all.map((e) => e.n));
   const groups = CATS.map((c) => ({ c, items: shown.filter((e) => e.cat.id === c.id).sort((a, b) => b.n - a.n) })).filter((g) => g.items.length);
-  $("#elList").innerHTML = groups.length ? groups.map((g) => `<div class="el-group"><h3><i style="background:${g.c.c}"></i>${esc(g.c.name)}</h3><div class="el-grid">` +
-    g.items.map((e) => `<button class="el" style="--gc:${g.c.c}" data-en="${e.en}" aria-pressed="${sel.en === e.en}">
-      <span class="nm">${esc(e.name)}</span><span class="mt">EN ${e.en}${e.unit ? ` · ${esc(e.unit)}` : ""}</span><span class="cnt">${int(e.n)} bridge${e.n === 1 ? "" : "s"}</span>
-      <span class="meter"><b style="width:${Math.max(2, Math.sqrt(e.n / maxN) * 100)}%"></b></span></button>`).join("") + `</div></div>`).join("")
-    : `<p class="note-inline">No element types match “${esc(q)}”.</p>`;
-  $("#elCount").textContent = `${shown.length} of ${all.length} shown` + (none ? ` · ${none} type${none === 1 ? "" : "s"} have no records in this period` : "");
+  $("#elList").innerHTML = groups.length ? groups.map((g) => `<div class="el-group"><h3>${esc(g.c.name)}<small>${g.items.length}</small></h3><div class="el-grid">` +
+    g.items.map((e) => `<button class="el" data-en="${e.en}" aria-pressed="${sel.en === e.en}">
+      <span class="nm">${esc(e.name)}</span><span class="mt">Element ${e.en}${e.unit ? `, measured in ${esc(e.unit)}` : ""}</span><span class="cnt">${int(e.n)} bridge${e.n === 1 ? "" : "s"}</span></button>`).join("") + `</div></div>`).join("")
+    : `<p class="note-inline">Nothing matches “${esc(q)}”.</p>`;
+  $("#elCount").textContent = shown.length === all.length ? (none ? `${none} other type${none === 1 ? " has" : "s have"} no inspections in this period.` : "") : `Showing ${shown.length} of ${all.length}.`;
 }
 
 /* ---------- step 4: profiles ---------- */
@@ -645,13 +670,31 @@ const BINS = { aMin: 1, aMax: 100, aw: 5, cw: 5, age: [], cs: [] };
 for (let lo = 1; lo <= 100; lo += 5) BINS.age.push({ lo, label: `${lo}–${lo + 4}` });
 for (let lo = 0; lo < 100; lo += 5) BINS.cs.push({ lo, label: lo === 0 ? "0–5" : `>${lo}–${lo + 5}` });
 const MODES = {
-  abs: { label: "Deck area in cell (sq ft), same scale across CS1–CS4", z: "Total deck area (sq ft)", help: "Bar height is the total deck area of the bridges in each cell.", fmt: (v) => sig3(v), tick: (v) => compact(v) },
-  tot: { label: "Share of total deck area (%), same scale across CS1–CS4", z: "Share of total deck area (%)", help: "Bar height is the cell's share of the profile's total deck area; each figure sums to 100%.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(2)}%` },
-  band: { label: "Share of the age band's deck area (%), same scale across CS1–CS4", z: "Share of age band (%)", help: "Bar height is the cell's share of its age band's deck area; within each figure, every age band sums to 100%. This removes the effect of how many bridges are in each age band.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(1)}%` },
+  abs: { label: "Deck area (sq ft)", z: "Total deck area (sq ft)", help: "Non-normalized: bar height is the total deck area of the bridges in each cell, in square feet. All four charts share one scale.", fmt: (v) => sig3(v), tick: (v) => shortNum(v), end: (v) => shortNum(v) },
+  tot: { label: "Normalized deck area (% of all deck area)", z: "Deck area, % of total", help: "Normalized by all deck area: bar height is the cell's share of all the deck area in the profile, so each chart adds up to 100%.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(2)}%` },
+  band: { label: "Normalized deck area (% of the age band)", z: "Deck area, % of age band", help: "Normalized by age band: bar height is the cell's share of the deck area in its age band, so each age band adds up to 100%. Use this to compare age bands with very different numbers of bridges.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(1)}%` },
 };
 let prof = null; // { w, cells:[[{u,v,area,n,pTot,pBand,value}]×4], bands, maxBy }
+// Data for one period [s, e]: add up the groups ends[e][g] for g = s … e (see method notes).
+// Returns { bridges, deckArea, excluded, cells } with cells as packed triples, or null.
+function periodData(d, key) {
+  const [s, e] = key.split("-").map(Number), groups = d.ends[e];
+  if (!groups) return null;
+  const out = { bridges: 0, deckArea: 0, excluded: {}, cells: [] }, acc = new Map();
+  for (const [g, x] of Object.entries(groups)) {
+    if (+g < s) continue;
+    out.bridges += x.bridges; out.deckArea += x.deckArea;
+    for (const [k, v] of Object.entries(x.excluded)) out.excluded[k] = (out.excluded[k] || 0) + v;
+    for (let i = 0; i < x.cells.length; i += 3) {
+      const c = acc.get(x.cells[i]);
+      if (c) { c[0] += x.cells[i + 1]; c[1] += x.cells[i + 2]; } else acc.set(x.cells[i], [x.cells[i + 1], x.cells[i + 2]]);
+    }
+  }
+  [...acc.keys()].sort((a, b) => a - b).forEach((k) => out.cells.push(k, ...acc.get(k)));
+  return out;
+}
 function buildProfile() {
-  const w = elData.windows[sel.win];
+  const w = periodData(elData, sel.win);
   if (!w) return null;
   const cells = [[], [], [], []];
   for (let i = 0; i < w.cells.length; i += 3) {
@@ -671,40 +714,100 @@ function applyMode() {
 }
 function renderProfile() {
   const panel = $("#panel-profile");
-  if (!elData || !sel.win) { panel.classList.add("locked"); $("#profSub").textContent = "Select an element type first."; prof = null; return; }
+  if (!elData || !sel.win) { panel.classList.add("locked"); $("#profSub").textContent = "Choose an element type first."; prof = null; return; }
   panel.classList.remove("locked");
   prof = buildProfile();
   const el = stIdx.elements.find((e) => e.en === sel.en);
-  $("#profSub").textContent = `${el ? el.name : elData.name} (EN ${sel.en}) · ${stIdx.name} · ${sel.win.replace("-", "–")}. Condition-state shares across bridges, by bridge age.`;
+  $("#profSub").textContent = `${el ? el.name : elData.name} (element ${sel.en}) in ${stIdx.name}, ${sel.win.replace("-", " to ")}.`;
   if (!prof || !prof.w.bridges) {
-    $("#profFacts").innerHTML = `<span class="tag warn">No bridges with usable records in this period</span>`;
-    $$(".prof-box").forEach((b) => (b.innerHTML = "")); return;
+    $("#profFacts").innerHTML = `<span class="warn-text">No bridges have usable records for this element in this period.</span>`;
+    $$(".prof-box").forEach((b) => (b.innerHTML = "")); renderOtherTabs(); return;
   }
   const ex = prof.w.excluded || {}, exN = Object.values(ex).reduce((a, b) => a + b, 0);
   const EXL = { no_quantity: "no element quantity", quantity_check: "failed quantity check", no_deck_area: "no deck area", no_age: "no year built", age_out_of_range: "age outside 1–100 years" };
-  $("#profFacts").innerHTML = `<span><b>${int(prof.w.bridges)}</b> bridge${prof.w.bridges === 1 ? "" : "s"}</span><span>Deck area <b>${sig3(prof.total)} sq ft</b></span><span>Period <b>${sel.win.replace("-", "–")}</b></span>` +
-    (exN ? `<span title="${esc(Object.entries(ex).map(([k, v]) => `${int(v)} ${EXL[k] || k}`).join("; "))}"><b>${int(exN)}</b> excluded</span>` : "") +
-    `<span class="tags">${elData.unit ? `<span class="tag">Quantity unit: ${esc(elData.unit)}</span>` : ""}</span>`;
-  $("#exclNote").textContent = exN ? `Excluded from the profile: ${Object.entries(ex).map(([k, v]) => `${int(v)} with ${EXL[k] || k}`).join("; ")}.` : "No bridges were excluded.";
+  $("#profFacts").innerHTML = `<span><b>${int(prof.w.bridges)}</b> bridge${prof.w.bridges === 1 ? "" : "s"}</span><span><b>${sig3(prof.total)}</b> sq ft of deck</span>` +
+    (exN ? `<span title="${esc(Object.entries(ex).map(([k, v]) => `${int(v)} ${EXL[k] || k}`).join("; "))}"><b>${int(exN)}</b> left out (see the table below)</span>` : "") +
+    (elData.unit ? `<span>Element quantity in ${esc(elData.unit)}</span>` : "");
+  $("#exclNote").textContent = exN ? `Left out: ${Object.entries(ex).map(([k, v]) => `${int(v)} with ${EXL[k] || k}`).join(", ")}.` : "No bridges were left out.";
   const rows = prof.bands.map((b, u) => b.n ? `<tr><td>${BINS.age[u].label}</td><td>${int(b.n)}</td><td>${sig3(b.area)}</td><td>${pct((b.area / prof.total) * 100)}</td></tr>` : "").join("");
-  $("#bandTitle").textContent = `Age band summary (${prof.bands.filter((b) => b.n).length} bands with bridges)`;
+  $("#bandTitle").textContent = "Bridges and deck area by age band";
   $("#bandTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Bridges</th><th>Deck area (sq ft)</th><th>Share of deck area</th></tr></thead><tbody>${rows}</tbody>`;
-  drawProfiles();
+  if (tab === "insights") drawProfiles();
+  renderOtherTabs();
 }
+
+/* ---------- Basic Analytics and Advanced Analytics ----------
+   Both tabs share the selection made in steps 1 to 3. Put the content for each tab in
+   renderBasicAnalytics() and renderAdvancedAnalytics(); they run every time the selection
+   changes. ctx holds:
+     ctx.state, ctx.stateName          "TX", "Texas"
+     ctx.period                        { key: "2016-2025", start: 2016, end: 2025, years: 10 }
+     ctx.element                       { en: 107, name: "Steel Open Girder/Beam", unit: "ft" }
+     ctx.windowData                    raw data for the period: bridges, deckArea, excluded, cells
+     ctx.profile                       decoded cells per CS (u = age band, v = CS% band, area, n),
+                                       age-band totals and total deck area (null if no bridges)
+     ctx.label                         "Steel Open Girder/Beam in Texas, 2016 to 2025"            */
+function analysisContext() {
+  const el = stIdx.elements.find((e) => e.en === sel.en);
+  const [start, end] = sel.win.split("-").map(Number);
+  const name = el ? el.name : elData.name;
+  return {
+    state: sel.st, stateName: stIdx.name, period: { key: sel.win, start, end, years: stIdx.years.filter((y) => y >= start && y <= end).length },
+    element: { en: sel.en, name, unit: elData.unit || null },
+    windowData: prof ? prof.w : periodData(elData, sel.win), profile: prof && prof.w.bridges ? prof : null,
+    label: `${name} in ${stIdx.name}, ${start} to ${end}`,
+  };
+}
+function renderBasicAnalytics(ctx) {
+  $$("#analyticsBody [data-ctx]").forEach((e) => (e.textContent = `It will use the same selection: ${ctx.label}.`));
+}
+function renderAdvancedAnalytics(ctx) {
+  $$("#advancedBody [data-ctx]").forEach((e) => (e.textContent = `It will use the same selection: ${ctx.label}.`));
+}
+function renderOtherTabs() {
+  if (!elData || !stIdx || !sel.win) return;
+  const ctx = analysisContext();
+  renderBasicAnalytics(ctx);
+  renderAdvancedAnalytics(ctx);
+}
+
+/* ---------- tabs ---------- */
+const TABS = ["insights", "analytics", "advanced"];
+let tab = "insights";
+function setTab(t, { focus = false, hash = true } = {}) {
+  if (!TABS.includes(t)) t = "insights";
+  tab = t;
+  TABS.forEach((x) => {
+    const b = $(`#tab-${x}`), pane = $(`#pane-${x}`), on = x === t;
+    b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; pane.hidden = !on;
+    if (on && focus) b.focus();
+  });
+  hideTip();
+  if (t === "insights") requestAnimationFrame(drawProfiles);
+  if (hash) writeHash();
+}
+$(".tabs").addEventListener("click", (ev) => { const b = ev.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
+$(".tabs").addEventListener("keydown", (ev) => {
+  const i = TABS.indexOf(tab), k = ev.key;
+  const j = k === "ArrowRight" ? (i + 1) % TABS.length : k === "ArrowLeft" ? (i + TABS.length - 1) % TABS.length : k === "Home" ? 0 : k === "End" ? TABS.length - 1 : -1;
+  if (j >= 0) { ev.preventDefault(); setTab(TABS[j], { focus: true }); }
+});
 function profTip(k, c) {
   const cs = CSN[k];
-  return `<b>${cs} · age ${BINS.age[c.u].label} yr · ${cs} ${BINS.cs[c.v].label}%</b><br><span class="m">Deck area:</span> ${sig3(c.area)} sq ft<br><span class="m">Share of total deck area:</span> ${pct(c.pTot)}<br><span class="m">Share of age band:</span> ${pct(c.pBand)}<br><span class="m">Bridges:</span> ${int(c.n)}`;
+  return `<b>${cs} ${BINS.cs[c.v].label}%, age ${BINS.age[c.u].label} years</b><br><span class="m">Deck area:</span> ${sig3(c.area)} sq ft<br><span class="m">Share of total deck area:</span> ${pct(c.pTot)}<br><span class="m">Share of age band:</span> ${pct(c.pBand)}<br><span class="m">Bridges:</span> ${int(c.n)}`;
 }
 function drawProfiles() {
-  if (!prof || !prof.w.bridges) return;
+  if (!prof || !prof.w.bridges || tab !== "insights") return;
   applyMode();
   const M = MODES[mode], z = P3D.niceTop(prof.max || 1, 5);
   if (mode !== "abs" && z.top > 100) { z.top = 100; z.step = 20; } // shares never exceed 100%
   $("#cbLabel").textContent = M.label; $("#modeHelp").textContent = M.help;
-  $$("#modeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+  $$("#normSeg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.norm === "raw") === (mode === "abs"))));
+  $("#normByWrap").hidden = mode === "abs";
+  if (mode !== "abs") $("#normBy").value = mode;
   const cStep = P3D.niceTop(prof.max || 1, 4).step;
   let ticks = ""; for (let v = 0; v < prof.max - cStep * 0.35; v += cStep) ticks += `<span style="left:${(v / prof.max) * 100}%">${M.tick(v)}</span>`;
-  $("#profTicks").innerHTML = ticks + `<span style="left:100%">${M.fmt(prof.max)}</span>`;
+  $("#profTicks").innerHTML = ticks + `<span style="left:100%">${(M.end || M.fmt)(prof.max)}</span>`;
   prof.cells.forEach((cells, k) => {
     P3D.render($(`#prof${k}`), {
       cells, bins: BINS, zTop: z.top, zStep: z.step, cMax: prof.max || 1, csName: CSN[k], zLabel: M.z,
@@ -715,7 +818,8 @@ function drawProfiles() {
 }
 P3D.attachRotate([0, 1, 2, 3].map((k) => $(`#prof${k}`)), drawProfiles);
 $("#profReset").addEventListener("click", () => { P3D.resetView(); drawProfiles(); });
-$("#modeSeg").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-mode]"); if (!b) return; mode = b.dataset.mode; drawProfiles(); });
+$("#normSeg").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-norm]"); if (!b) return; mode = b.dataset.norm === "raw" ? "abs" : $("#normBy").value; drawProfiles(); });
+$("#normBy").addEventListener("change", (ev) => { mode = ev.target.value; drawProfiles(); });
 let prz = 0;
 new ResizeObserver(() => { cancelAnimationFrame(prz); prz = requestAnimationFrame(drawProfiles); }).observe($("#prof0"));
 function bandHover(u) {
@@ -755,19 +859,13 @@ addEventListener("scroll", hideTip, { passive: true });
 /* ---------- chrome ---------- */
 function renderChrome() {
   const el = stIdx && sel.en ? stIdx.elements.find((e) => e.en === sel.en) : null;
-  $("#stepState").textContent = sel.st ? nameOf(sel.st) : "Not selected";
-  $("#stepYears").textContent = sel.win ? sel.win.replace("-", "–") : "Not selected";
-  $("#stepType").textContent = el ? el.name : "Not selected";
-  $("#stepProf").textContent = el ? "Ready" : "Waiting";
-  const done = [!!sel.st, !!sel.win, !!el, !!el];
-  const cur = done.indexOf(false);
-  $$(".step").forEach((s, i) => { s.classList.toggle("done", done[i]); s.classList.toggle("current", i === cur); });
-  $("#topCrumbs").innerHTML = [sel.st && nameOf(sel.st), sel.win && sel.win.replace("-", "–"), el && el.name].filter(Boolean).map((x) => `<b>${esc(x)}</b>`).join('<span aria-hidden="true">/</span>');
-  document.title = el ? `${el.name} · ${nameOf(sel.st)} · ${sel.win} | Bridge Deterioration Model` : "Bridge Deterioration Model | Bentley Systems";
+  const parts = [[sel.st && nameOf(sel.st), "state"], [sel.win && sel.win.replace("-", "–"), "years"], [el && el.name, "profile"]].filter((p) => p[0]);
+  $("#topCrumbs").innerHTML = parts.map(([t, go]) => `<button data-go="${go}">${esc(t)}</button>`).join('<span aria-hidden="true">/</span>');
+  document.title = el ? `${el.name}, ${nameOf(sel.st)} ${sel.win} | Bridge Deterioration Model` : "Bridge Deterioration Model | Bentley Systems";
 }
 function jump(q) { requestAnimationFrame(() => { const el = $(q); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 76 }); }); }
 function writeHash() {
-  const h = "#/" + [sel.st, sel.win, sel.en].filter((x) => x != null).join("/");
+  const h = "#/" + [sel.st, sel.win, sel.en, sel.en != null && tab !== "insights" ? tab : null].filter((x) => x != null).join("/");
   if (location.hash !== h) history.replaceState(null, "", h);
 }
 
@@ -781,7 +879,7 @@ async function selectState(st, { win = null, en = null, scroll = true } = {}) {
   try { stIdx = await getJSON(`data/${st}/index.json`); } catch (e) { showErr("#panel-years", e); return; }
   if (my !== token) return;
   const W = stIdx.windows;
-  sel.win = (win && W.some((w) => w.key === win)) ? win : W[W.length - 1].key; // default: latest period
+  sel.win = (win && W.some((w) => w.key === win)) ? win : W.length === 1 ? W[0].key : latestKey(stIdx.years); // default: latest five years
   renderYears(); renderTypes(); renderChrome(); writeHash();
   if (en != null && stIdx.elements.some((e) => e.en === en)) await selectElement(en, { scroll: false });
   else renderProfile();
@@ -789,8 +887,9 @@ async function selectState(st, { win = null, en = null, scroll = true } = {}) {
 }
 function selectWindow(key, scroll = false) {
   if (!stIdx || !stIdx.windows.some((w) => w.key === key)) return;
+  if (key === sel.win) return;
   sel.win = key;
-  if (sel.en != null && !(stIdx.elements.find((e) => e.en === sel.en)?.bridges[key] > 0)) { sel.en = null; elData = null; }
+  if (sel.en != null && !(stIdx.elements.find((e) => e.en === sel.en)?.bridges[winIdx()] > 0)) { sel.en = null; elData = null; }
   renderYears(); renderTypes(); renderProfile(); renderChrome(); writeHash();
   if (scroll) jump("#panel-type");
 }
@@ -823,22 +922,30 @@ $("#smallStates").addEventListener("mouseleave", () => { hideTip(); updateStateI
 $("#stateSelect").addEventListener("change", (ev) => ev.target.value && selectState(ev.target.value));
 $("#yearbars").addEventListener("click", (ev) => {
   const b = ev.target.closest(".yb"); if (!b || b.disabled || !stIdx || stIdx.windows.length === 1) return;
-  const y = +b.dataset.y, W = stIdx.windows;
-  const w = W.find((x) => x.start === y) || (y > W[W.length - 1].start ? W[W.length - 1] : W[0]);
-  selectWindow(w.key, true);
+  const y = +b.dataset.y, w = curWin();
+  // move whichever end of the period is nearer to the clicked year (ties move the end year)
+  const moveStart = y < w.start || (y <= w.end && y - w.start < w.end - y);
+  selectWindow(moveStart ? fitPeriod(y, w.end, "start") : fitPeriod(w.start, y, "end"));
 });
-$("#yStart").addEventListener("change", (ev) => selectWindow(ev.target.value, true));
-$("#yEnd").addEventListener("change", (ev) => selectWindow(ev.target.value, true));
-$("#yPrev").addEventListener("click", () => { const W = stIdx.windows, i = W.findIndex((w) => w.key === sel.win); if (i > 0) selectWindow(W[i - 1].key); });
-$("#yNext").addEventListener("click", () => { const W = stIdx.windows, i = W.findIndex((w) => w.key === sel.win); if (i < W.length - 1) selectWindow(W[i + 1].key); });
-$("#catChips").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-cat]"); if (b) { catFilter = b.dataset.cat; renderTypes(); } });
+$("#yStart").addEventListener("change", (ev) => selectWindow(fitPeriod(+ev.target.value, curWin().end, "start")));
+$("#yEnd").addEventListener("change", (ev) => selectWindow(fitPeriod(curWin().start, +ev.target.value, "end")));
+function shiftPeriod(d) {
+  const ys = stIdx.years, w = curWin(), i = ys.indexOf(w.start) + d, j = ys.indexOf(w.end) + d;
+  if (i >= 0 && j < ys.length) selectWindow(`${ys[i]}-${ys[j]}`);
+}
+$("#yPrev").addEventListener("click", () => shiftPeriod(-1));
+$("#yNext").addEventListener("click", () => shiftPeriod(1));
+$("#yLast5").addEventListener("click", () => selectWindow(latestKey(stIdx.years)));
+$("#yAll").addEventListener("click", () => { const ys = stIdx.years; selectWindow(`${ys[0]}-${ys[ys.length - 1]}`); });
+$("#catSelect").addEventListener("change", (ev) => { catFilter = ev.target.value; renderTypes(); });
 $("#elSearch").addEventListener("input", () => renderTypes());
 $("#elList").addEventListener("click", (ev) => { const b = ev.target.closest(".el"); if (b) selectElement(+b.dataset.en); });
-$$("[data-go]").forEach((s) => s.addEventListener("click", () => jump({ state: "#panel-state", years: "#panel-years", type: "#panel-type", profile: "#panel-profile", method: "#method" }[s.dataset.go])));
+document.addEventListener("click", (ev) => { const g = ev.target.closest("[data-go]"); if (g) jump({ state: "#panel-state", years: "#panel-years", type: "#panel-type", profile: "#panel-profile", method: "#method" }[g.dataset.go]); });
 window.addEventListener("hashchange", () => route(false));
 
 function route(scroll) {
-  const [st, win, en] = location.hash.replace(/^#\/?/, "").split("/");
+  const [st, win, en, t] = location.hash.replace(/^#\/?/, "").split("/");
+  if (TABS.includes(t || "insights") && (t || "insights") !== tab) setTab(t || "insights", { hash: false });
   const S = (st || "").toUpperCase();
   if (!S || !IDX.states[S]) return;
   if (S !== sel.st) selectState(S, { win, en: en ? +en : null, scroll });
@@ -850,7 +957,7 @@ function route(scroll) {
 (async () => {
   try { IDX = await getJSON("data/index.json"); } catch (e) { $("#usmap").innerHTML = ""; showErr("#panel-state", e); return; }
   renderMap(); renderChrome();
-  if (IDX.generated) $("#genAt").textContent = `Data prepared ${IDX.generated}`;
+  if (IDX.generated) { const d = new Date(IDX.generated + "T00:00:00"); $("#genAt").textContent = `, prepared ${d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.`; }
   route(true);
 })();
 })();

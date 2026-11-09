@@ -1,1 +1,1 @@
-{"en":316,"name":"Other Bearing","unit":"each","state":"GU","windows":{"2022-2024":{"bridges":1,"deckArea":3610,"excluded":{},"cells":[159,3610,1,540,3610,1,940,3610,1,1340,3610,1]}}}
+{"en":316,"name":"Other Bearing","unit":"each","state":"GU","ends":{"2024":{"2024":{"bridges":1,"deckArea":3610,"excluded":{},"cells":[159,3610,1,540,3610,1,940,3610,1,1340,3610,1]}}}}

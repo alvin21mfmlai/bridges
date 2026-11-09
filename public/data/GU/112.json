@@ -1,1 +1,1 @@
-{"en":112,"name":"Other Girder/Beam","unit":"ft","state":"GU","windows":{"2022-2024":{"bridges":0,"deckArea":0,"excluded":{"no_deck_area":1},"cells":[]}}}
+{"en":112,"name":"Other Girder/Beam","unit":"ft","state":"GU","ends":{"2024":{"2024":{"bridges":0,"deckArea":0,"excluded":{"no_deck_area":1},"cells":[]}}}}

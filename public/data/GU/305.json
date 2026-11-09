@@ -1,1 +1,1 @@
-{"en":305,"name":"Assembly Joint without Seal","unit":"ft","state":"GU","windows":{"2022-2024":{"bridges":1,"deckArea":8986,"excluded":{},"cells":[120,8986,1,534,8986,1,925,8986,1,1320,8986,1]}}}
+{"en":305,"name":"Assembly Joint without Seal","unit":"ft","state":"GU","ends":{"2024":{"2024":{"bridges":1,"deckArea":8986,"excluded":{},"cells":[120,8986,1,534,8986,1,925,8986,1,1320,8986,1]}}}}

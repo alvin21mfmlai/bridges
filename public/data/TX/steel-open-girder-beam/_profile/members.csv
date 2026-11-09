@@ -1,5 +1,0 @@
-bridge_id,element_id,inspection_id,report_type_id,date,quantity_valid,total,cs1,cs2,cs3,cs4,year_built,year_built_source,deck_area_sq_ft,deck_area_source,year_built_source_missing,deck_area_source_missing,profile_status,profile_reason
-1000,x1000,890760,16,2026-02-10,True,1238.0,0.0,1094.0,144.0,0.0,1949,SNBI B.W.01 (2300901),8977.0,SNBI B.G.16 Calculated Deck Area,False,False,included,
-2000,x2000,884281,16,2026-01-14,True,1140.0,567.0,550.0,17.0,6.0,1934,SNBI B.W.01 (2300901),6270.0,SNBI B.G.16 Calculated Deck Area,False,False,included,
-3000,x3000,867311,12,2025-11-03,True,273.0,253.0,20.0,0.0,0.0,1995,SNBI B.W.01 (2300901),932.1,SNBI B.G.16 Calculated Deck Area,False,False,included,
-5000,x5000,863337,16,2025-10-27,True,1600.0,600.0,800.0,200.0,0.0,1934,SNBI B.W.01 (2300901),3680.0,SNBI B.G.16 Calculated Deck Area,False,False,included,

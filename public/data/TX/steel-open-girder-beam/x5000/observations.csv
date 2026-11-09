@@ -1,6 +1,0 @@
-bridge_id,element_id,inspection_id,report_type_id,date,total,b,quantity_valid,scope,cs1,cs2,cs3,cs4,maintenance_completion_date,used_in_fit,is_latest
-5000,x5000,402561,1,2018-10-22,1600.0,0.0,True,"('Steel Open Girder/Beam', 'Struct element', 'Steel', 'Superstructure', '')",1240.0,360.0,0.0,0.0,,True,False
-5000,x5000,477107,1,2020-11-20,1600.0,0.125,True,"('Steel Open Girder/Beam', 'Struct element', 'Steel', 'Superstructure', '')",600.0,800.0,200.0,0.0,,True,False
-5000,x5000,619366,1,2022-10-15,1600.0,0.125,True,"('Steel Open Girder/Beam', 'Struct element', 'Steel', 'Superstructure', '')",600.0,800.0,200.0,0.0,,True,False
-5000,x5000,770096,1,2024-10-08,1600.0,0.125,True,"('Steel Open Girder/Beam', 'Struct element', 'Steel', 'Superstructure', '')",600.0,800.0,200.0,0.0,,True,False
-5000,x5000,863337,16,2025-10-27,1600.0,0.125,True,"('Steel Open Girder/Beam', 'Struct element', 'Steel', 'Superstructure', '')",600.0,800.0,200.0,0.0,,True,True

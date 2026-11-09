@@ -1,1 +1,1 @@
-{"en":116,"name":"Reinforced Concrete Stringer","unit":"ft","state":"PR","windows":{"2021-2025":{"bridges":1,"deckArea":2233,"excluded":{},"cells":[339,2233,1,720,2233,1,1120,2233,1,1520,2233,1]}}}
+{"en":116,"name":"Reinforced Concrete Stringer","unit":"ft","state":"PR","ends":{"2025":{"2025":{"bridges":1,"deckArea":2233,"excluded":{},"cells":[339,2233,1,720,2233,1,1120,2233,1,1520,2233,1]}}}}

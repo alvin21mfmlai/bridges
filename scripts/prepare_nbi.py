@@ -6,20 +6,24 @@
 Reads every <STATE>/bridge_element_yearly.csv (the by_element/ files hold the same rows and
 are ignored) and writes small JSON files to public/data/:
 
-    public/data/index.json            jurisdictions, years, windows, bridge counts
-    public/data/<ST>/index.json       element types of a state, bridges per window
-    public/data/<ST>/<EN>.json        condition-state profile cells per 5-year window
+    public/data/index.json            jurisdictions, years, bridge counts
+    public/data/<ST>/index.json       element types of a state, valid periods, bridges per period
+    public/data/<ST>/<EN>.json        condition-state profile cells, grouped by end year and record year
 
-Profile rule, per state × element type × window:
-  - Each bridge counts once, at its latest data year inside the window.
+Profile rule, per state × element type × period:
+  - Each bridge counts once, at its latest data year inside the period.
   - Age = BRIDGE_AGE_YEARS at that year (data year − year built), 5-year bins 1–5 … 96–100.
   - CSk share = CSk / TOTALQTY × 100, 5% bins [0,5], (5,10] … (95,100].
   - A cell holds the summed deck area (sq ft) and the number of bridges.
   - Excluded, with counts: no quantity, quantity check failed, no deck area, no age,
     age outside 1–100.
 Only data years from MIN_YEAR (2016) onwards are used.
-Windows: every run of 5 consecutive calendar years inside the state's data years. A state
-with 5 or fewer data years gets a single window covering all of them.
+Periods: any start and end data year holding at least 5 data years. A state with 5 or fewer
+data years has one period covering all of them.
+
+Storage: for each valid end year e, every bridge's latest record up to e is grouped by that
+record's year g (ends[e][g]). A period [s, e] is the sum of the groups g = s … e at end e,
+which is exactly "latest record inside [s, e]". The browser does that sum.
 
 Requires: pip install duckdb
 """
@@ -71,19 +75,25 @@ def main(src):
         WHERE DATA_YEAR >= {MIN_YEAR}""")
     print(f"loaded {con.execute('select count(*) from y').fetchone()[0]:,} rows in {time.time()-t0:.0f}s")
 
-    # data years and 5-year windows per state
+    # data years, valid periods and valid end years per state.
+    # A period [s, e] runs between two data years and holds at least WIN data years;
+    # a state with WIN or fewer data years has one period: all of them.
     years = {st: sorted(ys) for st, ys in con.execute("select st, list(distinct yr) from y group by st").fetchall()}
     windows = []  # (st, key, start, end)
     for st, ys in years.items():
         if len(ys) <= WIN:
             windows.append((st, f"{ys[0]}-{ys[-1]}", ys[0], ys[-1]))
         else:
-            for s in range(ys[0], ys[-1] - WIN + 2):
-                windows.append((st, f"{s}-{s+WIN-1}", s, s + WIN - 1))
-    con.execute("CREATE TABLE w (st VARCHAR, wk VARCHAR, ws INTEGER, we INTEGER)")
-    con.executemany("INSERT INTO w VALUES (?,?,?,?)", windows)
+            for i, s in enumerate(ys):
+                for j in range(i + WIN - 1, len(ys)):
+                    windows.append((st, f"{s}-{ys[j]}", s, ys[j]))
+    ends = sorted({(st, e) for st, _, _, e in windows})
+    con.execute("CREATE TABLE ends (st VARCHAR, e INTEGER)")
+    con.executemany("INSERT INTO ends VALUES (?,?)", ends)
 
-    # latest record per bridge × element inside each window, with exclusion reason and bins
+    # For each valid end year e: the latest record per bridge × element up to e, labelled with
+    # that record's year g. The latest record in a period [s, e] is the latest record up to e
+    # whenever its year g >= s, so any period is the sum of groups g = s..e at end e.
     pick_sql = f"""
         SELECT *,
           CASE WHEN tot IS NULL OR tot <= 0 THEN 'no_quantity'
@@ -93,21 +103,21 @@ def main(src):
                WHEN age < {AGE_MIN} OR age > {AGE_MAX} THEN 'age_out_of_range'
                ELSE NULL END AS excl
         FROM (
-          SELECT y.*, w.wk FROM y JOIN w ON y.st = w.st AND y.yr BETWEEN w.ws AND w.we
+          SELECT y.*, ends.e, y.yr AS g FROM y JOIN ends ON y.st = ends.st AND y.yr <= ends.e
           WHERE y.st = $st
-          QUALIFY row_number() OVER (PARTITION BY y.st, y.en, w.wk, y.sn ORDER BY y.yr DESC) = 1
+          QUALIFY row_number() OVER (PARTITION BY y.st, y.en, ends.e, y.sn ORDER BY y.yr DESC) = 1
         )"""
     # one state at a time keeps memory bounded
     con.execute(f"CREATE TABLE pick AS {pick_sql.replace('$st', repr(sorted(years)[0]))} LIMIT 0")
     for st in sorted(years):
         con.execute(f"INSERT INTO pick {pick_sql}", {"st": st})
-    print(f"picked latest records per window in {time.time()-t0:.0f}s")
+    print(f"picked latest records per end year in {time.time()-t0:.0f}s")
     # long format: one row per bridge × CS; bin indices
     con.execute(f"""
         CREATE TABLE cells AS
         WITH long AS (
-          SELECT st, en, wk, sn, area, age, k, 100.0 * q / tot AS pct FROM (
-            SELECT st, en, wk, sn, area, age, tot, unnest([1,2,3,4]) AS k, unnest([cs1,cs2,cs3,cs4]) AS q
+          SELECT st, en, e, g, sn, area, age, k, 100.0 * q / tot AS pct FROM (
+            SELECT st, en, e, g, sn, area, age, tot, unnest([1,2,3,4]) AS k, unnest([cs1,cs2,cs3,cs4]) AS q
             FROM pick WHERE excl IS NULL)
         ), b AS (
           SELECT *, ((age - {AGE_MIN}) // {AGE_W})::INTEGER AS u,
@@ -115,13 +125,13 @@ def main(src):
                       ELSE least({100 // CS_W - 1}, ceil(round(pct, 9) / {CS_W} - 1e-9)::INTEGER - 1) END AS v
           FROM long
         )
-        SELECT st, en, wk, k, u, v, sum(area) AS area, count(*) AS n
+        SELECT st, en, e, g, k, u, v, sum(area) AS area, count(*) AS n
         FROM b GROUP BY ALL""")
 
-    # sanity: in every state × element × window, each CS figure holds the same bridges and area
+    # sanity: in every state × element × end × group, each CS figure holds the same bridges and area
     bad = con.execute("""
-        SELECT count(*) FROM (SELECT st, en, wk, count(DISTINCT round(a, 3)) d, count(DISTINCT nn) dn
-          FROM (SELECT st, en, wk, k, sum(area) a, sum(n) nn FROM cells GROUP BY ALL) GROUP BY ALL)
+        SELECT count(*) FROM (SELECT st, en, e, g, count(DISTINCT round(a, 3)) d, count(DISTINCT nn) dn
+          FROM (SELECT st, en, e, g, k, sum(area) a, sum(n) nn FROM cells GROUP BY ALL) GROUP BY ALL)
         WHERE d > 1 OR dn > 1""").fetchone()[0]
     assert bad == 0, f"{bad} groups have inconsistent totals across CS figures"
 
@@ -136,12 +146,12 @@ def main(src):
     os.makedirs(OUT, exist_ok=True)
 
     groups = con.execute("""
-        SELECT st, en, wk, count(*) FILTER (WHERE excl IS NULL) n, coalesce(sum(area) FILTER (WHERE excl IS NULL), 0) a,
+        SELECT st, en, e, g, count(*) FILTER (WHERE excl IS NULL) n, coalesce(sum(area) FILTER (WHERE excl IS NULL), 0) a,
                count(*) FILTER (WHERE excl='no_quantity'), count(*) FILTER (WHERE excl='quantity_check'),
                count(*) FILTER (WHERE excl='no_deck_area'), count(*) FILTER (WHERE excl='no_age'),
                count(*) FILTER (WHERE excl='age_out_of_range')
-        FROM pick GROUP BY ALL ORDER BY st, en, wk""").fetchall()
-    cells = con.execute("SELECT st, en, wk, k, u, v, area, n FROM cells ORDER BY st, en, wk, k, u, v").fetchall()
+        FROM pick GROUP BY ALL ORDER BY st, en, e, g""").fetchall()
+    cells = con.execute("SELECT st, en, e, g, k, u, v, area, n FROM cells ORDER BY st, en, e, g, k, u, v").fetchall()
     bridges_state = dict(con.execute("SELECT st, count(DISTINCT sn) FROM y GROUP BY st").fetchall())
     rows_year = {}
     for st, yr, n in con.execute("SELECT st, yr, count(DISTINCT sn) FROM y GROUP BY st, yr").fetchall():
@@ -150,19 +160,20 @@ def main(src):
     by_group = {}
     nv = 100 // CS_W
     nu = (AGE_MAX - AGE_MIN + 1) // AGE_W
-    for st, en, wk, k, u, v, area, n in cells:
+    for st, en, e, g, k, u, v, area, n in cells:
         # packed cell: code = (cs − 1)·nu·nv + ageBin·nv + csBin, then deck area (sq ft, rounded), then bridges
-        by_group.setdefault((st, en, wk), []).extend([(k - 1) * nu * nv + u * nv + v, round(area), n])
+        by_group.setdefault((st, en, e, g), []).extend([(k - 1) * nu * nv + u * nv + v, round(area), n])
 
     files = {}
-    for st, en, wk, n, a, e1, e2, e3, e4, e5 in groups:
-        f = files.setdefault((st, en), {"en": en, **el_info[en], "state": st, "windows": {}})
-        f["windows"][wk] = {
+    for st, en, e, g, n, a, e1, e2, e3, e4, e5 in groups:
+        f = files.setdefault((st, en), {"en": en, **el_info[en], "state": st, "ends": {}})
+        # ends[e][g]: bridges whose latest record up to end year e is from year g
+        f["ends"].setdefault(str(e), {})[str(g)] = {
             "bridges": n, "deckArea": round(a),
             "excluded": {k: v for k, v in zip(["no_quantity", "quantity_check", "no_deck_area", "no_age", "age_out_of_range"],
                                                [e1, e2, e3, e4, e5]) if v},
             # flat triples [code, deckAreaSqFt, bridges, …]; code = (cs−1)·400 + ageBin·20 + csBin
-            "cells": by_group.get((st, en, wk), []),
+            "cells": by_group.get((st, en, e, g), []),
         }
 
     states_index = {}
@@ -173,7 +184,8 @@ def main(src):
             if s_ != st:
                 continue
             els.append({"en": en, "name": f["name"], "unit": f["unit"],
-                        "bridges": {k: f["windows"].get(k, {}).get("bridges", 0) for k, _, _ in sw}})
+                        "bridges": [sum(grp["bridges"] for gy, grp in f["ends"].get(str(e), {}).items() if int(gy) >= s)
+                                    for _, s, e in sw]})
             os.makedirs(os.path.join(OUT, st), exist_ok=True)
             with open(os.path.join(OUT, st, f"{en}.json"), "w") as fh:
                 json.dump(f, fh, separators=(",", ":"))
@@ -187,7 +199,7 @@ def main(src):
 
     with open(os.path.join(OUT, "index.json"), "w") as fh:
         json.dump({"generated": time.strftime("%Y-%m-%d"), "source": os.path.basename(src.rstrip("/")),
-                   "rule": {"minYear": MIN_YEAR, "ageMin": AGE_MIN, "ageMax": AGE_MAX, "ageBinWidth": AGE_W, "csBinWidth": CS_W, "windowYears": WIN},
+                   "rule": {"minYear": MIN_YEAR, "ageMin": AGE_MIN, "ageMax": AGE_MAX, "ageBinWidth": AGE_W, "csBinWidth": CS_W, "minPeriodYears": WIN},
                    "states": states_index}, fh, separators=(",", ":"))
     con.close()
     shutil.rmtree(work, ignore_errors=True)

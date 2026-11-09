@@ -1,1 +1,1 @@
-{"en":207,"name":"Steel Column Tower/Trestle","unit":"ft","state":"TX","windows":{"2021-2025":{"bridges":1,"deckArea":230098,"excluded":{},"cells":[359,230098,1,740,230098,1,1140,230098,1,1540,230098,1]}}}
+{"en":207,"name":"Steel Column Tower/Trestle","unit":"ft","state":"TX","ends":{"2025":{"2025":{"bridges":1,"deckArea":230098,"excluded":{},"cells":[359,230098,1,740,230098,1,1140,230098,1,1540,230098,1]}}}}

@@ -36,7 +36,7 @@
     const az = (view.az * Math.PI) / 180, el = (view.el * Math.PI) / 180;
     const sa = Math.sin(az), ca = Math.cos(az), se = Math.sin(el), ce = Math.cos(el);
     const R = Math.hypot(NU, NV) / 2;
-    const mL = narrow ? 50 : 58, mR = narrow ? 16 : 22, mT = 12, mB = narrow ? 54 : 64;
+    const mL = narrow ? 60 : 58, mR = narrow ? 16 : 22, mT = 12, mB = narrow ? 54 : 64;
     const k = Math.min((W - mL - mR) / (2 * R), (H - mT - mB) / (HS * ce + 2 * R * se));
     const cx = mL + (W - mL - mR) / 2;
     const baseY = H - mB - (R * se - 0) * k; // screen y of the floor centre

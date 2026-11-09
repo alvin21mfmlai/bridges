@@ -1,1 +1,1 @@
-{"en":105,"name":"Reinforced Concrete Closed Web/Box Girder","unit":"ft","state":"GU","windows":{"2022-2024":{"bridges":2,"deckArea":12782,"excluded":{},"cells":[39,10509,1,231,2272,1,420,10509,1,620,2272,1,820,10509,1,1028,2272,1,1220,10509,1,1420,2272,1]}}}
+{"en":105,"name":"Reinforced Concrete Closed Web/Box Girder","unit":"ft","state":"GU","ends":{"2024":{"2024":{"bridges":2,"deckArea":12782,"excluded":{},"cells":[39,10509,1,231,2272,1,420,10509,1,620,2272,1,820,10509,1,1028,2272,1,1220,10509,1,1420,2272,1]}}}}
