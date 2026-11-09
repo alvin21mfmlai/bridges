@@ -305,7 +305,7 @@ table.data tr.hl td{background:var(--accent-muted)}
     <div class="panel-body years">
       <div>
         <div class="yearbars" id="yearbars" role="group" aria-label="Data years"></div>
-        <p class="note-inline" style="margin:10px 0 0">Bars show how many bridges were inspected each year. Click the above bar with the year tagging to add or remove their respective inclusion.</p>
+        <p class="note-inline" style="margin:10px 0 0">Bars show how many bridges were inspected each year.</p>
       </div>
       <div class="year-ctl">
         <div class="period-badge" id="periodBadge"></div>
@@ -735,7 +735,7 @@ function renderProfile() {
     (elData.unit ? `<span>Element quantity in ${esc(elData.unit)}</span>` : "");
   $("#exclNote").textContent = exN ? `Left out: ${Object.entries(ex).map(([k, v]) => `${int(v)} with ${EXL[k] || k}`).join(", ")}.` : "No bridges were left out.";
   const rows = prof.bands.map((b, u) => b.n ? `<tr><td>${BINS.age[u].label}</td><td>${int(b.n)}</td><td>${sig3(b.area)}</td><td>${pct((b.area / prof.total) * 100)}</td></tr>` : "").join("");
-  $("#bandTitle").textContent = "Bridges and deck area by age band";
+  $("#bandTitle").textContent = "Bridges and deck area by age band (same for all condition states)";
   $("#bandTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Bridges</th><th>Deck area (sq ft)</th><th>Share of deck area</th></tr></thead><tbody>${rows}</tbody>`;
   if (tab === "insights") drawProfiles();
   renderOtherTabs();
