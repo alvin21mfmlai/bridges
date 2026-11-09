@@ -979,7 +979,6 @@ function route(scroll) {
 (async () => {
   try { IDX = await getJSON("data/index.json"); } catch (e) { $("#usmap").innerHTML = ""; showErr("#panel-state", e); return; }
   renderMap(); renderChrome();
-  if (IDX.generated) { const d = new Date(IDX.generated + "T00:00:00"); $("#genAt").textContent = `, prepared ${d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.`; }
   route(true);
 })();
 })();
