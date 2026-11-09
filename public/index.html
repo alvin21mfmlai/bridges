@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bridge Deterioration Model | Bentley Systems</title>
-<meta name="description" content="Element-level bridge deterioration model, filtered by state, element type and element ID.">
+<meta name="description" content="Condition-state profiles of bridge elements by bridge age, from National Bridge Inventory element data, by state, period and element type.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -18,7 +18,6 @@
   --bg:#ffffff; --bg-zebra:#fbfbfc; --bg-hover:#f7f8f8; --backdrop:#eef0f1; --backdrop-hover:#e6e9ea; --disabled:#dde1e3;
   --border-subtle:#c4cbcf; --border:#b3bcc1; --border-fg:#8f8f8f;
   --positive:#157e11; --warning:#8f6400; --negative:#c52b26;
-  --forecast:#c75b00;            /* matches the forecast line in the figures */
   --dark:#242b2e; --dark-2:#333c41; --dark-text:#cccccc;
   --r:4px;
   --shadow-1:0 1px 5px rgba(0,0,0,.25); --shadow-2:0 1px 10px rgba(0,0,0,.18); --shadow-3:0 3px 14px rgba(0,0,0,.2);
@@ -98,100 +97,6 @@ main.wrap{padding-top:32px;padding-bottom:56px}
 select{font:inherit;font-size:14px;height:36px;padding:0 36px 0 12px;border-radius:var(--r);border:1px solid var(--border-fg);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23363636' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;-webkit-appearance:none;color:var(--text);min-width:220px;cursor:pointer}
 select:hover{border-color:#6b6b6b}
 .field-label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px}
-
-/* ---------- state tile map ---------- */
-.map-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:32px;align-items:start}
-@media (max-width:900px){.map-layout{grid-template-columns:minmax(0,1fr)}}
-.tilemap{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;max-width:740px;min-width:0}
-.tile{aspect-ratio:1;min-width:0;padding:0;border:1px solid var(--border-subtle);border-radius:var(--r);display:grid;place-items:center;font-weight:600;font-size:clamp(9px,1.15vw,13px);background:var(--bg-zebra);color:var(--text-disabled);cursor:not-allowed;transition:background .2s,border-color .2s}
-.tile.has{background:var(--accent);border-color:var(--accent);color:#fff;cursor:pointer}
-.tile.has:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
-.tile.sel{background:var(--dark);border-color:var(--dark);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--accent)}
-@media (max-width:600px){.tilemap{gap:2px}.tile{font-size:8.5px}.panel{padding:16px}.wrap{padding:0 16px}select{min-width:0;width:100%}.panel-head .tools{margin-left:0;width:100%}}
-.map-side{border-left:1px solid var(--backdrop);padding-left:24px}
-@media (max-width:900px){.map-side{border-left:0;padding-left:0}}
-.legend{display:flex;flex-direction:column;gap:8px;margin:16px 0 20px;font-size:13px;color:var(--text-muted)}
-.legend span{display:flex;align-items:center;gap:10px}
-.legend i{width:16px;height:16px;border-radius:2px;display:inline-block;border:1px solid var(--border-subtle)}
-.kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:13px;margin-top:16px;padding-top:16px;border-top:1px solid var(--backdrop)}
-.kv dt{color:var(--text-muted)}.kv dd{margin:0;font-weight:600;text-align:right}
-
-/* ---------- choice cards ---------- */
-.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.card{position:relative;text-align:left;border:1px solid var(--border-subtle);background:#fff;border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .2s,box-shadow .2s;display:flex;flex-direction:column;gap:8px;min-width:0}
-.card:hover{border-color:var(--accent);box-shadow:var(--shadow-2)}
-.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:#f5fafd}
-.card[aria-pressed="true"]::after{content:"";position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='9' viewBox='0 0 11 9'%3E%3Cpath d='M1 4.5l3 3L10 1' fill='none' stroke='%23fff' stroke-width='1.8'/%3E%3C/svg%3E") no-repeat center}
-.card .k{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);padding-right:28px}
-.card .t{font-size:18px;font-weight:600}
-.card .sub{font-size:13px;color:var(--text-muted)}
-.cards.type-cards{grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr))}
-.type-card{flex-direction:row;align-items:center;gap:16px;padding-right:44px}
-.type-card .ico{flex:none;width:56px;height:56px;border-radius:var(--r);background:var(--accent-muted);display:grid;place-items:center}
-.el-card .id{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--accent)}
-.el-card svg.spark{width:100%;height:56px;display:block;border-bottom:1px solid var(--backdrop)}
-.el-card .row{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--text-muted)}
-.el-card .row b{font-family:var(--font-mono);color:var(--text);font-weight:600}
-.el-card .row b.up{color:var(--forecast)}
-
-/* ---------- detail ---------- */
-.detail-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--backdrop)}
-.detail-head h2{margin:0;font-size:24px;font-weight:600}
-.detail-head h2 .mono{color:var(--accent)}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--border-subtle);background:var(--bg-zebra);color:var(--text)}
-.tag.ok{border-color:#9cc59a;background:#e7f4e6;color:var(--positive)}
-.tag.warn{border-color:#d9b46a;background:#f9f1e6;color:var(--warning)}
-.nav-btns{margin-left:auto;display:flex;gap:8px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;margin-bottom:20px;border:1px solid var(--border-subtle);border-radius:var(--r);overflow:hidden}
-.stat{padding:14px 16px;background:#fff;border-right:1px solid var(--backdrop);border-bottom:1px solid var(--backdrop);margin:0 -1px -1px 0}
-.stat .l{font-size:12px;font-weight:600;color:var(--text-muted)}
-.stat .v{font-size:24px;font-weight:600;margin-top:2px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.stat.f .v{color:var(--forecast)}
-.stat .s{font-size:12px;color:var(--text-muted)}
-.downloads{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
-.downloads .lbl{font-size:13px;color:var(--text-muted);margin-right:4px}
-.downloads a{display:inline-flex;align-items:center;gap:6px;font-size:13px;height:28px;padding:0 10px;border-radius:var(--r);border:1px solid var(--border-subtle);background:#fff;color:var(--accent);text-decoration:none}
-.downloads a:hover{border-color:var(--accent);background:var(--accent-muted)}
-
-/* charts */
-.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:12px}
-.toolbar .lbl{font-size:12px;font-weight:600;color:var(--text-muted)}
-.seg{display:inline-flex;border:1px solid var(--border-fg);border-radius:var(--r);overflow:hidden}
-.seg button{border:0;background:#fff;height:32px;padding:0 12px;font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid var(--border-subtle)}
-.seg button:last-child{border-right:0}
-.seg button:hover{background:var(--bg-hover)}
-.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
-.toolbar .spacer{flex:1}
-.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-@media (max-width:1000px){.charts{grid-template-columns:minmax(0,1fr)}}
-.chart-card{border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff;padding:14px 14px 8px;min-width:0}
-.chart-card h3{margin:0;font-size:15px;font-weight:600}
-.chart-card .csub{margin:2px 0 8px;font-size:12.5px;color:var(--text-muted)}
-.chart-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--text-muted);margin-bottom:4px}
-.chart-legend span{display:inline-flex;align-items:center;gap:6px}
-.chart-box{position:relative;width:100%}
-.chart-box svg{display:block;width:100%;height:auto;overflow:visible}
-.chart-box .hit{cursor:pointer}
-#tip{position:fixed;z-index:60;pointer-events:none;background:var(--dark);color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:var(--r);box-shadow:var(--shadow-3);max-width:320px;opacity:0;transition:opacity .12s}
-#tip.on{opacity:1}
-#tip b{font-weight:600}
-#tip .m{color:#cccccc}
-.tables{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:16px}
-@media (max-width:1240px){.tables{grid-template-columns:minmax(0,1fr)}}
-.tbl-card{border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff;min-width:0}
-.tbl-card h3{margin:0;padding:12px 14px;font-size:14px;font-weight:600;border-bottom:1px solid var(--border-subtle)}
-.tbl-wrap{overflow-x:auto}
-table.data{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
-table.data th{text-align:right;font-weight:600;font-size:12px;color:var(--text-muted);padding:8px 10px;background:var(--bg-zebra);border-bottom:1px solid var(--border-subtle);white-space:nowrap}
-table.data td{text-align:right;padding:7px 10px;border-bottom:1px solid var(--backdrop);white-space:nowrap}
-table.data th:first-child,table.data td:first-child{text-align:left}
-table.data tr:last-child td{border-bottom:0}
-table.data tbody tr:hover td{background:var(--bg-hover)}
-td.neg{color:var(--negative)} td.pos{color:var(--accent-hover)}
-.tbl-note{font-size:12px;color:var(--text-muted);padding:10px 14px;border-top:1px solid var(--backdrop)}
-.tbl-note.warn{color:var(--warning);background:#f9f1e6}
-.fallback-fig img{width:100%;height:auto;display:block;border:1px solid var(--border-subtle);border-radius:var(--r)}
 /* condition-state profile (after step 2) */
 .prof-facts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin-bottom:14px;font-size:13px;color:var(--text-muted)}
 .prof-facts b{color:var(--text);font-weight:600}
@@ -217,7 +122,7 @@ details.prof-tbl{margin-top:16px;border:1px solid var(--border-subtle);border-ra
 details.prof-tbl summary{cursor:pointer;padding:12px 14px;font-weight:600;font-size:14px}
 details.prof-tbl[open] summary{border-bottom:1px solid var(--border-subtle)}
 table.data tr.hl td{background:var(--accent-muted)}
-/* reference: how the curves are generated */
+/* reference: how the profiles are computed */
 .method-list{border:1px solid var(--border-subtle);border-radius:var(--r);overflow:hidden}
 .method-item{display:grid;grid-template-columns:200px minmax(0,1fr);border-bottom:1px solid var(--border-subtle)}
 .method-item:last-child{border-bottom:0}
@@ -238,6 +143,115 @@ footer{background:var(--dark);color:var(--dark-text);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:24px}
 footer b{color:#fff;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+@media (max-width:600px){.panel{padding:16px}.wrap{padding:0 16px}select{min-width:0;width:100%}.panel-head .tools{margin-left:0;width:100%}}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.note-inline{font-size:12.5px;color:var(--text-muted)}
+.err{padding:14px 16px;border:1px solid #e3a5a3;background:#fbeceb;color:var(--negative);border-radius:var(--r)}
+
+/* ---------- step 1: US map ---------- */
+.map-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+@media (max-width:980px){.map-layout{grid-template-columns:minmax(0,1fr)}}
+.usmap{position:relative;min-width:0}
+.usmap svg{display:block;width:100%;height:auto;overflow:visible}
+.usmap .st{stroke:#fff;stroke-width:.9;stroke-linejoin:round;cursor:pointer;transition:fill .18s,filter .18s;outline:none}
+.usmap .st:hover,.usmap .st:focus-visible{stroke:#242b2e;stroke-width:1.6;filter:drop-shadow(0 3px 6px rgba(0,40,80,.35)) brightness(1.06)}
+.usmap .st.sel{fill:#f28c28!important;stroke:#242b2e;stroke-width:2;filter:drop-shadow(0 4px 10px rgba(160,70,0,.45))}
+.usmap .st.nodata{fill:url(#hatch);cursor:not-allowed}
+.usmap .st.nodata:hover{filter:none;stroke:#fff;stroke-width:.9}
+.usmap .lbl{font-size:11px;font-weight:600;pointer-events:none;text-anchor:middle;dominant-baseline:central;letter-spacing:.02em}
+.usmap .lbl.sel{fill:#fff!important}
+.chips-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
+.chips-row .note-inline{margin-right:4px}
+.chip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:30px;padding:0 10px;border-radius:var(--r);border:1px solid rgba(0,0,0,.08);font-weight:600;font-size:12.5px;cursor:pointer;transition:filter .15s,box-shadow .15s}
+.chip:hover{filter:brightness(1.06);box-shadow:0 2px 6px rgba(0,40,80,.3)}
+.chip[aria-pressed="true"]{background:#f28c28!important;color:#fff!important;box-shadow:0 0 0 2px #242b2e}
+.chip[disabled]{background:repeating-linear-gradient(45deg,#eef0f1 0 4px,#e2e5e7 4px 8px)!important;color:var(--text-disabled)!important;cursor:not-allowed;box-shadow:none}
+.map-side h3{margin:0 0 4px;font-size:15px}
+.ramp{height:12px;border-radius:2px;border:1px solid var(--border-subtle)}
+.ramp-ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:3px}
+.legend{display:flex;flex-direction:column;gap:6px;margin:12px 0 0;font-size:12.5px;color:var(--text-muted)}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:16px;height:16px;border-radius:2px;display:inline-block;border:1px solid var(--border-subtle)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:13px;margin-top:16px;padding-top:16px;border-top:1px solid var(--backdrop)}
+.kv dt{color:var(--text-muted)}.kv dd{margin:0;font-weight:600;text-align:right}
+.kv .ttl{grid-column:1/-1;font-size:15px;font-weight:600;color:var(--text)}
+.map-side select{width:100%;margin-top:16px}
+
+/* ---------- step 2: years ---------- */
+.years{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:28px;align-items:end}
+@media (max-width:900px){.years{grid-template-columns:minmax(0,1fr)}}
+.yearbars{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;align-items:end;height:190px;padding:0 2px;position:relative}
+.yb{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;border:0;background:none;padding:0;cursor:pointer;min-width:0}
+.yb .bar{border-radius:3px 3px 0 0;background:#c9d6df;transition:background .18s,height .3s;min-height:3px}
+.yb .n{font-size:10.5px;color:var(--text-muted);text-align:center;margin-bottom:3px;white-space:nowrap;overflow:hidden}
+.yb .y{font-size:12px;font-weight:600;text-align:center;padding-top:6px;border-top:1px solid var(--border-subtle);color:var(--text-muted)}
+.yb.in .bar{background:linear-gradient(180deg,#3aa0e8,#0071b8)}
+.yb.in .y{color:var(--accent);border-top:3px solid var(--accent);padding-top:4px}
+.yb:hover .bar{filter:brightness(1.08)}
+.yb[disabled]{cursor:not-allowed}
+.yb[disabled] .bar{background:repeating-linear-gradient(45deg,#eef0f1 0 4px,#e2e5e7 4px 8px)}
+.yb .ys{display:none}
+@media (max-width:640px){.yb .yl{display:none}.yb .ys{display:inline}.yb .n{font-size:9px}.yearbars{gap:3px;height:170px}.usmap .lbl{display:none}}
+.year-ctl{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.year-ctl select{min-width:0;width:100%}
+.year-ctl .shift{grid-column:1/-1;display:flex;gap:8px}
+.year-ctl .shift .btn{flex:1}
+.period-badge{grid-column:1/-1;font-size:20px;font-weight:600;color:var(--accent)}
+.period-badge small{display:block;font-size:12.5px;font-weight:400;color:var(--text-muted)}
+
+/* ---------- step 3: element types ---------- */
+.el-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.search{flex:1;min-width:220px;max-width:420px;height:36px;padding:0 12px 0 34px;border:1px solid var(--border-fg);border-radius:var(--r);font:inherit;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Ccircle cx='6' cy='6' r='4.6' fill='none' stroke='%23595959' stroke-width='1.6'/%3E%3Cpath d='M9.5 9.5l3.5 3.5' stroke='%23595959' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat 11px center}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.cat-chips button{height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--border-subtle);background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--text-muted)}
+.cat-chips button:hover{border-color:var(--accent);color:var(--accent)}
+.cat-chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.cat-chips .c{font-weight:400;opacity:.8;margin-left:4px}
+.el-group{margin-bottom:18px}
+.el-group h3{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted)}
+.el-group h3 i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.el-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.el{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px 12px;border:1px solid var(--border-subtle);border-left:4px solid var(--gc,#0071b8);border-radius:var(--r);background:#fff;cursor:pointer;transition:box-shadow .15s,border-color .15s;min-width:0}
+.el:hover{box-shadow:var(--shadow-2);border-color:var(--gc,#0071b8)}
+.el[aria-pressed="true"]{background:#f5fafd;box-shadow:inset 0 0 0 1px var(--accent);border-color:var(--accent)}
+.el .nm{font-weight:600;font-size:13.5px;line-height:1.3;padding-right:20px}
+.el .mt{font-size:12px;color:var(--text-muted)}
+.el .cnt{font-family:var(--font-mono);font-size:12px;color:var(--text)}
+.el .meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--backdrop)}
+.el .meter b{display:block;height:100%;background:var(--gc,#0071b8);opacity:.75}
+.el[aria-pressed="true"]::after{content:"";position:absolute;top:10px;right:10px;width:16px;height:16px;border-radius:50%;background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='7' viewBox='0 0 9 7'%3E%3Cpath d='M1 3.5l2.3 2.3L8 1' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat center}
+
+/* ---------- step 4: profiles ---------- */
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--border-subtle);background:var(--bg-zebra);color:var(--text)}
+.tag.warn{border-color:#d9b46a;background:#f9f1e6;color:var(--warning)}
+.seg{display:inline-flex;border:1px solid var(--border-fg);border-radius:var(--r);overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:#fff;height:32px;padding:0 12px;font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid var(--border-subtle)}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--bg-hover)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.mode-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:12px}
+.mode-row .lbl{font-size:12px;font-weight:600;color:var(--text-muted)}
+.mode-help{font-size:12.5px;color:var(--text-muted);margin:-4px 0 14px}
+.chart-card{border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff;padding:14px 14px 8px;min-width:0}
+.chart-card h3{margin:0;font-size:15px;font-weight:600}
+.chart-card .csub{margin:2px 0 8px;font-size:12.5px;color:var(--text-muted)}
+#tip{position:fixed;z-index:60;pointer-events:none;background:var(--dark);color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:var(--r);box-shadow:var(--shadow-3);max-width:320px;opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}
+#tip b{font-weight:600}
+#tip .m{color:#cccccc}
+.tbl-wrap{overflow-x:auto}
+table.data{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+table.data th{text-align:right;font-weight:600;font-size:12px;color:var(--text-muted);padding:8px 10px;background:var(--bg-zebra);border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+table.data td{text-align:right;padding:7px 10px;border-bottom:1px solid var(--backdrop);white-space:nowrap}
+table.data th:first-child,table.data td:first-child{text-align:left}
+table.data tr:last-child td{border-bottom:0}
+table.data tbody tr:hover td{background:var(--bg-hover)}
+table.data tr.hl td{background:var(--accent-muted)}
+.tbl-note{font-size:12px;color:var(--text-muted);padding:10px 14px;border-top:1px solid var(--backdrop)}
+.prof-grid .bar3d.hl polygon{stroke:#00568f;stroke-width:1.4}
+.loading{padding:28px;text-align:center;color:var(--text-muted)}
+
 </style>
 </head>
 <body>
@@ -270,12 +284,12 @@ footer b{color:#fff;font-weight:600}
   </svg>
   <div class="wrap">
     <p class="kicker">Bridge asset analytics</p>
-    <h1>Element ID-level deterioration model</h1>
-    <p class="lede">Perform the following in sequence: (1) Select a state, (2) Select an element type, and (3) Select an element ID to see its fitted deterioration curve!</p>
-    <p class="lede">The analysis is based on the element ID's inspection history, interval-by-interval fit, followed by forecasting its poor (CS3) and severe (CS4) condition from the latest inspection date.</p>
+    <h1>Element condition profiles by bridge age</h1>
+    <p class="lede">Perform the following in sequence: (1) Select a state, (2) Select a 5-year period, (3) Select an element type, and (4) Explore how its condition states are spread across bridge ages!</p>
+    <p class="lede">Built from National Bridge Inventory element data. Each bridge counts once, at its latest inspection record within the selected period, weighted by its deck area.</p>
     <div class="hero-actions">
-      <button class="btn cta lg" data-go="state">Browse curves</button>
-      <button class="btn ghost lg" data-go="method">How to read a curve</button>
+      <button class="btn cta lg" data-go="state">Start with a state</button>
+      <button class="btn ghost lg" data-go="method">How the profiles are computed</button>
     </div>
   </div>
 </section>
@@ -284,8 +298,9 @@ footer b{color:#fff;font-weight:600}
   <div class="wrap">
     <ol class="stepper" aria-label="Filter steps">
       <li><button class="step" data-go="state"><span class="n">1</span><span class="lbl"><span>State</span><b id="stepState">Not selected</b></span></button></li>
-      <li><button class="step" data-go="type"><span class="n">2</span><span class="lbl"><span>Element type</span><b id="stepType">Not selected</b></span></button></li>
-      <li><button class="step" data-go="element"><span class="n">3</span><span class="lbl"><span>Element ID</span><b id="stepEl">Not selected</b></span></button></li>
+      <li><button class="step" data-go="years"><span class="n">2</span><span class="lbl"><span>Period</span><b id="stepYears">Not selected</b></span></button></li>
+      <li><button class="step" data-go="type"><span class="n">3</span><span class="lbl"><span>Element type</span><b id="stepType">Not selected</b></span></button></li>
+      <li><button class="step" data-go="profile"><span class="n">4</span><span class="lbl"><span>Profiles</span><b id="stepProf">Waiting</b></span></button></li>
     </ol>
   </div>
 </div>
@@ -294,38 +309,77 @@ footer b{color:#fff;font-weight:600}
 
   <section class="panel" id="panel-state" aria-labelledby="h-state">
     <div class="panel-head">
-      <div><p class="eyebrow">Step 1</p><h2 id="h-state">Select a state</h2><p class="sub">States shown in blue have deterioration curves available.</p></div>
-      <div class="tools"><select id="stateSelect" aria-label="State"></select></div>
+      <div><p class="eyebrow">Step 1</p><h2 id="h-state">Select a state</h2><p class="sub">Colour shows how many bridges have element inspection records. Hover a state for details; select it to continue.</p></div>
     </div>
     <div class="panel-body map-layout">
-      <div class="tilemap" id="tilemap" role="group" aria-label="United States tile map"></div>
+      <div>
+        <div class="usmap" id="usmap"><div class="loading">Loading the map…</div></div>
+        <div class="chips-row" id="smallStates"></div>
+      </div>
       <div class="map-side">
+        <h3>Bridges with element data</h3>
+        <div class="ramp" id="ramp"></div>
+        <div class="ramp-ticks" id="rampTicks"></div>
         <div class="legend">
-          <span><i style="background:var(--accent);border-color:var(--accent)"></i>Curves available</span>
-          <span><i style="background:var(--dark);border-color:var(--dark)"></i>Selected</span>
-          <span><i style="background:var(--bg-zebra)"></i>No data</span>
+          <span><i style="background:#f28c28;border-color:#242b2e"></i>Selected</span>
+          <span><i style="background:repeating-linear-gradient(45deg,#eef0f1 0 3px,#d5dadd 3px 6px)"></i>No data in this release</span>
         </div>
-        <dl class="kv" id="stateSummary"></dl>
+        <dl class="kv" id="stateInfo"></dl>
+        <select id="stateSelect" aria-label="Select a state from the list"></select>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel locked" id="panel-years" aria-labelledby="h-years">
+    <div class="panel-head">
+      <div><p class="eyebrow">Step 2</p><h2 id="h-years">Select a 5-year period</h2><p class="sub" id="yearsSub">Select a state first.</p></div>
+    </div>
+    <div class="panel-body years">
+      <div>
+        <div class="yearbars" id="yearbars" role="group" aria-label="Data years"></div>
+        <p class="note-inline" style="margin:10px 0 0">Bars show the number of bridges with records in each data year. Select a year to start the period there.</p>
+      </div>
+      <div class="year-ctl">
+        <div class="period-badge" id="periodBadge"></div>
+        <div><label class="field-label" for="yStart">Start year</label><select id="yStart"></select></div>
+        <div><label class="field-label" for="yEnd">End year</label><select id="yEnd"></select></div>
+        <div class="shift"><button class="btn" id="yPrev">← Earlier</button><button class="btn" id="yNext">Later →</button></div>
       </div>
     </div>
   </section>
 
   <section class="panel locked" id="panel-type" aria-labelledby="h-type">
     <div class="panel-head">
-      <div><p class="eyebrow">Step 2</p><h2 id="h-type">Select an element type</h2><p class="sub" id="typeSub">Select a state first.</p></div>
+      <div><p class="eyebrow">Step 3</p><h2 id="h-type">Select an element type</h2><p class="sub" id="typeSub">Select a period first.</p></div>
     </div>
-    <div class="panel-body"><div class="cards type-cards" id="typeCards"></div></div>
+    <div class="panel-body">
+      <div class="el-tools">
+        <input type="search" class="search" id="elSearch" placeholder="Search element types or numbers…" aria-label="Search element types">
+        <span class="note-inline" id="elCount"></span>
+      </div>
+      <div class="cat-chips" id="catChips" role="group" aria-label="Element categories"></div>
+      <div id="elList"></div>
+    </div>
   </section>
 
   <section class="panel locked" id="panel-profile" aria-labelledby="h-prof">
     <div class="panel-head">
-      <div><p class="eyebrow">Element type overview</p><h2 id="h-prof">Condition-state profile by bridge age</h2><p class="sub" id="profSub">Select an element type first.</p></div>
-      <div class="tools"><button class="btn" id="profReset">Reset view</button></div>
+      <div><p class="eyebrow">Step 4</p><h2 id="h-prof">Condition-state profiles by bridge age</h2><p class="sub" id="profSub">Select an element type first.</p></div>
+      <div class="tools"><button class="btn" id="profReset">Reset view</button><button class="btn" id="profCsv">Download data (CSV)</button></div>
     </div>
     <div class="panel-body">
       <div class="prof-facts" id="profFacts"></div>
+      <div class="mode-row">
+        <span class="lbl" id="modeLbl">Bar value</span>
+        <div class="seg" id="modeSeg" role="group" aria-labelledby="modeLbl">
+          <button data-mode="abs" aria-pressed="true">Deck area (sq ft)</button>
+          <button data-mode="tot" aria-pressed="false">% of total deck area</button>
+          <button data-mode="band" aria-pressed="false">% within age band</button>
+        </div>
+      </div>
+      <p class="mode-help" id="modeHelp"></p>
       <div class="colorbar">
-        <span class="lbl">Deck area in cell (sq ft), same scale across CS1–CS4</span>
+        <span class="lbl" id="cbLabel">Deck area in cell (sq ft), same scale across CS1–CS4</span>
         <div class="scale"><div class="bar"></div><div class="ticks" id="profTicks"></div></div>
       </div>
       <div class="prof-grid" id="profGrid">
@@ -334,127 +388,65 @@ footer b{color:#fff;font-weight:600}
         <div class="chart-card"><h3>CS3 · Poor</h3><p class="csub">Share of the element quantity in condition state 3</p><div class="prof-box" id="prof2"></div></div>
         <div class="chart-card"><h3>CS4 · Severe</h3><p class="csub">Share of the element quantity in condition state 4</p><div class="prof-box" id="prof3"></div></div>
       </div>
-      <p class="prof-note"><b>Bar height and colour show the total deck area in each age and CS% cell.</b> Each bridge contributes its full deck area once per figure. Age = profile year − year built. These are condition distributions, not fitted curves. Drag a figure to rotate all four; hover a bar to see its values.</p>
+      <p class="prof-note"><b>Each bar is one age band × CS% band cell.</b> Each bridge appears once in every figure, at its latest record in the period, with its full deck area. Drag a figure to rotate all four; hover a bar to see its values and highlight the same age band everywhere.</p>
       <details class="prof-tbl">
-        <summary id="profTblTitle">Bridges in the profile</summary>
-        <div class="tbl-wrap"><table class="data" id="profTable"></table></div>
-        <div id="profExcl"></div>
+        <summary id="bandTitle">Age band summary</summary>
+        <div class="tbl-wrap"><table class="data" id="bandTable"></table></div>
+        <div class="tbl-note" id="exclNote"></div>
       </details>
     </div>
   </section>
 
-  <section class="panel locked" id="panel-element" aria-labelledby="h-el">
-    <div class="panel-head">
-      <div><p class="eyebrow">Step 3</p><h2 id="h-el">Select an element ID</h2><p class="sub" id="elSub">Select an element type first.</p></div>
-      <div class="tools"><select id="elSelect" aria-label="Element ID"></select></div>
-    </div>
-    <div class="panel-body"><div class="cards" id="elCards"></div></div>
-  </section>
-
-  <section class="panel" id="panel-detail" aria-labelledby="h-detail" hidden>
-    <div class="detail-head">
-      <h2 id="h-detail"></h2>
-      <div class="tags" id="detailChips"></div>
-      <div class="nav-btns">
-        <button class="btn" id="prevBtn" aria-label="Previous element">Previous</button>
-        <button class="btn" id="nextBtn" aria-label="Next element">Next</button>
-      </div>
-    </div>
-    <div class="stats" id="stats"></div>
-
-    <div id="computed">
-      <div class="toolbar">
-        <span class="lbl" id="hzLabel">Forecast horizon</span>
-        <div class="seg" id="horizon" role="group" aria-labelledby="hzLabel">
-          <button data-h="10" aria-pressed="false">10 yr</button>
-          <button data-h="20" aria-pressed="true">20 yr</button>
-          <button data-h="30" aria-pressed="false">30 yr</button>
-          <button data-h="50" aria-pressed="false">50 yr</button>
-        </div>
-        <span class="spacer"></span>
-        <button class="btn" id="dlCsv">Download curve (CSV)</button>
-        <button class="btn cta" id="dlPng">Download charts (PNG)</button>
-      </div>
-      <div class="charts">
-        <div class="chart-card">
-          <h3>Historical fit</h3>
-          <p class="csub">Each interval starts at its observed condition; gaps to the next inspection are fitting errors.</p>
-          <div class="chart-legend" id="legHist"></div>
-          <div class="chart-box" id="chartHist"></div>
-        </div>
-        <div class="chart-card">
-          <h3>Observed history and forecast</h3>
-          <p class="csub" id="fcSub"></p>
-          <div class="chart-legend" id="legFc"></div>
-          <div class="chart-box" id="chartFc"></div>
-        </div>
-      </div>
-      <div class="tables">
-        <div class="tbl-card">
-          <h3 id="ivTitle">Fitting intervals</h3>
-          <div class="tbl-wrap"><table class="data" id="ivTable"></table></div>
-          <div id="ivNote"></div>
-        </div>
-        <div class="tbl-card">
-          <h3>Forecast milestones</h3>
-          <div class="tbl-wrap"><table class="data" id="msTable"></table></div>
-          <div class="tbl-note">Assumes no maintenance or intervention.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fallback-fig" id="fallbackFig" hidden></div>
-    <div class="downloads" id="downloads" aria-label="Data files"></div>
-  </section>
-
   <section class="panel" id="method" aria-labelledby="h-method">
-    <div class="panel-head"><div><p class="eyebrow">Reference</p><h2 id="h-method">How the curves are generated</h2></div></div>
-<div class="method-list">
-  <!-- Model Section -->
-  <section class="method-item">
-    <h3 class="method-title">Model</h3>
-    <div class="method-content">
-      <div class="formula-container">
-        <span class="formula">b(t) = 1 − (1 − b₀) · e<sup>−r·t</sup></span>
-      </div>
-      <ul class="variable-list">
-        <li><strong>b:</strong> The share of the element's quantity in poor or severe condition (condition states 3 and 4).</li>
-        <li><strong>b₀:</strong> The share at the start.</li>
-        <li><strong>t:</strong> Time in years.</li>
-        <li><strong>r:</strong> The element-ID deterioration rate per year.</li>
-      </ul>
+    <div class="panel-head"><div><p class="eyebrow">Reference</p><h2 id="h-method">How the profiles are computed</h2></div></div>
+    <div class="method-list">
+      <!-- Data Section -->
+      <section class="method-item">
+        <h3 class="method-title">Data</h3>
+        <div class="method-content">
+          <p>National Bridge Inventory element condition records by state, element type and data year, matched to NBI inventory items for year built and deck area.</p>
+          <p id="methodCoverage">Coverage is listed on the map in Step 1.</p>
+        </div>
+      </section>
+      <!-- Period Section -->
+      <section class="method-item">
+        <h3 class="method-title">Period</h3>
+        <div class="method-content">
+          <p>A period is 5 consecutive data years. A state with 5 or fewer data years uses all of them.</p>
+          <p>Each bridge counts once per element type: at its <strong>latest record</strong> within the period.</p>
+        </div>
+      </section>
+      <!-- Bins Section -->
+      <section class="method-item">
+        <h3 class="method-title">Bins</h3>
+        <div class="method-content">
+          <ul class="variable-list">
+            <li><strong>Age:</strong> bridge age in the record's data year (data year − year built), in 5-year bands 1–5 … 96–100.</li>
+            <li><strong>CS%:</strong> the element quantity in a condition state ÷ its total quantity × 100, in 5% bands [0,5], (5,10] … (95,100].</li>
+            <li><strong>CS1–CS4:</strong> Good, Fair, Poor and Severe condition states; each has its own figure.</li>
+          </ul>
+        </div>
+      </section>
+      <!-- Values Section -->
+      <section class="method-item">
+        <h3 class="method-title">Bar values</h3>
+        <div class="method-content">
+          <ul class="variable-list">
+            <li><strong>Deck area:</strong> the total deck area (sq ft) of the bridges in the cell.</li>
+            <li><strong>% of total:</strong> the cell's deck area ÷ the deck area of all bridges in the profile. Each figure sums to 100%.</li>
+            <li><strong>% within age band:</strong> the cell's deck area ÷ the deck area of its age band. Each age band sums to 100% in each figure.</li>
+          </ul>
+        </div>
+      </section>
+      <!-- Exclusions Section -->
+      <section class="method-item">
+        <h3 class="method-title">Exclusions</h3>
+        <div class="method-content">
+          <p>Records with no element quantity, a failed quantity check, no deck area, no year built, or an age outside 1–100 years are left out and counted under the profile.</p>
+          <p>All reported figures are rounded to 3 significant figures.</p>
+        </div>
+      </section>
     </div>
-  </section>
-
-  <!-- Intervals Section -->
-  <section class="method-item">
-    <h3 class="method-title">Intervals</h3>
-    <div class="method-content">
-      <p>Consecutive inspections used in the fit form an interval.</p>
-      <p>An interval is excluded when the element's total quantity changes between its two inspections.</p>
-      <p>Each remaining interval gets an equal weight.</p>
-    </div>
-  </section>
-
-  <!-- Fitting Section -->
-  <section class="method-item">
-    <h3 class="method-title">Fitting</h3>
-    <div class="method-content">
-      <p><strong>r ≥ 0</strong> minimizes the weighted squared error between each interval's predicted and observed end share.</p>
-      <p>Fitting RMSE is reported in percentage points next to a persistence baseline (no change).</p>
-      <p>This is a fitting measure, not out-of-sample validation.</p>
-    </div>
-  </section>
-
-  <!-- Forecast Section -->
-  <section class="method-item">
-    <h3 class="method-title">Forecast</h3>
-    <div class="method-content">
-      <p>The curve starts at the latest inspection and runs for the selected horizon, assuming no intervention.</p>
-      <p>All reported figures are rounded to 3 significant figures.</p>
-    </div>
-  </section>
-</div>
   </section>
 
 </main>
@@ -463,518 +455,406 @@ footer b{color:#fff;font-weight:600}
 
 <footer>
   <div class="wrap">
-    <span><b>Bentley Systems</b> · Bridge Deterioration Model Prototype using Synthetic Data</span>
+    <span><b>Bentley Systems</b> · Bridge Deterioration Model Prototype using NBI element data</span>
     <span id="genAt"></span>
   </div>
 </footer>
 
-<script src="catalog.js"></script>
-<script src="model.js"></script>
-<script src="profile.js"></script>
+<script src="usmap.js"></script>
 <script src="profile3d.js"></script>
 <script>
 (() => {
 "use strict";
-const CAT = window.BRIDGE_CATALOG || { states: {}, sources: {} };
-/* Elements reference a shared source dataset (synthetic copies all point at one); attach its data. */
-for (const st of Object.values(CAT.states)) for (const t of Object.values(st.types)) for (const e of t.elements)
-  if (e.src && CAT.sources && CAT.sources[e.src]) Object.assign(e, CAT.sources[e.src]);
 const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const P3D = window.Profile3D, MAP = window.US_MAP;
 
-/* 50 states + DC on a 12 × 8 tile grid: [code, name, row, col] */
-const STATES = [
-  ["AK","Alaska",0,0],["ME","Maine",0,11],
-  ["WI","Wisconsin",1,6],["VT","Vermont",1,10],["NH","New Hampshire",1,11],
-  ["WA","Washington",2,1],["ID","Idaho",2,2],["MT","Montana",2,3],["ND","North Dakota",2,4],["MN","Minnesota",2,5],["IL","Illinois",2,6],["MI","Michigan",2,7],["NY","New York",2,9],["MA","Massachusetts",2,10],
-  ["OR","Oregon",3,1],["NV","Nevada",3,2],["WY","Wyoming",3,3],["SD","South Dakota",3,4],["IA","Iowa",3,5],["IN","Indiana",3,6],["OH","Ohio",3,7],["PA","Pennsylvania",3,8],["NJ","New Jersey",3,9],["CT","Connecticut",3,10],["RI","Rhode Island",3,11],
-  ["CA","California",4,1],["UT","Utah",4,2],["CO","Colorado",4,3],["NE","Nebraska",4,4],["MO","Missouri",4,5],["KY","Kentucky",4,6],["WV","West Virginia",4,7],["VA","Virginia",4,8],["MD","Maryland",4,9],["DE","Delaware",4,10],
-  ["AZ","Arizona",5,2],["NM","New Mexico",5,3],["KS","Kansas",5,4],["AR","Arkansas",5,5],["TN","Tennessee",5,6],["NC","North Carolina",5,7],["SC","South Carolina",5,8],["DC","District of Columbia",5,9],
-  ["OK","Oklahoma",6,4],["LA","Louisiana",6,5],["MS","Mississippi",6,6],["AL","Alabama",6,7],["GA","Georgia",6,8],
-  ["HI","Hawaii",7,0],["TX","Texas",7,4],["FL","Florida",7,9],
-];
-const NAME = Object.fromEntries(STATES.map(([c, n]) => [c, n]));
-
-const sel = { state: null, type: null, el: null };
-
-/* ---------- helpers ---------- */
-const MODEL = window.DeteriorationModel;
-const { sig3, sig3Signed, toMs, isoDate } = MODEL;
+/* ---------- number formatting: 3 significant figures ---------- */
+function sig3(v) {
+  if (v == null || !isFinite(v)) return "—";
+  if (v === 0) return "0";
+  const r = Number(v.toPrecision(3));
+  if (r === 0) return "0";
+  const mag = Math.floor(Math.log10(Math.abs(r)));
+  if (mag >= 3) return Math.round(r).toLocaleString("en-US");
+  if (mag < -6) return r.toExponential(2);
+  return r.toFixed(Math.max(0, 2 - mag));
+}
 const pct = (v) => (v == null ? "—" : `${sig3(v)}%`);
-const elementsOf = () => (sel.state && sel.type ? CAT.states[sel.state].types[sel.type].elements : []);
-const countEls = (code) => Object.values(CAT.states[code]?.types || {}).reduce((a, t) => a + t.elements.length, 0);
-const CARD_H = 20;
-let horizon = 20;
+const int = (v) => Number(v).toLocaleString("en-US");
+const compact = (v) => v >= 1e9 ? `${sig3(v / 1e9)}B` : v >= 1e6 ? `${sig3(v / 1e6)}M` : v >= 1e3 ? `${sig3(v / 1e3)}k` : int(v);
 
+/* ---------- data ---------- */
 const cache = new Map();
-function modelFor(e, h = CARD_H) {
-  const key = `${e.src || `${sel.state}/${sel.type}/${e.id}`}@${h}`;
-  if (!cache.has(key)) cache.set(key, e.obs && e.obs.length >= 2 ? MODEL.run(e.obs, { horizonYears: h, steps: Math.max(100, h * 10) }) : null);
-  return cache.get(key);
+async function getJSON(url) {
+  if (!cache.has(url)) cache.set(url, fetch(url).then((r) => { if (!r.ok) throw new Error(`${r.status} ${url}`); return r.json(); }));
+  try { return await cache.get(url); } catch (e) { cache.delete(url); throw e; }
 }
+let IDX = null;
+const sel = { st: null, win: null, en: null };
+let stIdx = null, elData = null, mode = "abs";
 
-function spark(R, w = 240, h = 56) {
-  if (!R || !R.forecast.length) return "";
-  const s = R.forecast, yMax = Math.max(50, ...s.map((p) => p.pct));
-  const X = (x) => 4 + (x / s[s.length - 1].h) * (w - 8);
-  const Y = (y) => h - 6 - (y / yMax) * (h - 12);
-  const line = s.map((p, i) => `${i ? "L" : "M"}${X(p.h).toFixed(1)} ${Y(p.pct).toFixed(1)}`).join("");
-  const lp = s[s.length - 1];
-  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
-    <path d="${line}L${X(lp.h)} ${Y(0)}L${X(0)} ${Y(0)}Z" fill="#c75b00" fill-opacity=".1"/>
-    <path d="${line}" fill="none" stroke="#c75b00" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-    <circle cx="${X(lp.h)}" cy="${Y(lp.pct)}" r="3" fill="#c75b00"/></svg>`;
+/* ---------- element categories (by element number) ---------- */
+const CATS = [
+  { id: "deck", name: "Decks & slabs", c: "#0071b8", test: (n) => n >= 12 && n <= 65 },
+  { id: "girder", name: "Girders & stringers", c: "#008ae0", test: (n) => n >= 102 && n <= 118 },
+  { id: "truss", name: "Trusses, arches & cables", c: "#5a5fd6", test: (n) => n >= 120 && n <= 149 },
+  { id: "floor", name: "Floor beams & connections", c: "#8a4fd0", test: (n) => n >= 152 && n <= 162 },
+  { id: "column", name: "Columns & pier walls", c: "#c0459a", test: (n) => n >= 202 && n <= 213 },
+  { id: "abut", name: "Abutments, footings, piles & caps", c: "#d9502f", test: (n) => n >= 215 && n <= 236 },
+  { id: "culvert", name: "Culverts", c: "#c77d00", test: (n) => n >= 240 && n <= 245 },
+  { id: "joint", name: "Joints", c: "#5f8f00", test: (n) => n >= 300 && n <= 306 },
+  { id: "bearing", name: "Bearings", c: "#008a73", test: (n) => n >= 310 && n <= 316 },
+  { id: "rail", name: "Railings", c: "#2f7d9a", test: (n) => n >= 330 && n <= 334 },
+  { id: "surface", name: "Wearing surfaces & coatings", c: "#6b7280", test: (n) => n >= 510 && n <= 521 },
+  { id: "other", name: "Unclassified", c: "#9aa3a9", test: () => true },
+];
+const catOf = (en) => CATS.find((c) => c.test(en));
+let catFilter = "all";
+
+/* ---------- map colour ramp (sqrt scale, vivid blues) ---------- */
+const RAMP = [[0, [201, 232, 251]], [0.35, [86, 176, 238]], [0.65, [0, 113, 184]], [1, [27, 52, 128]]];
+function rampColor(t) {
+  t = Math.min(1, Math.max(0, t));
+  for (let i = 1; i < RAMP.length; i++) if (t <= RAMP[i][0]) {
+    const [t0, a] = RAMP[i - 1], [t1, b] = RAMP[i], f = (t - t0) / (t1 - t0);
+    return a.map((x, k) => Math.round(x + (b[k] - x) * f));
+  }
+  return RAMP[RAMP.length - 1][1];
 }
+const rgb = (c) => `rgb(${c.join(",")})`;
+const lum = (c) => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+let maxBridges = 1;
+const stateColor = (st) => { const s = IDX.states[st]; return s ? rampColor(Math.sqrt(s.bridges / maxBridges)) : null; };
+const ALL_NAMES = { AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia", FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming", PR: "Puerto Rico", GU: "Guam" };
+const nameOf = (st) => IDX?.states[st]?.name || ALL_NAMES[st] || st;
+const SMALL = ["VT", "NH", "MA", "RI", "CT", "NJ", "DE", "MD", "DC", "HI", "PR", "GU"];
 
-/* ---------- step 1: states ---------- */
-function renderStates() {
-  const map = $("#tilemap");
-  map.innerHTML = STATES.map(([c, n, r, col]) => {
-    const has = !!CAT.states[c];
-    const k = countEls(c);
-    return `<button class="tile${has ? " has" : ""}${sel.state === c ? " sel" : ""}" style="grid-row:${r + 1};grid-column:${col + 1}"
-      data-state="${c}" ${has ? "" : "disabled"} aria-pressed="${sel.state === c}"
-      title="${esc(n)}${has ? ` — ${k} element curve${k === 1 ? "" : "s"}` : " — no data yet"}"
-      aria-label="${esc(n)}${has ? `, ${k} element curves` : ", no data"}">${c}</button>`;
+/* ---------- step 1: map ---------- */
+function stateTip(st) {
+  const s = IDX.states[st];
+  if (!s) return `<b>${esc(nameOf(st))}</b><br><span class="m">No element data in this release</span>`;
+  return `<b>${esc(s.name)}</b><br><span class="m">Bridges:</span> ${int(s.bridges)}<br><span class="m">Data years:</span> ${s.years[0]}–${s.years[s.years.length - 1]} (${s.years.length})<br><span class="m">Element types:</span> ${s.elementTypes}`;
+}
+function renderMap() {
+  maxBridges = Math.max(...Object.values(IDX.states).map((s) => s.bridges));
+  const paths = MAP.states.map((s) => {
+    const has = !!IDX.states[s.id], col = has ? stateColor(s.id) : null;
+    return `<path class="st${has ? "" : " nodata"}" data-st="${s.id}" d="${s.d}" ${has ? `fill="${rgb(col)}" tabindex="0" role="button" aria-label="${esc(s.name)}, ${int(IDX.states[s.id].bridges)} bridges"` : `aria-label="${esc(s.name)}, no data"`}/>`;
   }).join("");
-  const opts = STATES.filter(([c]) => CAT.states[c]).sort((a, b) => a[1].localeCompare(b[1]));
-  const extra = Object.keys(CAT.states).filter((c) => !NAME[c]);
-  $("#stateSelect").innerHTML = `<option value="">Select a state…</option>` +
-    opts.map(([c, n]) => `<option value="${c}">${esc(n)} (${c})</option>`).join("") +
-    extra.map((c) => `<option value="${c}">${c}</option>`).join("");
-  $("#stateSelect").value = sel.state || "";
-
-  const nStates = Object.keys(CAT.states).length;
-  const total = Object.keys(CAT.states).reduce((a, c) => a + countEls(c), 0);
+  const labels = MAP.states.filter((s) => s.w > 34 && s.h > 22 && !["DC"].includes(s.id)).map((s) => {
+    const col = IDX.states[s.id] ? stateColor(s.id) : [238, 240, 241];
+    const fill = lum(col) > 0.55 ? "#1b2a3a" : "#ffffff";
+    const off = { FL: [8, 6], LA: [-8, 0], MI: [9, 20], CA: [-6, 0], KY: [4, 2], ID: [0, 12], HI: [10, 6] }[s.id] || [0, 0];
+    return `<text class="lbl" data-lbl="${s.id}" x="${s.cx + off[0]}" y="${s.cy + off[1]}" fill="${fill}">${s.id}</text>`;
+  }).join("");
+  $("#usmap").innerHTML = `<svg viewBox="${MAP.viewBox}" role="group" aria-label="Map of US states">
+    <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#eef0f1"/><line x1="0" y1="0" x2="0" y2="6" stroke="#d5dadd" stroke-width="3"/></pattern></defs>
+    <g id="mapStates">${paths}</g><g>${labels}</g></svg>`;
+  // small states and territories as chips
+  $("#smallStates").innerHTML = `<span class="note-inline">Small states &amp; territories:</span>` + SMALL.map((st) => {
+    const has = !!IDX.states[st], col = has ? stateColor(st) : null;
+    return `<button class="chip" data-st="${st}" ${has ? `style="background:${rgb(col)};color:${lum(col) > 0.55 ? "#1b2a3a" : "#fff"}"` : "disabled"} title="${esc(nameOf(st))}" aria-pressed="false">${st}</button>`;
+  }).join("");
+  // ramp legend
+  $("#ramp").style.background = `linear-gradient(90deg,${[0, 0.25, 0.5, 0.75, 1].map((t) => rgb(rampColor(t))).join(",")})`;
+  const minB = Math.min(...Object.values(IDX.states).map((s) => s.bridges));
+  $("#rampTicks").innerHTML = `<span>${compact(minB)}</span><span>${compact(Math.round(maxBridges * 0.25))}</span><span>${compact(maxBridges)}</span>`;
+  // dropdown
+  const opts = Object.entries(IDX.states).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  $("#stateSelect").innerHTML = `<option value="">Or choose from the list…</option>` + opts.map(([st, s]) => `<option value="${st}">${esc(s.name)} (${st})</option>`).join("");
+  const missing = Object.keys(ALL_NAMES).filter((st) => !IDX.states[st] && !["PR", "GU"].includes(st));
+  $("#methodCoverage").textContent = `This release covers ${Object.keys(IDX.states).length} jurisdictions with data years ${Math.min(...Object.values(IDX.states).map((s) => s.years[0]))}–${Math.max(...Object.values(IDX.states).map((s) => s.years[s.years.length - 1]))}` + (missing.length ? `; no data for ${missing.map(nameOf).join(", ")}.` : ".");
+  updateStateInfo(null);
+}
+function updateStateInfo(hoverSt) {
+  const st = hoverSt || sel.st;
   const kv = (k, v) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`;
-  $("#stateSummary").innerHTML = sel.state
-    ? kv("Selected state", NAME[sel.state] || sel.state) + kv("Element types", Object.keys(CAT.states[sel.state].types).length) + kv("Element curves", countEls(sel.state))
-    : kv("States with data", nStates) + kv("Element curves", total) + kv("Coverage", `${nStates} of 51`);
+  if (!st) {
+    const n = Object.keys(IDX.states).length, b = Object.values(IDX.states).reduce((a, s) => a + s.bridges, 0);
+    $("#stateInfo").innerHTML = `<span class="ttl">United States</span>` + kv("Jurisdictions with data", n) + kv("Bridges", int(b));
+    return;
+  }
+  const s = IDX.states[st];
+  $("#stateInfo").innerHTML = `<span class="ttl">${esc(nameOf(st))}${hoverSt && hoverSt !== sel.st ? "" : sel.st ? " · selected" : ""}</span>` +
+    (s ? kv("Bridges", int(s.bridges)) + kv("Data years", `${s.years[0]}–${s.years[s.years.length - 1]} (${s.years.length})`) + kv("Element types", s.elementTypes) : kv("Element data", "None in this release"));
+}
+function paintSelection() {
+  $$("#mapStates .st").forEach((p) => p.classList.toggle("sel", p.dataset.st === sel.st));
+  if (sel.st) { const p = $(`#mapStates .st[data-st="${sel.st}"]`); if (p) p.parentNode.appendChild(p); }
+  $$("#usmap .lbl").forEach((t) => t.classList.toggle("sel", t.dataset.lbl === sel.st));
+  $$("#smallStates .chip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.st === sel.st)));
+  $("#stateSelect").value = sel.st || "";
 }
 
-/* ---------- step 2: element types ---------- */
-const ICONS = {
-  girder: `<path d="M3 12h28M3 22h28" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><path d="M17 12v10M8 12v10M26 12v10" stroke="#00568f" stroke-width="2.2" stroke-linecap="round"/><path d="M3 12l5 10M8 12l9 10M17 12l9 10M26 12l5 10" stroke="#008ae0" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>`,
-  deck: `<rect x="3" y="12" width="28" height="8" rx="1" stroke="#0071b8" stroke-width="2.4"/><circle cx="9" cy="16" r="1.4" fill="#008ae0"/><circle cx="15" cy="16" r="1.4" fill="#008ae0"/><circle cx="21" cy="16" r="1.4" fill="#008ae0"/><circle cx="27" cy="16" r="1.4" fill="#008ae0"/><path d="M3 25h28" stroke="#00568f" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2 3"/>`,
-  column: `<path d="M8 7h18" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><rect x="13" y="9" width="8" height="18" rx="1" stroke="#00568f" stroke-width="2.2"/><path d="M9 29h16" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><path d="M15.5 12v12M18.5 12v12" stroke="#008ae0" stroke-width="1.2" stroke-linecap="round"/>`,
-  abutment: `<path d="M4 9h12v20H4" stroke="#00568f" stroke-width="2.2" stroke-linejoin="round"/><path d="M16 9h15" stroke="#0071b8" stroke-width="2.6" stroke-linecap="round"/><path d="M16 29l14-12" stroke="#008ae0" stroke-width="1.6" stroke-linecap="round"/><path d="M19 29l3-3M24 29l3-3M29 29l2-2" stroke="#008ae0" stroke-width="1.2" stroke-linecap="round"/>`,
-};
-function typeIcon(name) {
-  const n = String(name).toLowerCase();
-  const k = /deck|slab/.test(n) ? "deck" : /column|pier|pile/.test(n) ? "column" : /abutment|wall/.test(n) ? "abutment" : "girder";
-  return `<svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">${ICONS[k]}</svg>`;
+/* ---------- step 2: years ---------- */
+function renderYears() {
+  const panel = $("#panel-years");
+  if (!stIdx) { panel.classList.add("locked"); $("#yearsSub").textContent = "Select a state first."; return; }
+  panel.classList.remove("locked");
+  const ys = stIdx.years, W = stIdx.windows, win = W.find((w) => w.key === sel.win);
+  const fixed = W.length === 1;
+  $("#yearsSub").textContent = fixed
+    ? `${stIdx.name} has ${ys.length} data year${ys.length === 1 ? "" : "s"} (${ys.join(", ")}), so all of them are used.`
+    : `${stIdx.name} has data for ${ys[0]}–${ys[ys.length - 1]}. Choose any 5 consecutive years; each bridge counts at its latest record in the period.`;
+  const span = []; for (let y = ys[0]; y <= ys[ys.length - 1]; y++) span.push(y);
+  const maxN = Math.max(...Object.values(stIdx.bridgesPerYear));
+  $("#yearbars").innerHTML = span.map((y) => {
+    const n = stIdx.bridgesPerYear[y] || 0, inW = win && y >= win.start && y <= win.end, has = ys.includes(y);
+    return `<button class="yb${inW ? " in" : ""}" data-y="${y}" ${has && !fixed ? "" : has ? "" : "disabled"} aria-pressed="${inW}" aria-label="${y}: ${int(n)} bridges${inW ? ", in period" : ""}">
+      <span class="n">${n ? compact(n) : ""}</span><span class="bar" style="height:${Math.max(2, (n / maxN) * 140)}px"></span><span class="y"><span class="yl">${y}</span><span class="ys">’${String(y).slice(2)}</span></span></button>`;
+  }).join("");
+  $("#yStart").innerHTML = W.map((w) => `<option value="${w.key}">${w.start}</option>`).join("");
+  $("#yEnd").innerHTML = W.map((w) => `<option value="${w.key}">${w.end}</option>`).join("");
+  $("#yStart").value = $("#yEnd").value = sel.win;
+  [$("#yStart"), $("#yEnd")].forEach((s) => (s.disabled = fixed));
+  const i = W.findIndex((w) => w.key === sel.win);
+  $("#yPrev").disabled = fixed || i <= 0; $("#yNext").disabled = fixed || i >= W.length - 1;
+  const nYears = win ? ys.filter((y) => y >= win.start && y <= win.end).length : 0;
+  $("#periodBadge").innerHTML = win ? `${win.start}–${win.end}<small>${nYears} data year${nYears === 1 ? "" : "s"}${fixed ? " · all available years" : " · 5-year period"}</small>` : "";
 }
+
+/* ---------- step 3: element types ---------- */
 function renderTypes() {
   const panel = $("#panel-type");
-  if (!sel.state) { panel.classList.add("locked"); $("#typeSub").textContent = "Select a state first."; $("#typeCards").innerHTML = ""; return; }
+  if (!stIdx || !sel.win) { panel.classList.add("locked"); $("#typeSub").textContent = "Select a period first."; return; }
   panel.classList.remove("locked");
-  const types = CAT.states[sel.state].types;
-  $("#typeSub").textContent = `${Object.keys(types).length} element type(s) with curves in ${NAME[sel.state] || sel.state}.`;
-  $("#typeCards").innerHTML = Object.entries(types).map(([slug, t]) => {
-    const rates = t.elements.map((e) => modelFor(e)?.r).filter((v) => v != null);
-    return `<button class="card type-card" data-type="${esc(slug)}" aria-pressed="${sel.type === slug}">
-      <span class="ico">${typeIcon(t.name)}</span>
-      <span style="min-width:0"><span class="k">Element type</span><br><span class="t">${esc(t.name)}</span><br>
-      <span class="sub">${t.elements.length} element ID${t.elements.length === 1 ? "" : "s"}${rates.length ? ` · rate ${sig3(Math.min(...rates))} to ${sig3(Math.max(...rates))} /yr` : ""}</span></span>
-    </button>`;
-  }).join("");
+  const all = stIdx.elements.map((e) => ({ ...e, n: e.bridges[sel.win] || 0, cat: catOf(e.en) })).filter((e) => e.n > 0);
+  const none = stIdx.elements.length - all.length;
+  $("#typeSub").textContent = `${all.length} element types have records in ${stIdx.name} for ${sel.win.replace("-", "–")}. The count is the number of bridges with that element.`;
+  const counts = {}; all.forEach((e) => (counts[e.cat.id] = (counts[e.cat.id] || 0) + 1));
+  $("#catChips").innerHTML = `<button data-cat="all" aria-pressed="${catFilter === "all"}">All<span class="c">${all.length}</span></button>` +
+    CATS.filter((c) => counts[c.id]).map((c) => `<button data-cat="${c.id}" aria-pressed="${catFilter === c.id}">${esc(c.name)}<span class="c">${counts[c.id]}</span></button>`).join("");
+  if (catFilter !== "all" && !counts[catFilter]) catFilter = "all";
+  const q = $("#elSearch").value.trim().toLowerCase();
+  const shown = all.filter((e) => (catFilter === "all" || e.cat.id === catFilter) && (!q || e.name.toLowerCase().includes(q) || String(e.en).includes(q)));
+  const maxN = Math.max(1, ...all.map((e) => e.n));
+  const groups = CATS.map((c) => ({ c, items: shown.filter((e) => e.cat.id === c.id).sort((a, b) => b.n - a.n) })).filter((g) => g.items.length);
+  $("#elList").innerHTML = groups.length ? groups.map((g) => `<div class="el-group"><h3><i style="background:${g.c.c}"></i>${esc(g.c.name)}</h3><div class="el-grid">` +
+    g.items.map((e) => `<button class="el" style="--gc:${g.c.c}" data-en="${e.en}" aria-pressed="${sel.en === e.en}">
+      <span class="nm">${esc(e.name)}</span><span class="mt">EN ${e.en}${e.unit ? ` · ${esc(e.unit)}` : ""}</span><span class="cnt">${int(e.n)} bridge${e.n === 1 ? "" : "s"}</span>
+      <span class="meter"><b style="width:${Math.max(2, Math.sqrt(e.n / maxN) * 100)}%"></b></span></button>`).join("") + `</div></div>`).join("")
+    : `<p class="note-inline">No element types match “${esc(q)}”.</p>`;
+  $("#elCount").textContent = `${shown.length} of ${all.length} shown` + (none ? ` · ${none} type${none === 1 ? "" : "s"} have no records in this period` : "");
 }
 
-/* ---------- step 3: elements ---------- */
-function renderElements() {
-  const panel = $("#panel-element");
-  if (!sel.type) { panel.classList.add("locked"); $("#elSub").textContent = "Select an element type first."; $("#elCards").innerHTML = ""; $("#elSelect").innerHTML = ""; return; }
+/* ---------- step 4: profiles ---------- */
+const CSN = ["CS1", "CS2", "CS3", "CS4"];
+const BINS = { aMin: 1, aMax: 100, aw: 5, cw: 5, age: [], cs: [] };
+for (let lo = 1; lo <= 100; lo += 5) BINS.age.push({ lo, label: `${lo}–${lo + 4}` });
+for (let lo = 0; lo < 100; lo += 5) BINS.cs.push({ lo, label: lo === 0 ? "0–5" : `>${lo}–${lo + 5}` });
+const MODES = {
+  abs: { label: "Deck area in cell (sq ft), same scale across CS1–CS4", z: "Total deck area (sq ft)", help: "Bar height is the total deck area of the bridges in each cell.", fmt: (v) => sig3(v), tick: (v) => compact(v) },
+  tot: { label: "Share of total deck area (%), same scale across CS1–CS4", z: "Share of total deck area (%)", help: "Bar height is the cell's share of the profile's total deck area; each figure sums to 100%.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(2)}%` },
+  band: { label: "Share of the age band's deck area (%), same scale across CS1–CS4", z: "Share of age band (%)", help: "Bar height is the cell's share of its age band's deck area; within each figure, every age band sums to 100%. This removes the effect of how many bridges are in each age band.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(1)}%` },
+};
+let prof = null; // { w, cells:[[{u,v,area,n,pTot,pBand,value}]×4], bands, maxBy }
+function buildProfile() {
+  const w = elData.windows[sel.win];
+  if (!w) return null;
+  const cells = [[], [], [], []];
+  for (let i = 0; i < w.cells.length; i += 3) {
+    const code = w.cells[i], k = Math.floor(code / 400), u = Math.floor((code % 400) / 20), v = code % 20;
+    cells[k].push({ u, v, area: w.cells[i + 1], n: w.cells[i + 2] });
+  }
+  const bands = BINS.age.map(() => ({ area: 0, n: 0 }));
+  cells[0].forEach((c) => { bands[c.u].area += c.area; bands[c.u].n += c.n; });
+  const total = w.deckArea || bands.reduce((a, b) => a + b.area, 0);
+  cells.forEach((cs) => cs.forEach((c) => { c.pTot = total ? (c.area / total) * 100 : 0; c.pBand = bands[c.u].area ? (c.area / bands[c.u].area) * 100 : 0; }));
+  return { w, cells, bands, total };
+}
+function applyMode() {
+  const key = { abs: "area", tot: "pTot", band: "pBand" }[mode];
+  prof.cells.forEach((cs) => cs.forEach((c) => (c.value = c[key])));
+  prof.max = Math.max(0, ...prof.cells.flat().map((c) => c.value));
+}
+function renderProfile() {
+  const panel = $("#panel-profile");
+  if (!elData || !sel.win) { panel.classList.add("locked"); $("#profSub").textContent = "Select an element type first."; prof = null; return; }
   panel.classList.remove("locked");
-  const t = CAT.states[sel.state].types[sel.type];
-  $("#elSub").textContent = `${t.elements.length} ${t.name} element(s). Cards show the ${CARD_H}-year poor/severe forecast, computed from each element's inspections.`;
-  $("#elSelect").innerHTML = `<option value="">Select an element ID…</option>` + t.elements.map((e) => `<option value="${esc(e.id)}">${esc(e.id)}${e.bridgeId ? ` · Bridge ${esc(e.bridgeId)}` : ""}</option>`).join("");
-  $("#elSelect").value = sel.el || "";
-  $("#elCards").innerHTML = t.elements.map((e) => {
-    const R = modelFor(e);
-    const latest = R?.origin ? R.origin.b * 100 : null, end = R ? R.at(CARD_H) : null;
-    const up = latest != null && end != null && sig3(end) !== sig3(latest);
-    return `<button class="card el-card" data-el="${esc(e.id)}" aria-pressed="${sel.el === e.id}" aria-label="Element ${esc(e.id)}">
-      <span class="k">Element ID${e.bridgeId ? ` · Bridge ${esc(e.bridgeId)}` : ""}</span>
-      <span class="id">${esc(e.id)}</span>
-      ${spark(R)}
-      <span class="row"><span>Latest poor/severe</span><b>${pct(latest)}</b></span>
-      <span class="row"><span>In ${CARD_H} years</span><b class="${up ? "up" : ""}">${pct(end)}</b></span>
-      <span class="row"><span>Rate</span><b>${R ? sig3(R.r) : "—"} /yr</b></span>
-    </button>`;
-  }).join("");
-}
-
-/* ---------- charts (hand-built SVG) ---------- */
-const COL = { obs: "#242b2e", fit: "#0071b8", resid: "#7fa7c9", fc: "#c75b00", grid: "#e6e9ea", axis: "#8f8f8f", text: "#595959", unused: "#a1a1a1" };
-const FONT = "Noto Sans, Open Sans, Segoe UI, Arial, sans-serif";
-const tickTxt = (v) => String(+v.toFixed(6));
-function niceStep(range, target) {
-  const raw = range / target, p = 10 ** Math.floor(Math.log10(raw)), n = raw / p;
-  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p;
-}
-function niceMax(v) { const m = Math.max(v * 1.12, 1); const s = niceStep(m, 5); return { max: Math.ceil(m / s) * s, step: s }; }
-function yearTicks(t0, t1, maxTicks) {
-  const y0 = new Date(t0).getUTCFullYear(), y1 = new Date(t1).getUTCFullYear() + 1;
-  const step = [1, 2, 5, 10, 20, 25, 50].find((s) => (y1 - y0) / s <= maxTicks) || 100;
-  const out = [];
-  for (let y = Math.ceil(y0 / step) * step; y <= y1; y += step) { const t = Date.UTC(y, 0, 1); if (t >= t0 && t <= t1) out.push([t, y]); }
-  return out;
-}
-function frame(box, x0, x1, yTop) {
-  const W = Math.max(280, Math.round(box.clientWidth)), H = Math.round(Math.min(380, Math.max(240, W * 0.6)));
-  const m = { l: 50, r: 14, t: 10, b: 42 };
-  const { max: yMax, step } = niceMax(yTop);
-  const X = (t) => m.l + ((t - x0) / (x1 - x0 || 1)) * (W - m.l - m.r);
-  const Y = (v) => H - m.b - (v / yMax) * (H - m.t - m.b);
-  let g = `<rect width="${W}" height="${H}" fill="#fff"/>`;
-  for (let v = 0; v <= yMax + 1e-9; v += step)
-    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${COL.grid}"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="${COL.text}">${tickTxt(v)}</text>`;
-  for (const [t, y] of yearTicks(x0, x1, Math.max(3, Math.floor((W - m.l - m.r) / 64))))
-    g += `<line x1="${X(t)}" x2="${X(t)}" y1="${m.t}" y2="${H - m.b}" stroke="${COL.grid}"/><text x="${X(t)}" y="${H - m.b + 17}" text-anchor="middle" font-size="11" fill="${COL.text}">${y}</text>`;
-  g += `<line x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}" stroke="${COL.axis}"/><line x1="${m.l}" x2="${m.l}" y1="${m.t}" y2="${H - m.b}" stroke="${COL.axis}"/>`;
-  g += `<text x="${(m.l + W - m.r) / 2}" y="${H - 6}" text-anchor="middle" font-size="11.5" fill="${COL.text}">Calendar year</text>`;
-  g += `<text transform="translate(13 ${(m.t + H - m.b) / 2}) rotate(-90)" text-anchor="middle" font-size="11.5" fill="${COL.text}">Poor/severe quantity (%)</text>`;
-  return { W, H, m, X, Y, g, yMax };
-}
-const svgOpen = (W, H, label) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${FONT}" role="img" aria-label="${esc(label)}">`;
-const pathOf = (pts, X, Y) => pts.map((p, i) => `${i ? "L" : "M"}${X(p.t).toFixed(1)} ${Y(p.pct).toFixed(2)}`).join("");
-const xMark = (x, y, s, c) => `<path d="M${x - s} ${y - s}L${x + s} ${y + s}M${x - s} ${y + s}L${x + s} ${y - s}" stroke="${c}" stroke-width="2"/>`;
-
-function obsTip(o) {
-  const cs = o.cs && o.cs.some((v) => v != null) ? `<br><span class="m">CS1–CS4 quantity:</span> ${o.cs.map((v) => sig3(v)).join(" / ")}` : "";
-  return `<b>Inspection ${o.d}</b><br><span class="m">Poor/severe:</span> ${pct(o.b * 100)}${cs}${o.used ? "" : "<br><span class=\"m\">Not used in fit</span>"}`;
-}
-function ivTip(iv) {
-  return `<b>Interval ${iv.n}</b> · ${iv.start.d} → ${iv.end.d}<br><span class="m">Predicted end:</span> ${pct(iv.pred * 100)}<br><span class="m">Observed end:</span> ${pct(iv.end.b * 100)}<br><span class="m">Error:</span> ${sig3Signed(iv.errPP)} pp`;
-}
-
-function historyLayers(R, X, Y, small) {
-  let s = "", hits = "";
-  for (const iv of R.intervals) {
-    const xe = X(toMs(iv.end.d));
-    s += `<line x1="${xe}" x2="${xe}" y1="${Y(iv.end.b * 100)}" y2="${Y(iv.pred * 100)}" stroke="${COL.resid}" stroke-width="1.5"/>`;
-    s += `<path d="${pathOf(R.segment(iv), X, Y)}" fill="none" stroke="${COL.fit}" stroke-width="2" stroke-dasharray="6 4"/>`;
-    s += xMark(xe, Y(iv.pred * 100), small ? 3.5 : 4.5, COL.fit);
-    hits += `<circle class="hit" cx="${xe}" cy="${Y(iv.pred * 100)}" r="10" fill="transparent" data-tip="${esc(ivTip(iv))}"/>`;
+  prof = buildProfile();
+  const el = stIdx.elements.find((e) => e.en === sel.en);
+  $("#profSub").textContent = `${el ? el.name : elData.name} (EN ${sel.en}) · ${stIdx.name} · ${sel.win.replace("-", "–")}. Condition-state shares across bridges, by bridge age.`;
+  if (!prof || !prof.w.bridges) {
+    $("#profFacts").innerHTML = `<span class="tag warn">No bridges with usable records in this period</span>`;
+    $$(".prof-box").forEach((b) => (b.innerHTML = "")); return;
   }
-  const all = R.used.concat(R.allObs.filter((o) => !o.used && o.b != null));
-  for (const o of all) {
-    const x = X(toMs(o.d)), y = Y(o.b * 100);
-    s += o.used ? `<circle cx="${x}" cy="${y}" r="${small ? 4 : 5}" fill="${COL.obs}"/>` : `<circle cx="${x}" cy="${y}" r="${small ? 4 : 5}" fill="#fff" stroke="${COL.unused}" stroke-width="1.5"/>`;
-    hits += `<circle class="hit" cx="${x}" cy="${y}" r="10" fill="transparent" data-tip="${esc(obsTip(o))}"/>`;
-  }
-  return { s, hits };
+  const ex = prof.w.excluded || {}, exN = Object.values(ex).reduce((a, b) => a + b, 0);
+  const EXL = { no_quantity: "no element quantity", quantity_check: "failed quantity check", no_deck_area: "no deck area", no_age: "no year built", age_out_of_range: "age outside 1–100 years" };
+  $("#profFacts").innerHTML = `<span><b>${int(prof.w.bridges)}</b> bridge${prof.w.bridges === 1 ? "" : "s"}</span><span>Deck area <b>${sig3(prof.total)} sq ft</b></span><span>Period <b>${sel.win.replace("-", "–")}</b></span>` +
+    (exN ? `<span title="${esc(Object.entries(ex).map(([k, v]) => `${int(v)} ${EXL[k] || k}`).join("; "))}"><b>${int(exN)}</b> excluded</span>` : "") +
+    `<span class="tags">${elData.unit ? `<span class="tag">Quantity unit: ${esc(elData.unit)}</span>` : ""}</span>`;
+  $("#exclNote").textContent = exN ? `Excluded from the profile: ${Object.entries(ex).map(([k, v]) => `${int(v)} with ${EXL[k] || k}`).join("; ")}.` : "No bridges were excluded.";
+  const rows = prof.bands.map((b, u) => b.n ? `<tr><td>${BINS.age[u].label}</td><td>${int(b.n)}</td><td>${sig3(b.area)}</td><td>${pct((b.area / prof.total) * 100)}</td></tr>` : "").join("");
+  $("#bandTitle").textContent = `Age band summary (${prof.bands.filter((b) => b.n).length} bands with bridges)`;
+  $("#bandTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Bridges</th><th>Deck area (sq ft)</th><th>Share of deck area</th></tr></thead><tbody>${rows}</tbody>`;
+  drawProfiles();
 }
-
-function drawHistory(box, R, e) {
-  const t0 = toMs(R.used[0].d), t1 = toMs(R.used[R.used.length - 1].d), pad = (t1 - t0) * 0.04 || 86400000 * 60;
-  const top = Math.max(...R.used.map((o) => o.b * 100), ...R.intervals.map((iv) => iv.pred * 100));
-  const F = frame(box, t0 - pad, t1 + pad, top);
-  const L = historyLayers(R, F.X, F.Y, false);
-  box.innerHTML = svgOpen(F.W, F.H, `Historical fit for element ${e.id}`) + F.g + L.s + L.hits + "</svg>";
+function profTip(k, c) {
+  const cs = CSN[k];
+  return `<b>${cs} · age ${BINS.age[c.u].label} yr · ${cs} ${BINS.cs[c.v].label}%</b><br><span class="m">Deck area:</span> ${sig3(c.area)} sq ft<br><span class="m">Share of total deck area:</span> ${pct(c.pTot)}<br><span class="m">Share of age band:</span> ${pct(c.pBand)}<br><span class="m">Bridges:</span> ${int(c.n)}`;
 }
-
-function drawForecast(box, R, e) {
-  const t0 = toMs(R.used[0].d), tO = toMs(R.origin.d), tE = R.forecast[R.forecast.length - 1].t;
-  const top = Math.max(...R.used.map((o) => o.b * 100), ...R.intervals.map((iv) => iv.pred * 100), ...R.forecast.map((p) => p.pct));
-  const pad = (tE - t0) * 0.02;
-  const F = frame(box, t0 - pad, tE + pad, top);
-  const { X, Y, m, H } = F;
-  const L = historyLayers(R, X, Y, true);
-  const last = R.forecast[R.forecast.length - 1];
-  let s = `<line x1="${X(tO)}" x2="${X(tO)}" y1="${m.t}" y2="${H - m.b}" stroke="${COL.fc}" stroke-dasharray="2 4" stroke-width="1.5"/>`;
-  s += `<path d="${pathOf(R.forecast, X, Y)}L${X(last.t)} ${Y(0)}L${X(tO)} ${Y(0)}Z" fill="${COL.fc}" fill-opacity=".07"/>`;
-  s += `<path d="${pathOf(R.forecast, X, Y)}" fill="none" stroke="${COL.fc}" stroke-width="2.75" stroke-linejoin="round"/>`;
-  s += `<circle cx="${X(last.t)}" cy="${Y(last.pct)}" r="4.5" fill="${COL.fc}"/>`;
-  const lx = X(last.t) - 6, ly = Math.max(m.t + 12, Y(last.pct) - 10);
-  s += `<text x="${lx}" y="${ly}" text-anchor="end" font-size="12" font-weight="600" fill="${COL.fc}">${pct(last.pct)} at +${R.horizonYears} yr</text>`;
-  const hover = `<g class="fc-hover" style="display:none"><line class="fh-l" y1="${m.t}" y2="${H - m.b}" stroke="${COL.fc}" stroke-opacity=".45"/><circle class="fh-c" r="5" fill="#fff" stroke="${COL.fc}" stroke-width="2"/></g>`;
-  const zone = `<rect class="fc-zone" x="${X(tO)}" y="${m.t}" width="${X(last.t) - X(tO)}" height="${H - m.b - m.t}" fill="transparent"/>`;
-  box.innerHTML = svgOpen(F.W, F.H, `History and ${R.horizonYears}-year forecast for element ${e.id}`) + F.g + s + L.s + hover + zone + L.hits + "</svg>";
-  const svg = box.querySelector("svg"), z = box.querySelector(".fc-zone"), hv = box.querySelector(".fc-hover");
-  const move = (ev) => {
-    const r = svg.getBoundingClientRect(), k = F.W / r.width;
-    const x = (ev.clientX - r.left) * k;
-    const frac = Math.min(1, Math.max(0, (x - X(tO)) / (X(last.t) - X(tO))));
-    const h = frac * R.horizonYears, v = R.at(h), t = tO + h * MODEL.YEAR_DAYS * MODEL.DAY;
-    hv.style.display = "";
-    hv.querySelector(".fh-l").setAttribute("x1", X(t)); hv.querySelector(".fh-l").setAttribute("x2", X(t));
-    hv.querySelector(".fh-c").setAttribute("cx", X(t)); hv.querySelector(".fh-c").setAttribute("cy", Y(v));
-    showTip(`<b>Forecast +${sig3(h)} yr</b> · ${isoDate(t)}<br><span class="m">Poor/severe:</span> ${pct(v)}`, ev.clientX, ev.clientY);
-  };
-  z.addEventListener("mousemove", move);
-  z.addEventListener("mouseleave", () => { hv.style.display = "none"; hideTip(); });
+function drawProfiles() {
+  if (!prof || !prof.w.bridges) return;
+  applyMode();
+  const M = MODES[mode], z = P3D.niceTop(prof.max || 1, 5);
+  if (mode !== "abs" && z.top > 100) { z.top = 100; z.step = 20; } // shares never exceed 100%
+  $("#cbLabel").textContent = M.label; $("#modeHelp").textContent = M.help;
+  $$("#modeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+  const cStep = P3D.niceTop(prof.max || 1, 4).step;
+  let ticks = ""; for (let v = 0; v < prof.max - cStep * 0.35; v += cStep) ticks += `<span style="left:${(v / prof.max) * 100}%">${M.tick(v)}</span>`;
+  $("#profTicks").innerHTML = ticks + `<span style="left:100%">${M.fmt(prof.max)}</span>`;
+  prof.cells.forEach((cells, k) => {
+    P3D.render($(`#prof${k}`), {
+      cells, bins: BINS, zTop: z.top, zStep: z.step, cMax: prof.max || 1, csName: CSN[k], zLabel: M.z,
+      fmtValue: M.fmt, fmtTick: M.tick, tipFor: (c) => profTip(k, c),
+      ariaLabel: `${CSN[k]} profile, ${cells.length} cells. Use the age band summary table for exact values.`,
+    });
+  });
 }
+P3D.attachRotate([0, 1, 2, 3].map((k) => $(`#prof${k}`)), drawProfiles);
+$("#profReset").addEventListener("click", () => { P3D.resetView(); drawProfiles(); });
+$("#modeSeg").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-mode]"); if (!b) return; mode = b.dataset.mode; drawProfiles(); });
+let prz = 0;
+new ResizeObserver(() => { cancelAnimationFrame(prz); prz = requestAnimationFrame(drawProfiles); }).observe($("#prof0"));
+function bandHover(u) {
+  const g = $("#profGrid");
+  g.classList.toggle("hovering", u != null);
+  $$(".bar3d", g).forEach((b) => { const hit = u != null && b.dataset.u === String(u); b.classList.toggle("hl", hit); b.classList.toggle("dim", u != null && !hit); });
+  $$("#bandTable tbody tr").forEach((tr) => tr.classList.toggle("hl", u != null && tr.firstChild.textContent === BINS.age[u].label));
+}
+$("#profGrid").addEventListener("mousemove", (ev) => {
+  const g = ev.target.closest(".bar3d");
+  if (!g || ev.buttons) { if ($("#profGrid").classList.contains("hovering")) { bandHover(null); hideTip(); } return; }
+  bandHover(+g.dataset.u); showTip(g.dataset.tip, ev.clientX, ev.clientY);
+});
+$("#profGrid").addEventListener("mouseleave", () => { bandHover(null); hideTip(); });
+$("#profGrid").addEventListener("click", (ev) => { const g = ev.target.closest(".bar3d"); if (g) { bandHover(+g.dataset.u); const r = g.getBoundingClientRect(); showTip(g.dataset.tip, r.left + r.width / 2, r.top); } });
+$("#profCsv").addEventListener("click", () => {
+  if (!prof || !prof.w.bridges) return;
+  const rows = ["state,element_number,element_name,period,condition_state,age_band_years,cs_percent_band,deck_area_sqft,bridges,share_of_total_deck_area_pct,share_of_age_band_pct"];
+  prof.cells.forEach((cs, k) => cs.forEach((c) => rows.push([sel.st, sel.en, `"${elData.name.replace(/"/g, '""')}"`, sel.win, CSN[k], BINS.age[c.u].label.replace("–", "-"), BINS.cs[c.v].label.replace("–", "-"), c.area, c.n, sig3(c.pTot), sig3(c.pBand)].join(","))));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
+  a.download = `${sel.st}_EN${sel.en}_${sel.win}_profile.csv`; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
 
+/* ---------- tooltip ---------- */
 const tip = $("#tip");
 function showTip(html, x, y) {
   tip.innerHTML = html; tip.classList.add("on");
   const w = tip.offsetWidth, h = tip.offsetHeight;
-  tip.style.left = Math.min(innerWidth - w - 8, x + 14) + "px";
+  tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, x + 14)) + "px";
   tip.style.top = (y - h - 12 < 4 ? y + 16 : y - h - 12) + "px";
 }
 function hideTip() { tip.classList.remove("on"); }
-document.addEventListener("mouseover", (ev) => { const h = ev.target.closest && ev.target.closest(".hit"); if (h) { const r = h.getBoundingClientRect(); showTip(h.dataset.tip, r.left + r.width / 2, r.top); } });
-document.addEventListener("mouseout", (ev) => { if (ev.target.closest && ev.target.closest(".hit")) hideTip(); });
 addEventListener("scroll", hideTip, { passive: true });
 
-const LEG_OBS = `<span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="${COL.obs}"/></svg>Observed (used in fit)</span>`;
-const LEG_FIT = `<span><svg width="24" height="10"><path d="M1 5h22" stroke="${COL.fit}" stroke-width="2" stroke-dasharray="6 4"/></svg>Fitted interval segments</span>`;
-const LEG_END = `<span><svg width="12" height="12"><path d="M2 2l8 8M2 10l8-8" stroke="${COL.fit}" stroke-width="2"/></svg>Fitted interval ends</span>`;
-const LEG_RES = `<span><svg width="10" height="14"><path d="M5 1v12" stroke="${COL.resid}" stroke-width="1.5"/></svg>Fitting error</span>`;
-const LEG_FC = `<span><svg width="24" height="10"><path d="M1 5h22" stroke="${COL.fc}" stroke-width="2.75"/></svg>Forecast from latest inspection</span>`;
-
-/* ---------- detail ---------- */
-let current = null; // { e, R }
-function renderDetail() {
-  const box = $("#panel-detail");
-  const els = elementsOf();
-  const i = els.findIndex((e) => e.id === sel.el);
-  if (i < 0) { box.hidden = true; current = null; return; }
-  const e = els[i], t = CAT.states[sel.state].types[sel.type], P = e.pipeline || {};
-  box.hidden = false;
-  $("#prevBtn").disabled = i === 0;
-  $("#nextBtn").disabled = i === els.length - 1;
-  $("#h-detail").innerHTML = `Element <span class="mono">${esc(e.id)}</span>`;
-  // $("#downloads").innerHTML = `<span class="lbl">Source files</span>` +
-    e.files.map((f) => `<a href="${esc(f.href)}" download>${esc(f.name)}${f.href === e.image ? " (pipeline figure)" : ""}</a>`).join("");
-
-  const R = modelFor(e, horizon);
-  const tags = [`<span class="tag">${esc(NAME[sel.state] || sel.state)}</span>`, `<span class="tag">${esc(t.name)}</span>`, e.bridgeId ? `<span class="tag">Bridge ${esc(e.bridgeId)}</span>` : ""];
-  if (t.synthetic) tags.push(`<span class="tag" title="Synthetic copy of the ${esc(e.src.split("/")[0])} demonstration data">Synthetic data</span>`);
-  if (!R || !R.origin || R.used.length < 2) {
-    current = null;
-    $("#computed").hidden = true;
-    $("#detailChips").innerHTML = tags.join("") + `<span class="tag warn">Not enough inspections to fit</span>`;
-    $("#stats").innerHTML = "";
-    const fb = $("#fallbackFig");
-    fb.hidden = !e.image;
-    fb.innerHTML = e.image ? `<img src="${esc(e.image)}" alt="Pipeline figure for element ${esc(e.id)}">` : "";
-    return;
-  }
-  R.allObs = e.obs;
-  current = { e, R };
-  $("#computed").hidden = false;
-  $("#fallbackFig").hidden = true;
-  if (P.ratePerYear != null) {
-    tags.push(sig3(R.r) === sig3(P.ratePerYear)
-      ? `<span class="tag ok" title="Browser fit ${sig3(R.r)} /yr; model.csv ${sig3(P.ratePerYear)} /yr">Fit matches pipeline</span>`
-      : `<span class="tag warn">Pipeline rate ${sig3(P.ratePerYear)} /yr</span>`);
-  }
-  $("#detailChips").innerHTML = tags.join("");
-
-  const worse = R.intervals.filter((iv) => iv.end.b > iv.start.b).length, better = R.intervals.filter((iv) => iv.end.b < iv.start.b).length;
-  const end = R.forecast[R.forecast.length - 1];
-  const stats = [
-    ["Deterioration rate", `${sig3(R.r)}`, `per year, element-ID rate${R.atUpper ? " (at fitting bound)" : ""}`],
-    ["Latest poor/severe", pct(R.origin.b * 100), `inspected ${R.origin.d}`],
-    [`Forecast at +${horizon} yr`, pct(end.pct), `by ${isoDate(end.t)}, no intervention`, "f"],
-    ["Fitting RMSE", `${sig3(R.rmsePP)} pp`, `persistence baseline ${sig3(R.persistencePP)} pp`],
-    ["Intervals in fit", `${R.intervals.length}`, `${worse} worse · ${R.intervals.length - worse - better} same · ${better} better${R.excluded.length ? ` · ${R.excluded.length} excluded` : ""}`],
-    ["Inspections used", `${R.used.length} / ${e.obs.length}`, "used in fit / total"],
-  ];
-  $("#stats").innerHTML = stats.map(([l, v, s, c]) => `<div class="stat ${c || ""}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${esc(s)}</div></div>`).join("");
-
-  document.querySelectorAll("#horizon button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.h === horizon)));
-  $("#fcSub").textContent = `Forecast runs ${horizon} years from the latest inspection (${R.origin.d}).`;
-  $("#legHist").innerHTML = LEG_OBS + LEG_FIT + LEG_END + LEG_RES;
-  $("#legFc").innerHTML = LEG_OBS + LEG_FIT + LEG_FC;
-  drawCharts();
-
-  $("#ivTitle").textContent = `Fitting intervals (${R.intervals.length})`;
-  $("#ivTable").innerHTML = `<thead><tr><th>#</th><th>Start</th><th>End</th><th>Years</th><th>Weight</th><th>Obs. start %</th><th>Obs. end %</th><th>Pred. end %</th><th>Error pp</th></tr></thead><tbody>` +
-    R.intervals.map((iv) => `<tr><td>${iv.n}</td><td>${iv.start.d}</td><td>${iv.end.d}</td><td>${sig3(iv.years)}</td><td>${sig3(iv.weight)}</td><td>${sig3(iv.start.b * 100)}</td><td>${sig3(iv.end.b * 100)}</td><td>${sig3(iv.pred * 100)}</td><td class="${iv.errPP < 0 ? "neg" : "pos"}">${sig3Signed(iv.errPP)}</td></tr>`).join("") + "</tbody>";
-  $("#ivNote").innerHTML = (R.excluded.length
-    ? `<div class="tbl-note warn">Excluded from the fit: ${R.excluded.map((x) => `${x.start.d} → ${x.end.d} (${esc(x.reason.toLowerCase())})`).join("; ")}.</div>` : "") +
-    `<div class="tbl-note">Obs. = observed, Pred. = predicted. Error = predicted minus observed, in percentage points (pp).</div>`;
-
-  const step = horizon <= 30 ? 5 : 10;
-  const marks = [0]; for (let h = step; h <= horizon; h += step) marks.push(h);
-  $("#msTable").innerHTML = `<thead><tr><th>Horizon</th><th>Date</th><th>Poor/severe %</th></tr></thead><tbody>` +
-    marks.map((h) => `<tr><td>${h ? `+${h} yr` : "Latest"}</td><td>${isoDate(toMs(R.origin.d) + h * MODEL.YEAR_DAYS * MODEL.DAY)}</td><td>${sig3(R.at(h))}</td></tr>`).join("") + "</tbody>";
-}
-
-function drawCharts() {
-  if (!current) return;
-  drawHistory($("#chartHist"), current.R, current.e);
-  drawForecast($("#chartFc"), current.R, current.e);
-}
-let rz = 0;
-new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimationFrame(drawCharts); }).observe($("#chartHist"));
-
-$("#horizon").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-h]"); if (!b) return; horizon = +b.dataset.h; renderDetail(); });
-
-function download(name, blob) {
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-}
-$("#dlCsv").addEventListener("click", () => {
-  if (!current) return;
-  const { e, R } = current, n = horizon * 10, t0 = toMs(R.origin.d);
-  const rows = ["element_id,forecast_origin_date,horizon_years,date,poor_severe_percent"];
-  for (let i = 0; i <= n; i++) { const h = i / 10; rows.push(`${e.id},${R.origin.d},${h.toFixed(1)},${isoDate(t0 + h * MODEL.YEAR_DAYS * MODEL.DAY)},${sig3(R.at(h))}`); }
-  download(`${sel.state}_${e.id}_curve_${horizon}yr.csv`, new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
-});
-$("#dlPng").addEventListener("click", async () => {
-  if (!current) return;
-  const { e, R } = current, t = CAT.states[sel.state].types[sel.type];
-  const svgs = [...document.querySelectorAll("#chartHist svg, #chartFc svg")];
-  const imgs = await Promise.all(svgs.map((s) => new Promise((res) => {
-    const im = new Image(); im.onload = () => res(im);
-    im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(s));
-  })));
-  const gap = 24, head = 76, pad = 24, s = 2;
-  const W = imgs.reduce((a, im) => a + im.width, 0) + gap + pad * 2, H = head + Math.max(...imgs.map((im) => im.height)) + pad;
-  const c = document.createElement("canvas"); c.width = W * s; c.height = H * s;
-  const g = c.getContext("2d"); g.scale(s, s); g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
-  g.fillStyle = "#242424"; g.font = `600 18px ${FONT}`;
-  g.fillText(`Element ${e.id}${e.bridgeId ? `  |  Bridge ${e.bridgeId}` : ""}  |  ${t.name}  |  ${NAME[sel.state] || sel.state}`, pad, 32);
-  g.fillStyle = "#595959"; g.font = `13px ${FONT}`;
-  g.fillText(`Rate ${sig3(R.r)} /yr · fitting RMSE ${sig3(R.rmsePP)} pp · latest ${pct(R.origin.b * 100)} (${R.origin.d}) · +${horizon} yr ${pct(R.at(horizon))}, no intervention`, pad, 56);
-  let x = pad; for (const im of imgs) { g.drawImage(im, x, head); x += im.width + gap; }
-  c.toBlob((b) => download(`${sel.state}_${e.id}_curves_${horizon}yr.png`, b), "image/png");
-});
-
-/* ---------- condition-state profile (after step 2) ---------- */
-const CPROF = window.ConditionProfile, P3D = window.Profile3D;
-const profCache = new Map();
-let profCurrent = null; // { key, P, t }
-const fmtArea = (v) => { const s = sig3(v), n = Number(s); return Math.abs(n) >= 1000 ? n.toLocaleString("en-US") : s; };
-const fmtCount = (v) => Number(v).toLocaleString("en-US");
-function profileFor(key) {
-  if (!key || !CAT.profiles || !CAT.profiles[key]) return null;
-  if (!profCache.has(key)) profCache.set(key, CPROF.compute(CAT.profiles[key]));
-  return profCache.get(key);
-}
-function renderProfile() {
-  const panel = $("#panel-profile");
-  const t = sel.state && sel.type ? CAT.states[sel.state].types[sel.type] : null;
-  const P = t ? profileFor(t.profile) : null;
-  if (!t) { panel.hidden = false; panel.classList.add("locked"); $("#profSub").textContent = "Select an element type first."; profCurrent = null; return; }
-  if (!P) { panel.hidden = true; profCurrent = null; return; }
-  panel.hidden = false; panel.classList.remove("locked");
-  const key = `${sel.state}/${sel.type}`;
-  const changed = !profCurrent || profCurrent.key !== key;
-  profCurrent = { key, P, t };
-  const M = P.meta, sName = NAME[sel.state] || sel.state;
-  $("#profSub").textContent = `${t.name} · ${sName} · profile year ${M.profileYear}. Distribution of CS1–CS4 quantity shares across bridges, by bridge age.`;
-  const match = CPROF.matchesPipeline(P, CAT.profiles[t.profile].pipelineBins);
-  const tags = [];
-  if (t.synthetic) tags.push(`<span class="tag" title="Synthetic copy of the ${esc(t.profile.split("/")[0])} demonstration profile">Synthetic data</span>`);
-  if (match === true) tags.push(`<span class="tag ok" title="The browser's binning reproduces bins.csv">Bins match pipeline</span>`);
-  else if (match === false) tags.push(`<span class="tag warn">Bins differ from bins.csv</span>`);
-  $("#profFacts").innerHTML = `<span><b>${P.bridges.length}</b> bridge${P.bridges.length === 1 ? "" : "s"}</span><span>Deck area <b>${fmtArea(P.totalArea)} sq ft</b></span>` +
-    (M.cutoffDate ? `<span>Condition cutoff <b>${esc(M.cutoffDate)}</b></span>` : "") +
-    (P.excluded.length ? `<span><b>${P.excluded.length}</b> excluded</span>` : "") + `<span class="tags">${tags.join("")}</span>`;
-
-  const cMax = P.maxArea || 1, cStep = P3D.niceTop(cMax, 4).step;
-  let ticks = ""; for (let v = 0; v < cMax - cStep * 0.35; v += cStep) ticks += `<span style="left:${(v / cMax) * 100}%">${fmtCount(v)}</span>`;
-  ticks += `<span style="left:100%">${fmtArea(cMax)}</span>`;
-  $("#profTicks").innerHTML = ticks;
-
-  const rows = P.bridges.map((b) => `<tr data-id="${esc(b.id)}"><td>${esc(b.id)}</td><td>${esc(b.elements.join(", "))}</td><td>${b.yearBuilt}</td><td>${b.age}</td><td>${esc(P.bins.age[b.ageIdx].label)}</td><td>${fmtArea(b.deckArea)}</td>${b.pct.map((p) => `<td>${sig3(p)}</td>`).join("")}<td>${esc(b.dates.sort().slice(-1)[0] || "")}</td></tr>`).join("");
-  $("#profTblTitle").textContent = `Bridges in the profile (${P.bridges.length})`;
-  $("#profTable").innerHTML = `<thead><tr><th>Bridge</th><th>Element IDs</th><th>Year built</th><th>Age (yr)</th><th>Age bin</th><th>Deck area (sq ft)</th><th>CS1 %</th><th>CS2 %</th><th>CS3 %</th><th>CS4 %</th><th>Latest inspection</th></tr></thead><tbody>${rows}</tbody>`;
-  $("#profExcl").innerHTML = P.excluded.length ? `<div class="tbl-note warn">Excluded: ${P.excluded.map((b) => `bridge ${esc(b.id)} (${esc(b.reason.toLowerCase())})`).join("; ")}.</div>` : "";
-  drawProfiles();
-}
-function profTip(k, c) {
-  const P = profCurrent.P, cs = P.CS[k];
-  const list = c.bridges.map((b) => `<br>· Bridge ${esc(b.id)}: ${fmtArea(b.deckArea)} sq ft, ${cs} ${sig3(b.pct[k])}%, age ${b.age}`).join("");
-  return `<b>${cs} · age ${P.bins.age[c.u].label} yr · ${cs} ${P.bins.cs[c.v].label}%</b><br><span class="m">Total deck area:</span> ${fmtArea(c.area)} sq ft<br><span class="m">Bridges (${c.bridges.length}):</span>${list}`;
-}
-function drawProfiles() {
-  if (!profCurrent) return;
-  const P = profCurrent.P, z = P3D.niceTop(P.maxArea, 5);
-  P.cells.forEach((cells, k) => {
-    P3D.render($(`#prof${k}`), {
-      cells, bins: P.bins, zTop: z.top, zStep: z.step, cMax: P.maxArea || 1, csName: P.CS[k],
-      fmtArea, fmtCount, tipFor: (c) => profTip(k, c),
-      ariaLabel: `${P.CS[k]} deck-area profile: ${cells.map((c) => `${fmtArea(c.area)} sq ft at age ${P.bins.age[c.u].label}, ${P.CS[k]} ${P.bins.cs[c.v].label}%`).join("; ")}`,
-    });
-  });
-}
-const profBoxes = [0, 1, 2, 3].map((k) => $(`#prof${k}`));
-P3D.attachRotate(profBoxes, drawProfiles);
-$("#profReset").addEventListener("click", () => { P3D.resetView(); drawProfiles(); });
-let prz = 0;
-new ResizeObserver(() => { cancelAnimationFrame(prz); prz = requestAnimationFrame(drawProfiles); }).observe($("#prof0"));
-function profHover(ids) {
-  const grid = $("#profGrid");
-  grid.classList.toggle("hovering", !!ids);
-  grid.querySelectorAll(".bar3d").forEach((g) => {
-    const hit = !!ids && g.dataset.ids.split(" ").some((x) => ids.includes(x));
-    g.classList.toggle("hl", hit); g.classList.toggle("dim", !!ids && !hit);
-  });
-  document.querySelectorAll("#profTable tbody tr").forEach((tr) => tr.classList.toggle("hl", !!ids && ids.includes(tr.dataset.id)));
-}
-$("#profGrid").addEventListener("mousemove", (ev) => {
-  const g = ev.target.closest(".bar3d");
-  if (!g || ev.buttons) { if ($("#profGrid").classList.contains("hovering")) { profHover(null); hideTip(); } return; }
-  profHover(g.dataset.ids.split(" "));
-  showTip(g.dataset.tip, ev.clientX, ev.clientY);
-});
-$("#profGrid").addEventListener("mouseleave", () => { profHover(null); hideTip(); });
-$("#profGrid").addEventListener("click", (ev) => { const g = ev.target.closest(".bar3d"); if (g) { profHover(g.dataset.ids.split(" ")); const r = g.getBoundingClientRect(); showTip(g.dataset.tip, r.left + r.width / 2, r.top); } });
-
+/* ---------- chrome ---------- */
 function renderChrome() {
-  const sName = sel.state ? (NAME[sel.state] || sel.state) : "";
-  const tName = sel.type ? CAT.states[sel.state].types[sel.type].name : "";
-  $("#stepState").textContent = sName || "Not selected";
-  $("#stepType").textContent = tName || "Not selected";
-  $("#stepEl").textContent = sel.el || "Not selected";
-  const steps = document.querySelectorAll(".step");
-  const done = [!!sel.state, !!sel.type, !!sel.el];
+  const el = stIdx && sel.en ? stIdx.elements.find((e) => e.en === sel.en) : null;
+  $("#stepState").textContent = sel.st ? nameOf(sel.st) : "Not selected";
+  $("#stepYears").textContent = sel.win ? sel.win.replace("-", "–") : "Not selected";
+  $("#stepType").textContent = el ? el.name : "Not selected";
+  $("#stepProf").textContent = el ? "Ready" : "Waiting";
+  const done = [!!sel.st, !!sel.win, !!el, !!el];
   const cur = done.indexOf(false);
-  steps.forEach((s, i) => { s.classList.toggle("done", done[i]); s.classList.toggle("current", i === cur); });
-  $("#topCrumbs").innerHTML = [sName, tName, sel.el].filter(Boolean).map((x) => `<b>${esc(x)}</b>`).join('<span aria-hidden="true">/</span>');
-  document.title = sel.el ? `${sel.el} · ${tName} · ${sName} | Bridge Deterioration Model` : "Bridge Deterioration Model | Bentley Systems";
+  $$(".step").forEach((s, i) => { s.classList.toggle("done", done[i]); s.classList.toggle("current", i === cur); });
+  $("#topCrumbs").innerHTML = [sel.st && nameOf(sel.st), sel.win && sel.win.replace("-", "–"), el && el.name].filter(Boolean).map((x) => `<b>${esc(x)}</b>`).join('<span aria-hidden="true">/</span>');
+  document.title = el ? `${el.name} · ${nameOf(sel.st)} · ${sel.win} | Bridge Deterioration Model` : "Bridge Deterioration Model | Bentley Systems";
 }
-
-function render() { renderStates(); renderTypes(); renderProfile(); renderElements(); renderDetail(); renderChrome(); }
-
-/* ---------- routing: #/TX/steel-open-girder-beam/x1000 ---------- */
+function jump(q) { requestAnimationFrame(() => { const el = $(q); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 76 }); }); }
 function writeHash() {
-  const parts = [sel.state, sel.type, sel.el].filter(Boolean).map(encodeURIComponent);
-  const h = "#/" + parts.join("/");
+  const h = "#/" + [sel.st, sel.win, sel.en].filter((x) => x != null).join("/");
   if (location.hash !== h) history.replaceState(null, "", h);
 }
-function readHash() {
-  const [s, t, e] = location.hash.replace(/^#\/?/, "").split("/").map(decodeURIComponent);
-  sel.state = s && CAT.states[s.toUpperCase()] ? s.toUpperCase() : null;
-  const types = sel.state ? CAT.states[sel.state].types : {};
-  sel.type = t && types[t] ? t : null;
-  if (sel.state && !sel.type && Object.keys(types).length === 1) sel.type = Object.keys(types)[0];
-  sel.el = sel.type && types[sel.type].elements.some((x) => x.id === e) ? e : null;
-}
 
-function setState(c, scroll = true) {
-  if (sel.state === c) return;
-  sel.state = c || null; sel.type = null; sel.el = null;
-  const types = c ? CAT.states[c].types : {};
-  if (Object.keys(types).length === 1) sel.type = Object.keys(types)[0]; // only one choice: take it
-  render(); writeHash();
-  if (scroll && c) jump(sel.type ? "#panel-element" : "#panel-type");
+/* ---------- selection flow ---------- */
+let token = 0;
+async function selectState(st, { win = null, en = null, scroll = true } = {}) {
+  if (!IDX.states[st]) return;
+  const my = ++token;
+  sel.st = st; sel.win = null; sel.en = null; stIdx = null; elData = null;
+  paintSelection(); updateStateInfo(null); renderYears(); renderTypes(); renderProfile(); renderChrome();
+  try { stIdx = await getJSON(`data/${st}/index.json`); } catch (e) { showErr("#panel-years", e); return; }
+  if (my !== token) return;
+  const W = stIdx.windows;
+  sel.win = (win && W.some((w) => w.key === win)) ? win : W[W.length - 1].key; // default: latest period
+  renderYears(); renderTypes(); renderChrome(); writeHash();
+  if (en != null && stIdx.elements.some((e) => e.en === en)) await selectElement(en, { scroll: false });
+  else renderProfile();
+  if (scroll) jump(en != null ? "#panel-profile" : "#panel-years");
 }
-function setType(t, scroll = true) { sel.type = t || null; sel.el = null; render(); writeHash(); if (scroll && t) jump("#panel-profile"); }
-function setEl(id, scroll = true) { sel.el = id || null; hideTip(); render(); writeHash(); if (scroll && id) jump("#panel-detail"); }
-function jump(q) { requestAnimationFrame(() => { const el = $(q); if (!el) return; window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 76 }); }); }
+function selectWindow(key, scroll = false) {
+  if (!stIdx || !stIdx.windows.some((w) => w.key === key)) return;
+  sel.win = key;
+  if (sel.en != null && !(stIdx.elements.find((e) => e.en === sel.en)?.bridges[key] > 0)) { sel.en = null; elData = null; }
+  renderYears(); renderTypes(); renderProfile(); renderChrome(); writeHash();
+  if (scroll) jump("#panel-type");
+}
+async function selectElement(en, { scroll = true } = {}) {
+  const my = ++token;
+  sel.en = en; renderTypes(); renderChrome(); writeHash();
+  $("#panel-profile").classList.remove("locked");
+  $("#profSub").textContent = "Loading…";
+  try { elData = await getJSON(`data/${sel.st}/${en}.json`); } catch (e) { showErr("#panel-profile", e); return; }
+  if (my !== token) return;
+  renderProfile(); renderChrome();
+  if (scroll) jump("#panel-profile");
+}
+function showErr(panel, e) {
+  const body = $(`${panel} .panel-body`); $(panel).classList.remove("locked");
+  const hint = location.protocol === "file:" ? " This page loads its data with fetch(), so open it through a web server (for example npx serve public) rather than from disk." : "";
+  body.insertAdjacentHTML("afterbegin", `<div class="err">Could not load data (${esc(e.message)}).${hint}</div>`);
+}
 
 /* ---------- events ---------- */
-$("#tilemap").addEventListener("click", (ev) => { const b = ev.target.closest("[data-state]"); if (b && !b.disabled) setState(b.dataset.state); });
-$("#stateSelect").addEventListener("change", (ev) => setState(ev.target.value));
-$("#typeCards").addEventListener("click", (ev) => { const b = ev.target.closest("[data-type]"); if (b) setType(b.dataset.type); });
-$("#elCards").addEventListener("click", (ev) => { const b = ev.target.closest("[data-el]"); if (b) setEl(b.dataset.el); });
-$("#elSelect").addEventListener("change", (ev) => setEl(ev.target.value));
-$("#prevBtn").addEventListener("click", () => { const els = elementsOf(), i = els.findIndex((e) => e.id === sel.el); if (i > 0) setEl(els[i - 1].id, false); });
-$("#nextBtn").addEventListener("click", () => { const els = elementsOf(), i = els.findIndex((e) => e.id === sel.el); if (i < els.length - 1) setEl(els[i + 1].id, false); });
-document.querySelectorAll("[data-go]").forEach((s) => s.addEventListener("click", () => jump({ state: "#panel-state", type: "#panel-type", element: "#panel-element", method: "#method" }[s.dataset.go])));
-window.addEventListener("hashchange", () => { readHash(); render(); });
+const mapBox = $("#usmap");
+mapBox.addEventListener("click", (ev) => { const p = ev.target.closest(".st"); if (p && IDX.states[p.dataset.st]) selectState(p.dataset.st); });
+mapBox.addEventListener("keydown", (ev) => { const p = ev.target.closest(".st"); if (p && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); selectState(p.dataset.st); } });
+mapBox.addEventListener("mousemove", (ev) => { const p = ev.target.closest(".st"); if (p) { showTip(stateTip(p.dataset.st), ev.clientX, ev.clientY); updateStateInfo(p.dataset.st); } else { hideTip(); } });
+mapBox.addEventListener("mouseleave", () => { hideTip(); updateStateInfo(null); });
+mapBox.addEventListener("focusin", (ev) => { const p = ev.target.closest(".st"); if (p) updateStateInfo(p.dataset.st); });
+$("#smallStates").addEventListener("click", (ev) => { const c = ev.target.closest(".chip"); if (c && !c.disabled) selectState(c.dataset.st); });
+$("#smallStates").addEventListener("mousemove", (ev) => { const c = ev.target.closest(".chip"); if (c) { showTip(stateTip(c.dataset.st), ev.clientX, ev.clientY); updateStateInfo(c.dataset.st); } else hideTip(); });
+$("#smallStates").addEventListener("mouseleave", () => { hideTip(); updateStateInfo(null); });
+$("#stateSelect").addEventListener("change", (ev) => ev.target.value && selectState(ev.target.value));
+$("#yearbars").addEventListener("click", (ev) => {
+  const b = ev.target.closest(".yb"); if (!b || b.disabled || !stIdx || stIdx.windows.length === 1) return;
+  const y = +b.dataset.y, W = stIdx.windows;
+  const w = W.find((x) => x.start === y) || (y > W[W.length - 1].start ? W[W.length - 1] : W[0]);
+  selectWindow(w.key, true);
+});
+$("#yStart").addEventListener("change", (ev) => selectWindow(ev.target.value, true));
+$("#yEnd").addEventListener("change", (ev) => selectWindow(ev.target.value, true));
+$("#yPrev").addEventListener("click", () => { const W = stIdx.windows, i = W.findIndex((w) => w.key === sel.win); if (i > 0) selectWindow(W[i - 1].key); });
+$("#yNext").addEventListener("click", () => { const W = stIdx.windows, i = W.findIndex((w) => w.key === sel.win); if (i < W.length - 1) selectWindow(W[i + 1].key); });
+$("#catChips").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-cat]"); if (b) { catFilter = b.dataset.cat; renderTypes(); } });
+$("#elSearch").addEventListener("input", () => renderTypes());
+$("#elList").addEventListener("click", (ev) => { const b = ev.target.closest(".el"); if (b) selectElement(+b.dataset.en); });
+$$("[data-go]").forEach((s) => s.addEventListener("click", () => jump({ state: "#panel-state", years: "#panel-years", type: "#panel-type", profile: "#panel-profile", method: "#method" }[s.dataset.go])));
+window.addEventListener("hashchange", () => route(false));
 
-// if (CAT.generatedAt) $("#genAt").textContent = `Data catalog updated ${CAT.generatedAt.slice(0, 10)}`;
-readHash(); render();
-if (sel.el) jump("#panel-detail");
+function route(scroll) {
+  const [st, win, en] = location.hash.replace(/^#\/?/, "").split("/");
+  const S = (st || "").toUpperCase();
+  if (!S || !IDX.states[S]) return;
+  if (S !== sel.st) selectState(S, { win, en: en ? +en : null, scroll });
+  else if (win && win !== sel.win) { selectWindow(win); if (en) selectElement(+en, { scroll }); }
+  else if (en && +en !== sel.en) selectElement(+en, { scroll });
+}
+
+/* ---------- start ---------- */
+(async () => {
+  try { IDX = await getJSON("data/index.json"); } catch (e) { $("#usmap").innerHTML = ""; showErr("#panel-state", e); return; }
+  renderMap(); renderChrome();
+  if (IDX.generated) $("#genAt").textContent = `Data prepared ${IDX.generated}`;
+  route(true);
 })();
+})();
+
 </script>
 </body>
 </html>

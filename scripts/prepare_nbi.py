@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""Pre-build the site's data files from the NBI element export.
+
+    python scripts/prepare_nbi.py <summary_states_nbi_data.zip | extracted folder>
+
+Reads every <STATE>/bridge_element_yearly.csv (the by_element/ files hold the same rows and
+are ignored) and writes small JSON files to public/data/:
+
+    public/data/index.json            jurisdictions, years, windows, bridge counts
+    public/data/<ST>/index.json       element types of a state, bridges per window
+    public/data/<ST>/<EN>.json        condition-state profile cells per 5-year window
+
+Profile rule, per state × element type × window:
+  - Each bridge counts once, at its latest data year inside the window.
+  - Age = BRIDGE_AGE_YEARS at that year (data year − year built), 5-year bins 1–5 … 96–100.
+  - CSk share = CSk / TOTALQTY × 100, 5% bins [0,5], (5,10] … (95,100].
+  - A cell holds the summed deck area (sq ft) and the number of bridges.
+  - Excluded, with counts: no quantity, quantity check failed, no deck area, no age,
+    age outside 1–100.
+Only data years from MIN_YEAR (2016) onwards are used.
+Windows: every run of 5 consecutive calendar years inside the state's data years. A state
+with 5 or fewer data years gets a single window covering all of them.
+
+Requires: pip install duckdb
+"""
+import duckdb, json, os, shutil, sys, tempfile, time, zipfile
+
+AGE_MIN, AGE_MAX, AGE_W, CS_W, WIN = 1, 100, 5, 5, 5
+MIN_YEAR = 2016  # data years before this are dropped (2015 is too sparse)
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "data")
+STATE_NAMES = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado",
+    "CT": "Connecticut", "DE": "Delaware", "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia",
+    "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
+    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland", "MA": "Massachusetts",
+    "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi", "MO": "Missouri", "MT": "Montana",
+    "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico",
+    "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
+    "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina", "SD": "South Dakota",
+    "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont", "VA": "Virginia", "WA": "Washington",
+    "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming", "PR": "Puerto Rico", "GU": "Guam",
+    "VI": "U.S. Virgin Islands", "AS": "American Samoa", "MP": "Northern Mariana Islands",
+}
+
+
+def source_glob(src):
+    """Return a glob of yearly CSVs, extracting them from the zip if needed."""
+    if os.path.isdir(src):
+        return os.path.join(src, "*", "bridge_element_yearly.csv"), None
+    tmp = tempfile.mkdtemp(prefix="nbi_")
+    with zipfile.ZipFile(src) as z:
+        names = [n for n in z.namelist() if n.endswith("/bridge_element_yearly.csv") and n.count("/") == 1]
+        for n in names:
+            z.extract(n, tmp)
+    return os.path.join(tmp, "*", "bridge_element_yearly.csv"), tmp
+
+
+def main(src):
+    t0 = time.time()
+    pattern, tmp = source_glob(src)
+    work = tempfile.mkdtemp(prefix="nbi_db_")
+    con = duckdb.connect(os.path.join(work, "work.duckdb"))
+    con.execute(f"SET memory_limit='3GB'; SET temp_directory='{work}'; SET preserve_insertion_order=false")
+    con.execute(f"""
+        CREATE TABLE y AS SELECT
+            STATE_CODE AS st, STRUCNUM AS sn, EN::INTEGER AS en, ELEMENT_NAME AS name, QUANTITY_UNIT AS unit,
+            DATA_YEAR::INTEGER AS yr, TOTALQTY::DOUBLE AS tot,
+            CS1::DOUBLE AS cs1, CS2::DOUBLE AS cs2, CS3::DOUBLE AS cs3, CS4::DOUBLE AS cs4,
+            BRIDGE_AGE_YEARS::INTEGER AS age, DECK_AREA_SQFT::DOUBLE AS area, QUANTITY_CHECK AS qc
+        FROM read_csv('{pattern}', header=true, union_by_name=true, sample_size=-1)
+        WHERE DATA_YEAR >= {MIN_YEAR}""")
+    print(f"loaded {con.execute('select count(*) from y').fetchone()[0]:,} rows in {time.time()-t0:.0f}s")
+
+    # data years and 5-year windows per state
+    years = {st: sorted(ys) for st, ys in con.execute("select st, list(distinct yr) from y group by st").fetchall()}
+    windows = []  # (st, key, start, end)
+    for st, ys in years.items():
+        if len(ys) <= WIN:
+            windows.append((st, f"{ys[0]}-{ys[-1]}", ys[0], ys[-1]))
+        else:
+            for s in range(ys[0], ys[-1] - WIN + 2):
+                windows.append((st, f"{s}-{s+WIN-1}", s, s + WIN - 1))
+    con.execute("CREATE TABLE w (st VARCHAR, wk VARCHAR, ws INTEGER, we INTEGER)")
+    con.executemany("INSERT INTO w VALUES (?,?,?,?)", windows)
+
+    # latest record per bridge × element inside each window, with exclusion reason and bins
+    pick_sql = f"""
+        SELECT *,
+          CASE WHEN tot IS NULL OR tot <= 0 THEN 'no_quantity'
+               WHEN qc IS NOT NULL AND qc <> 'ok' THEN 'quantity_check'
+               WHEN area IS NULL OR area <= 0 THEN 'no_deck_area'
+               WHEN age IS NULL THEN 'no_age'
+               WHEN age < {AGE_MIN} OR age > {AGE_MAX} THEN 'age_out_of_range'
+               ELSE NULL END AS excl
+        FROM (
+          SELECT y.*, w.wk FROM y JOIN w ON y.st = w.st AND y.yr BETWEEN w.ws AND w.we
+          WHERE y.st = $st
+          QUALIFY row_number() OVER (PARTITION BY y.st, y.en, w.wk, y.sn ORDER BY y.yr DESC) = 1
+        )"""
+    # one state at a time keeps memory bounded
+    con.execute(f"CREATE TABLE pick AS {pick_sql.replace('$st', repr(sorted(years)[0]))} LIMIT 0")
+    for st in sorted(years):
+        con.execute(f"INSERT INTO pick {pick_sql}", {"st": st})
+    print(f"picked latest records per window in {time.time()-t0:.0f}s")
+    # long format: one row per bridge × CS; bin indices
+    con.execute(f"""
+        CREATE TABLE cells AS
+        WITH long AS (
+          SELECT st, en, wk, sn, area, age, k, 100.0 * q / tot AS pct FROM (
+            SELECT st, en, wk, sn, area, age, tot, unnest([1,2,3,4]) AS k, unnest([cs1,cs2,cs3,cs4]) AS q
+            FROM pick WHERE excl IS NULL)
+        ), b AS (
+          SELECT *, ((age - {AGE_MIN}) // {AGE_W})::INTEGER AS u,
+                 CASE WHEN round(pct, 9) <= {CS_W} THEN 0
+                      ELSE least({100 // CS_W - 1}, ceil(round(pct, 9) / {CS_W} - 1e-9)::INTEGER - 1) END AS v
+          FROM long
+        )
+        SELECT st, en, wk, k, u, v, sum(area) AS area, count(*) AS n
+        FROM b GROUP BY ALL""")
+
+    # sanity: in every state × element × window, each CS figure holds the same bridges and area
+    bad = con.execute("""
+        SELECT count(*) FROM (SELECT st, en, wk, count(DISTINCT round(a, 3)) d, count(DISTINCT nn) dn
+          FROM (SELECT st, en, wk, k, sum(area) a, sum(n) nn FROM cells GROUP BY ALL) GROUP BY ALL)
+        WHERE d > 1 OR dn > 1""").fetchone()[0]
+    assert bad == 0, f"{bad} groups have inconsistent totals across CS figures"
+
+    meta_el = con.execute("""
+        SELECT en, mode(name) AS name, mode(unit) AS unit FROM y GROUP BY en""").fetchall()
+    el_info = {en: {"name": n, "unit": u} for en, n, u in meta_el}
+
+    if os.path.isdir(OUT):
+        for d in os.listdir(OUT):
+            p = os.path.join(OUT, d)
+            shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
+    os.makedirs(OUT, exist_ok=True)
+
+    groups = con.execute("""
+        SELECT st, en, wk, count(*) FILTER (WHERE excl IS NULL) n, coalesce(sum(area) FILTER (WHERE excl IS NULL), 0) a,
+               count(*) FILTER (WHERE excl='no_quantity'), count(*) FILTER (WHERE excl='quantity_check'),
+               count(*) FILTER (WHERE excl='no_deck_area'), count(*) FILTER (WHERE excl='no_age'),
+               count(*) FILTER (WHERE excl='age_out_of_range')
+        FROM pick GROUP BY ALL ORDER BY st, en, wk""").fetchall()
+    cells = con.execute("SELECT st, en, wk, k, u, v, area, n FROM cells ORDER BY st, en, wk, k, u, v").fetchall()
+    bridges_state = dict(con.execute("SELECT st, count(DISTINCT sn) FROM y GROUP BY st").fetchall())
+    rows_year = {}
+    for st, yr, n in con.execute("SELECT st, yr, count(DISTINCT sn) FROM y GROUP BY st, yr").fetchall():
+        rows_year.setdefault(st, {})[yr] = n
+
+    by_group = {}
+    nv = 100 // CS_W
+    nu = (AGE_MAX - AGE_MIN + 1) // AGE_W
+    for st, en, wk, k, u, v, area, n in cells:
+        # packed cell: code = (cs − 1)·nu·nv + ageBin·nv + csBin, then deck area (sq ft, rounded), then bridges
+        by_group.setdefault((st, en, wk), []).extend([(k - 1) * nu * nv + u * nv + v, round(area), n])
+
+    files = {}
+    for st, en, wk, n, a, e1, e2, e3, e4, e5 in groups:
+        f = files.setdefault((st, en), {"en": en, **el_info[en], "state": st, "windows": {}})
+        f["windows"][wk] = {
+            "bridges": n, "deckArea": round(a),
+            "excluded": {k: v for k, v in zip(["no_quantity", "quantity_check", "no_deck_area", "no_age", "age_out_of_range"],
+                                               [e1, e2, e3, e4, e5]) if v},
+            # flat triples [code, deckAreaSqFt, bridges, …]; code = (cs−1)·400 + ageBin·20 + csBin
+            "cells": by_group.get((st, en, wk), []),
+        }
+
+    states_index = {}
+    for st in sorted(years):
+        sw = [(k, s, e) for (s_, k, s, e) in windows if s_ == st]
+        els = []
+        for (s_, en), f in files.items():
+            if s_ != st:
+                continue
+            els.append({"en": en, "name": f["name"], "unit": f["unit"],
+                        "bridges": {k: f["windows"].get(k, {}).get("bridges", 0) for k, _, _ in sw}})
+            os.makedirs(os.path.join(OUT, st), exist_ok=True)
+            with open(os.path.join(OUT, st, f"{en}.json"), "w") as fh:
+                json.dump(f, fh, separators=(",", ":"))
+        els.sort(key=lambda x: x["en"])
+        with open(os.path.join(OUT, st, "index.json"), "w") as fh:
+            json.dump({"state": st, "name": STATE_NAMES.get(st, st), "years": years[st],
+                       "windows": [{"key": k, "start": s, "end": e} for k, s, e in sw],
+                       "bridgesPerYear": rows_year[st], "elements": els}, fh, separators=(",", ":"))
+        states_index[st] = {"name": STATE_NAMES.get(st, st), "years": years[st], "bridges": bridges_state[st],
+                            "elementTypes": len(els)}
+
+    with open(os.path.join(OUT, "index.json"), "w") as fh:
+        json.dump({"generated": time.strftime("%Y-%m-%d"), "source": os.path.basename(src.rstrip("/")),
+                   "rule": {"minYear": MIN_YEAR, "ageMin": AGE_MIN, "ageMax": AGE_MAX, "ageBinWidth": AGE_W, "csBinWidth": CS_W, "windowYears": WIN},
+                   "states": states_index}, fh, separators=(",", ":"))
+    con.close()
+    shutil.rmtree(work, ignore_errors=True)
+    if tmp:
+        shutil.rmtree(tmp, ignore_errors=True)
+    total = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(OUT) for f in fs)
+    nfiles = sum(len(fs) for _, _, fs in os.walk(OUT))
+    print(f"wrote {nfiles} files, {total/1e6:.1f} MB, to {os.path.normpath(OUT)} in {time.time()-t0:.0f}s")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    main(sys.argv[1])

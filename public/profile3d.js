@@ -1,5 +1,6 @@
 /* Hand-built 3D bar chart (orthographic SVG) for the condition-state profile.
- * Floor axes: bridge age bin (u) and CS% bin (v); bar height and colour: deck area in the cell.
+ * Floor axes: bridge age bin (u) and CS% bin (v); bar height and colour: the cell value
+ * (deck area, or a normalised share of it).
  * Drag to rotate (all four figures stay in sync); hover a bar for its values.
  */
 (function (root) {
@@ -25,7 +26,7 @@
   const DEFAULT_VIEW = { az: 42, el: 26 };
   const view = { ...DEFAULT_VIEW };
 
-  /* cfg: { cells, bins, zTop, zStep, cMax, csName, fmtArea, fmtCount, tipFor(cell) } */
+  /* cfg: { cells:[{u,v,value}], bins, zTop, zStep, cMax, csName, zLabel, fmtValue, fmtTick, tipFor(cell) } */
   function render(box, cfg) {
     const W = Math.max(240, Math.round(box.clientWidth));
     const narrow = W < 480, fs = narrow ? 10 : 11;
@@ -71,11 +72,11 @@
     g += L(P(zu, zv, 0), P(zu, zv, zT), "#8f8f8f");
     for (let z = 0; z <= zT + 1e-9; z += zStep) {
       const p = P(zu, zv, z);
-      g += L(p, [p[0] - 5, p[1]], "#8f8f8f") + `<text x="${(p[0] - 8).toFixed(1)}" y="${(p[1] + 4).toFixed(1)}" text-anchor="end" font-size="${fs}" fill="${text}">${cfg.fmtCount(z)}</text>`;
+      g += L(p, [p[0] - 5, p[1]], "#8f8f8f") + `<text x="${(p[0] - 8).toFixed(1)}" y="${(p[1] + 4).toFixed(1)}" text-anchor="end" font-size="${fs}" fill="${text}">${cfg.fmtTick(z)}</text>`;
     }
     const zBase = P(zu, zv, 0);
     const zm = P(zu, zv, zT * 0.5);
-    g += `<text transform="translate(${(zm[0] - (narrow ? 40 : 48)).toFixed(1)} ${zm[1].toFixed(1)}) rotate(-90)" text-anchor="middle" font-size="${fs + 0.5}" fill="${text}">Total deck area (sq ft)</text>`;
+    g += `<text transform="translate(${(zm[0] - (narrow ? 40 : 48)).toFixed(1)} ${zm[1].toFixed(1)}) rotate(-90)" text-anchor="middle" font-size="${fs + 0.5}" fill="${text}">${esc(cfg.zLabel)}</text>`;
 
     // floor axis labels along the front edges: every 4th bin boundary (0, 20, … 100)
     const edgeLabels = (axis) => {
@@ -86,7 +87,7 @@
         const val = axis === "u" ? cfg.bins.aMin - 1 + t * cfg.bins.aw : t * cfg.bins.cw;
         const p = at(t, 0), q = at(t, 0.5), r = at(t, 1.9);
         s += L(p, q, "#8f8f8f");
-        if (Math.hypot(r[0] - zBase[0], r[1] - zBase[1]) < 18) continue; // keep the z-axis corner readable
+        if (Math.hypot(r[0] - zBase[0], r[1] - zBase[1]) < 34) continue; // keep the z-axis corner readable
         s += `<text x="${r[0].toFixed(1)}" y="${(r[1] + 4).toFixed(1)}" text-anchor="middle" font-size="${fs}" fill="${text}">${val}</text>`;
       }
       const a = at(0, 4.4), b = at(N, 4.4), m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
@@ -106,7 +107,7 @@
     }).sort((a, b) => b.depth - a.depth);
     let barsSvg = "", labels = "";
     for (const b of bars) {
-      const z = b.c.area, col = plasma(b.c.area / cfg.cMax);
+      const z = b.c.value, col = plasma(b.c.value / cfg.cMax);
       const f = (u, v, h) => P(u, v, h);
       const faces = [];
       // side faces with outward normals (nu, nv); visible if the normal points towards the viewer
@@ -121,10 +122,9 @@
         faces.push(`<polygon points="${pts([f(ua, va, 0), f(ub, vb, 0), f(ub, vb, z), f(ua, va, z)])}" fill="${rgb(col, shade)}"/>`);
       }
       faces.push(`<polygon points="${pts([f(b.u0, b.v0, z), f(b.u1, b.v0, z), f(b.u1, b.v1, z), f(b.u0, b.v1, z)])}" fill="${rgb(col)}"/>`);
-      const ids = b.c.bridges.map((x) => x.id).join(" ");
-      barsSvg += `<g class="bar3d" data-ids="${esc(ids)}" data-tip="${esc(cfg.tipFor(b.c))}" stroke="rgba(36,43,46,.55)" stroke-width=".7" stroke-linejoin="round">${faces.join("")}</g>`;
+      barsSvg += `<g class="bar3d" data-u="${b.c.u}" data-tip="${esc(cfg.tipFor(b.c))}" stroke="rgba(36,43,46,.55)" stroke-width=".7" stroke-linejoin="round">${faces.join("")}</g>`;
       const top = P((b.u0 + b.u1) / 2, (b.v0 + b.v1) / 2, z);
-      labels += `<text x="${top[0].toFixed(1)}" y="${(top[1] - 9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="#242424" stroke="#fff" stroke-width="3" paint-order="stroke" pointer-events="none">${cfg.fmtArea(z)}</text>`;
+      labels += `<text x="${top[0].toFixed(1)}" y="${(top[1] - 9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="#242424" stroke="#fff" stroke-width="3" paint-order="stroke" pointer-events="none">${cfg.fmtValue(z)}</text>`;
     }
     g += barsSvg + (bars.length <= 16 && !narrow ? labels : "");
     box.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${FONT}" role="img" aria-label="${esc(cfg.ariaLabel || "")}">${g}</svg>`;
