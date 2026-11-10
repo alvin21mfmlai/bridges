@@ -8,7 +8,8 @@ are ignored) and writes small JSON files to public/data/:
 
     public/data/index.json            jurisdictions, years, bridge counts
     public/data/<ST>/index.json       element types of a state, valid periods, bridges per period
-    public/data/<ST>/<EN>.json        condition-state profile cells, grouped by end year and record year
+    public/data/<ST>/<EN>.json        condition-state profile cells and (0, 5]% counts, grouped by end year
+                                      and record year
 
 Profile rule, per state × element type × period:
   - Each bridge counts once, at its latest data year inside the period.
@@ -114,7 +115,7 @@ def main(src):
     print(f"picked latest records per end year in {time.time()-t0:.0f}s")
     # long format: one row per bridge × CS; bin indices
     con.execute(f"""
-        CREATE TABLE cells AS
+        CREATE TABLE cellsz AS
         WITH long AS (
           SELECT st, en, e, g, sn, area, age, k, 100.0 * q / tot AS pct FROM (
             SELECT st, en, e, g, sn, area, age, tot, unnest([1,2,3,4]) AS k, unnest([cs1,cs2,cs3,cs4]) AS q
@@ -122,11 +123,18 @@ def main(src):
         ), b AS (
           SELECT *, ((age - {AGE_MIN}) // {AGE_W})::INTEGER AS u,
                  CASE WHEN round(pct, 9) <= {CS_W} THEN 0
-                      ELSE least({100 // CS_W - 1}, ceil(round(pct, 9) / {CS_W} - 1e-9)::INTEGER - 1) END AS v
+                      ELSE least({100 // CS_W - 1}, ceil(round(pct, 9) / {CS_W} - 1e-9)::INTEGER - 1) END AS v,
+                 round(pct, 9) <= 0 AS z
           FROM long
         )
-        SELECT st, en, e, g, k, u, v, sum(area) AS area, count(*) AS n
+        SELECT st, en, e, g, k, u, v, z, sum(area) AS area, count(*) AS n
         FROM b GROUP BY ALL""")
+    # cells: the 3D profile bins (a 0% share falls in the first bin, [0, 5]);
+    # low: bridges with a share above 0% and up to 5% (csBin 0 without the exact zeros), per age
+    # band. Stored instead of the zeros because it is far sparser (most bridges have no CS3/CS4);
+    # the browser gets the 0% count as csBin 0 minus low.
+    con.execute("CREATE TABLE cells AS SELECT st, en, e, g, k, u, v, sum(area) AS area, sum(n) AS n FROM cellsz GROUP BY ALL")
+    con.execute("CREATE TABLE zeros AS SELECT st, en, e, g, k, u, area, n FROM cellsz WHERE v = 0 AND NOT z")
 
     # sanity: in every state × element × end × group, each CS figure holds the same bridges and area
     bad = con.execute("""
@@ -152,6 +160,7 @@ def main(src):
                count(*) FILTER (WHERE excl='age_out_of_range')
         FROM pick GROUP BY ALL ORDER BY st, en, e, g""").fetchall()
     cells = con.execute("SELECT st, en, e, g, k, u, v, area, n FROM cells ORDER BY st, en, e, g, k, u, v").fetchall()
+    zeros = con.execute("SELECT st, en, e, g, k, u, area, n FROM zeros ORDER BY st, en, e, g, k, u").fetchall()
     bridges_state = dict(con.execute("SELECT st, count(DISTINCT sn) FROM y GROUP BY st").fetchall())
     rows_year = {}
     for st, yr, n in con.execute("SELECT st, yr, count(DISTINCT sn) FROM y GROUP BY st, yr").fetchall():
@@ -163,6 +172,10 @@ def main(src):
     for st, en, e, g, k, u, v, area, n in cells:
         # packed cell: code = (cs − 1)·nu·nv + ageBin·nv + csBin, then deck area (sq ft, rounded), then bridges
         by_group.setdefault((st, en, e, g), []).extend([(k - 1) * nu * nv + u * nv + v, round(area), n])
+    zero_group = {}
+    for st, en, e, g, k, u, area, n in zeros:
+        # packed low count: code = (cs − 1)·nu + ageBin, then deck area (sq ft, rounded), then bridges
+        zero_group.setdefault((st, en, e, g), []).extend([(k - 1) * nu + u, round(area), n])
 
     files = {}
     for st, en, e, g, n, a, e1, e2, e3, e4, e5 in groups:
@@ -174,6 +187,9 @@ def main(src):
                                                [e1, e2, e3, e4, e5]) if v},
             # flat triples [code, deckAreaSqFt, bridges, …]; code = (cs−1)·400 + ageBin·20 + csBin
             "cells": by_group.get((st, en, e, g), []),
+            # flat triples [code, deckAreaSqFt, bridges, …] for bridges with a CS share above 0%
+            # and up to 5%; code = (cs−1)·20 + ageBin. csBin 0 of "cells" minus these = exactly 0%.
+            "low": zero_group.get((st, en, e, g), []),
         }
 
     states_index = {}

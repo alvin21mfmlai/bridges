@@ -29,6 +29,19 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
      deck area in the profile (each chart adds up to 100%) or by each age band (each age
      band adds up to 100%). Drag to rotate all four charts; hover a bar to see its values
      and highlight that age band. There is an age-band table and a CSV download.
+
+     Below them, **Bridges by condition-state range** (drawn by `public/csdist.js`):
+     - *Distribution*: four small histograms, one per condition state, of the share of
+       bridges by how much of the element quantity is in that state: exactly 0% (gray bar),
+       >0–5%, >5–10% … >95–100%. Each chart has its own y-axis. When the 0% bar is taller
+       than the axis it is drawn with a white break and its value is printed beside it.
+     - *More than x%*: one chart with a line per condition state, showing the share of
+       bridges with more than x% of the element in that state (x = 0, 5 … 95).
+     - *Measure*: % of bridges, or % of deck area (each bridge weighted by its deck area,
+       as in the 3D charts).
+     - *Bridge age*: all ages, or one 5-year age band.
+     - Hover for exact counts and deck area; Download CSV gives the table for the current
+       age filter. Picking a new state resets these controls.
    - **Basic Analytics** and **Advanced Analytics:** placeholders for now. Add their
      content in `renderBasicAnalytics(ctx)` and `renderAdvancedAnalytics(ctx)` in
      `public/index.html`. Both run whenever the selection changes; `ctx` (documented above
@@ -57,19 +70,21 @@ For each state × element type × period:
 public/
   index.html            the site (HTML, CSS and app script)
   profile3d.js          3D bar chart renderer (SVG, drag to rotate)
+  csdist.js             condition-state range histograms and "more than x%" curves (SVG)
   usmap.js              US state shapes (us-atlas, ISC licence, notice inside)
   assets/               logo
   data/
     index.json          jurisdictions, data years, bridge counts
     <ST>/index.json     the state's periods, bridges per year, element types and bridges per period
-    <ST>/<EN>.json      profile cells for one element type, grouped by end year and record year
+    <ST>/<EN>.json      profile cells and >0–5% counts for one element type, grouped by end
+                        year and record year
 scripts/
   prepare_nbi.py        builds public/data/ from the NBI export
 vercel.json
 ```
 
-The data files total about 77 MB across roughly 3,840 files (under the Hobby plan's
-100 MB limit for static files). Each `<EN>.json` is at most about 215 KB, and the browser
+The data files total about 79 MB across roughly 3,840 files (under the Hobby plan's
+100 MB limit for static files). Each `<EN>.json` is at most about 230 KB, and the browser
 loads only the file for the element type you select.
 
 Periods are not stored one by one (21 periods per state would be about 160 MB). Instead,
@@ -81,7 +96,12 @@ identical to computing the period directly.
 
 Cells
 are stored as flat triples `[code, deckAreaSqFt, bridges]`, where
-`code = (cs − 1)·400 + ageBin·20 + csBin`.
+`code = (cs − 1)·400 + ageBin·20 + csBin`. CS% band 0 is [0, 5] and so holds both the
+bridges with exactly 0% and those with >0–5%. To split them, each group also has `low`:
+triples `[code, deckAreaSqFt, bridges]` with `code = (cs − 1)·20 + ageBin` for the bridges
+with >0–5% only. The 0% count is CS% band 0 minus `low`. (`low` is stored instead of the
+zeros because it is much smaller: most bridges have no CS3 or CS4, so storing the zeros
+would have added about 19 MB.)
 
 ## Updating the data
 

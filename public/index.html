@@ -100,6 +100,32 @@ select:hover{border-color:#6b6b6b}
 .prof-grid.hovering .bar3d.dim{opacity:.22}
 .prof-grid .bar3d.hl polygon{stroke:#00568f;stroke-width:1.8}
 .prof-note{font-size:12.5px;color:var(--text-muted);margin:14px 0 0}
+/* bridges by condition-state range */
+.dist{margin-top:28px;padding-top:22px;border-top:1px solid var(--border-subtle)}
+.dist .mode-row select{height:32px;min-width:170px}
+.dist .ctl{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:600px){.dist .ctl{width:100%}.dist .ctl .lbl{min-width:68px}.dist .ctl select{flex:1;min-width:0}}
+.dist-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:1000px){.dist-grid{grid-template-columns:minmax(0,1fr)}}
+.dist-grid[hidden],.dist .chart-card[hidden],.dist .ctl[hidden]{display:none}
+.dist-grid .chart-card h3 .z{font-weight:400;color:var(--text-muted);font-size:13px;margin-left:6px}
+.dist-box,.exc-box{width:100%;min-height:170px}
+.dist-box svg,.exc-box svg{display:block;width:100%;height:auto;overflow:visible}
+.d-grid{stroke:#e6e9ec;stroke-width:1}
+.d-axis{stroke:#9ba5af;stroke-width:1}
+.d-tick{font-size:11px;fill:#5c6670}
+.d-axlbl{font-size:11.5px;fill:#5c6670}
+.d-zero{font-size:11.5px;fill:#3b4249;font-weight:600}
+.d-break{stroke:#fff;stroke-width:2.5;fill:none}
+.d-hit{fill:transparent}
+.d-bar{cursor:default}
+.d-bar:hover rect:not(.d-hit){filter:brightness(.85)}
+.d-line{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.d-pt{opacity:0}.d-pt.on{opacity:1}
+.d-guide{stroke:#9ba5af;stroke-width:1;stroke-dasharray:3 3}
+.d-over{fill:transparent;cursor:crosshair}
+.exc-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--text-muted);margin:0 0 6px}
+.exc-legend span{display:inline-flex;align-items:center;gap:6px}
 details.prof-tbl{margin-top:16px;border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff}
 details.prof-tbl summary{cursor:pointer;padding:12px 14px;font-weight:600;font-size:14px}
 details.prof-tbl[open] summary{border-bottom:1px solid var(--border-subtle)}
@@ -383,6 +409,40 @@ table.data tr.hl td{background:var(--accent-muted)}
           <div class="tbl-wrap"><table class="data" id="bandTable"></table></div>
           <div class="tbl-note" id="exclNote"></div>
         </details>
+
+        <!-- Bridges by condition-state range (2nd Basic Insights view). Drawn by drawDist() with csdist.js. -->
+        <section class="dist" id="distSec" aria-labelledby="h-dist">
+          <div class="pane-head">
+            <div><h3 class="pane-title" id="h-dist">Bridges by condition-state range</h3><div class="prof-facts" id="distFacts"></div></div>
+            <div class="tools"><button class="btn" id="distCsv">Download CSV</button></div>
+          </div>
+          <div class="mode-row">
+            <span class="ctl" id="distViewCtl"><span class="lbl" id="dvLbl">View</span>
+              <span class="seg" id="distView" role="group" aria-labelledby="dvLbl">
+                <button data-v="hist" aria-pressed="true">Distribution</button>
+                <button data-v="exc" aria-pressed="false">More than x%</button>
+              </span></span>
+            <span class="ctl"><span class="lbl" id="dwLbl">Measure</span>
+              <span class="seg" id="distWeight" role="group" aria-labelledby="dwLbl">
+                <button data-w="n" aria-pressed="true">% of bridges</button>
+                <button data-w="area" aria-pressed="false">% of deck area</button>
+              </span></span>
+            <span class="ctl"><label class="lbl" for="distAge">Bridge age</label>
+              <select id="distAge"></select></span>
+          </div>
+          <p class="mode-help" id="distHelp"></p>
+          <div class="dist-grid" id="distGrid">
+            <div class="chart-card"><h3>CS1 (Good)<span class="z" id="distZ0"></span></h3><div class="dist-box" id="dist0"></div></div>
+            <div class="chart-card"><h3>CS2 (Fair)<span class="z" id="distZ1"></span></h3><div class="dist-box" id="dist1"></div></div>
+            <div class="chart-card"><h3>CS3 (Poor)<span class="z" id="distZ2"></span></h3><div class="dist-box" id="dist2"></div></div>
+            <div class="chart-card"><h3>CS4 (Severe)<span class="z" id="distZ3"></span></h3><div class="dist-box" id="dist3"></div></div>
+          </div>
+          <div class="chart-card" id="excCard" hidden>
+            <div class="exc-legend" id="excLegend"></div>
+            <div class="exc-box" id="excBox"></div>
+          </div>
+          <p class="prof-note" id="distNote"></p>
+        </section>
       </div>
 
       <!-- Basic Analytics: add content inside #analyticsBody. renderBasicAnalytics(ctx) in the script runs whenever the selection changes. -->
@@ -442,6 +502,7 @@ table.data tr.hl td{background:var(--accent-muted)}
             <li><strong>% of total:</strong> the cell's deck area ÷ the deck area of all bridges in the profile. Each chart adds up to 100%.</li>
             <li><strong>% within age band:</strong> the cell's deck area ÷ the deck area of its age band. Each age band adds up to 100%.</li>
           </ul>
+          <p><strong>Bridges by condition-state range</strong> uses the same bridges. For each condition state, a bridge falls in one range of CSk ÷ total quantity: exactly 0%, >0–5%, >5–10% … >95–100%. The share is the number of bridges (or their deck area) in the range ÷ all bridges (or deck area) in the chosen age filter. "More than x%" adds up the ranges above x.</p>
         </div>
       </section>
       Exclusions Section
@@ -468,6 +529,7 @@ table.data tr.hl td{background:var(--accent-muted)}
 
 <script src="usmap.js"></script>
 <script src="profile3d.js"></script>
+<script src="csdist.js"></script>
 <script>
 (() => {
 "use strict";
@@ -687,7 +749,7 @@ let prof = null; // { w, cells:[[{u,v,area,n,pTot,pBand,value}]×4], bands, maxB
 function periodData(d, key) {
   const [s, e] = key.split("-").map(Number), groups = d.ends[e];
   if (!groups) return null;
-  const out = { bridges: 0, deckArea: 0, excluded: {}, cells: [] }, acc = new Map();
+  const out = { bridges: 0, deckArea: 0, excluded: {}, cells: [], low: [] }, acc = new Map(), lowAcc = new Map();
   for (const [g, x] of Object.entries(groups)) {
     if (+g < s) continue;
     out.bridges += x.bridges; out.deckArea += x.deckArea;
@@ -696,8 +758,14 @@ function periodData(d, key) {
       const c = acc.get(x.cells[i]);
       if (c) { c[0] += x.cells[i + 1]; c[1] += x.cells[i + 2]; } else acc.set(x.cells[i], [x.cells[i + 1], x.cells[i + 2]]);
     }
+    const lo = x.low || [];
+    for (let i = 0; i < lo.length; i += 3) {
+      const c = lowAcc.get(lo[i]);
+      if (c) { c[0] += lo[i + 1]; c[1] += lo[i + 2]; } else lowAcc.set(lo[i], [lo[i + 1], lo[i + 2]]);
+    }
   }
   [...acc.keys()].sort((a, b) => a - b).forEach((k) => out.cells.push(k, ...acc.get(k)));
+  [...lowAcc.keys()].sort((a, b) => a - b).forEach((k) => out.low.push(k, ...lowAcc.get(k)));
   return out;
 }
 function buildProfile() {
@@ -712,7 +780,10 @@ function buildProfile() {
   cells[0].forEach((c) => { bands[c.u].area += c.area; bands[c.u].n += c.n; });
   const total = w.deckArea || bands.reduce((a, b) => a + b.area, 0);
   cells.forEach((cs) => cs.forEach((c) => { c.pTot = total ? (c.area / total) * 100 : 0; c.pBand = bands[c.u].area ? (c.area / bands[c.u].area) * 100 : 0; }));
-  return { w, cells, bands, total };
+  // low[k][u]: bridges with a CS share above 0% and up to 5% (the rest of CS% band 0 is exactly 0%)
+  const low = [0, 1, 2, 3].map(() => BINS.age.map(() => ({ area: 0, n: 0 })));
+  for (let i = 0; i < w.low.length; i += 3) { const k = Math.floor(w.low[i] / 20), u = w.low[i] % 20; low[k][u] = { area: w.low[i + 1], n: w.low[i + 2] }; }
+  return { w, cells, bands, total, low };
 }
 function applyMode() {
   const key = { abs: "area", tot: "pTot", band: "pBand" }[mode];
@@ -728,7 +799,7 @@ function renderProfile() {
   $("#profSub").textContent = `${el ? el.name : elData.name} (element ${sel.en}) in ${stIdx.name}, ${sel.win.replace("-", " to ")}.`;
   if (!prof || !prof.w.bridges) {
     $("#profFacts").innerHTML = `<span class="warn-text">No bridges have usable records for this element in this period.</span>`;
-    $$(".prof-box").forEach((b) => (b.innerHTML = "")); renderOtherTabs(); return;
+    $$(".prof-box, .dist-box, .exc-box").forEach((b) => (b.innerHTML = "")); $("#distFacts").innerHTML = ""; renderOtherTabs(); return;
   }
   const ex = prof.w.excluded || {}, exN = Object.values(ex).reduce((a, b) => a + b, 0);
   const EXL = { no_quantity: "no element quantity", quantity_check: "failed quantity check", no_deck_area: "no deck area", no_age: "no year built", age_out_of_range: "age outside 1–100 years" };
@@ -739,6 +810,11 @@ function renderProfile() {
   const rows = prof.bands.map((b, u) => b.n ? `<tr><td>${BINS.age[u].label}</td><td>${int(b.n)}</td><td>${sig3(b.area)}</td><td>${pct((b.area / prof.total) * 100)}</td></tr>` : "").join("");
   $("#bandTitle").textContent = "Bridges and deck area by age band (same for all condition states)";
   $("#bandTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Bridges</th><th>Deck area (sq ft)</th><th>Share of deck area</th></tr></thead><tbody>${rows}</tbody>`;
+  // age filter for the condition-state range view: all ages, or one band that has bridges
+  if (distAge !== "all" && !prof.bands[+distAge]?.n) distAge = "all";
+  $("#distAge").innerHTML = `<option value="all">All ages (${int(prof.w.bridges)} bridges)</option>` +
+    prof.bands.map((b, u) => b.n ? `<option value="${u}">${BINS.age[u].label} years (${int(b.n)} bridge${b.n === 1 ? "" : "s"})</option>` : "").join("");
+  $("#distAge").value = distAge;
   if (tab === "insights") drawProfiles();
   renderOtherTabs();
 }
@@ -822,6 +898,7 @@ function drawProfiles() {
       ariaLabel: `${CSN[k]} profile, ${cells.length} cells. Use the age band summary table for exact values.`,
     });
   });
+  drawDist();
 }
 P3D.attachRotate([0, 1, 2, 3].map((k) => $(`#prof${k}`)), drawProfiles);
 $("#profReset").addEventListener("click", () => { P3D.resetView(); drawProfiles(); });
@@ -849,6 +926,102 @@ $("#profCsv").addEventListener("click", () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
   a.download = `${sel.st}_EN${sel.en}_${sel.win}_profile.csv`; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+
+/* ---------- bridges by condition-state range ---------- */
+// The "More than x%" view is switched off for now. Set this to true to bring back the
+// View switch (Distribution | More than x%) and the curves chart; nothing else changes.
+const SHOW_MORE_THAN = false;
+// Range index r: 0 = exactly 0%, 1 = >0–5%, 2 = >5–10% … 20 = >95–100% of the element quantity.
+const DIST_COL = ["#2e8540", "#c99a06", "#e0702a", "#c4302b"], DIST_ZERO = "#b8c0c8";
+const DIST_DASH = ["", "7 4", "2 3", "10 3 2 3"];
+const RANGE_LABEL = ["0%", ...BINS.cs.map((b, v) => (v === 0 ? ">0–5%" : `${b.label}%`))];
+let distView = "hist", distW = "n", distAge = "all";
+// counts per condition state and range for the chosen age filter: { n:[4][21], area:[4][21], totN, totA }
+function buildDist() {
+  if (!prof || !prof.w.bridges) return null;
+  const pickU = (u) => distAge === "all" || u === +distAge;
+  const n = [0, 1, 2, 3].map(() => Array(21).fill(0)), area = [0, 1, 2, 3].map(() => Array(21).fill(0));
+  prof.cells.forEach((cs, k) => cs.forEach((c) => { if (pickU(c.u)) { n[k][c.v + 1] += c.n; area[k][c.v + 1] += c.area; } }));
+  for (let k = 0; k < 4; k++) {
+    // CS% band 0 holds both exact zeros and >0–5%; split it with the stored >0–5% counts
+    let ln = 0, la = 0;
+    prof.low[k].forEach((l, u) => { if (pickU(u)) { ln += l.n; la += l.area; } });
+    n[k][0] = n[k][1] - ln; area[k][0] = area[k][1] - la; n[k][1] = ln; area[k][1] = la;
+  }
+  const totN = n[0].reduce((a, b) => a + b, 0), totA = area[0].reduce((a, b) => a + b, 0);
+  return { n, area, totN, totA };
+}
+// share of bridges (or deck area) with MORE than x% in the state, x = 0, 5 … 95
+const moreThan = (vals, tot) => Array.from({ length: 20 }, (_, j) => (tot ? (vals.slice(j + 1).reduce((a, b) => a + b, 0) / tot) * 100 : 0));
+function distTipRange(D, k, r) {
+  const sn = D.totN ? (D.n[k][r] / D.totN) * 100 : 0, sa = D.totA ? (D.area[k][r] / D.totA) * 100 : 0;
+  return `<b>${CSN[k]} ${r === 0 ? "exactly 0%" : RANGE_LABEL[r]} of the element</b><br><span class="m">Bridges:</span> ${int(D.n[k][r])} (${pct(sn)} of bridges)<br><span class="m">Deck area:</span> ${sig3(D.area[k][r])} sq ft (${pct(sa)} of deck area)`;
+}
+function drawDist() {
+  const D = buildDist();
+  if (!D || !D.totN) return;
+  const byArea = distW === "area", tot = byArea ? D.totA : D.totN, src = byArea ? D.area : D.n;
+  const unit = byArea ? "deck area" : "bridges";
+  $$("#distView button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === distView)));
+  $$("#distWeight button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.w === distW)));
+  const ageTxt = distAge === "all" ? "all ages" : `aged ${BINS.age[+distAge].label} years`;
+  $("#distFacts").innerHTML = `<span><b>${int(D.totN)}</b> bridge${D.totN === 1 ? "" : "s"}, ${ageTxt}</span><span><b>${sig3(D.totA)}</b> sq ft of deck</span>`;
+  if (!SHOW_MORE_THAN) distView = "hist";
+  $("#distViewCtl").hidden = !SHOW_MORE_THAN;
+  const hist = distView === "hist";
+  $("#distGrid").hidden = !hist; $("#excCard").hidden = hist;
+  $("#distHelp").textContent = hist
+    ? `How the ${unit} spread across shares of the element quantity in each condition state. The gray bar is the share with none of the element in that state (0%). Each chart has its own scale; a white break on the gray bar means it is taller than the axis.`
+    : `Share of ${unit} with more than x% of the element quantity in each condition state. For example, the CS3 line at 10 shows the share of ${unit} with more than 10% of the element in CS3.`;
+  $("#distNote").textContent = byArea
+    ? "Each bridge is weighted by its deck area, as in the 3D charts. Ranges include their upper bound: >5–10% means more than 5% and up to 10%."
+    : "Each bridge counts once, using its most recent inspection in the period. Ranges include their upper bound: >5–10% means more than 5% and up to 10%.";
+  if (hist) {
+    for (let k = 0; k < 4; k++) {
+      const vals = src[k].map((v) => (tot ? (v / tot) * 100 : 0));
+      $(`#distZ${k}`).textContent = `${pct(vals[0])} at 0%`;
+      CSD.histogram($(`#dist${k}`), {
+        values: vals, color: DIST_COL[k], zeroColor: DIST_ZERO,
+        axisLabel: `Share of element quantity in ${CSN[k]} (%)`,
+        ariaLabel: `${CSN[k]}: ${pct(vals[0])} of ${unit} have none of the element in ${CSN[k]}; ${pct(vals[20])} have more than 95%.`,
+      });
+      $$(`#dist${k} .d-bar`).forEach((g) => (g.dataset.tip = distTipRange(D, k, +g.dataset.i)));
+    }
+  } else {
+    const xs = Array.from({ length: 20 }, (_, j) => j * 5);
+    const series = [0, 1, 2, 3].map((k) => ({ name: CSN[k], color: DIST_COL[k], dash: DIST_DASH[k], values: moreThan(src[k], tot) }));
+    $("#excLegend").innerHTML = series.map((s) => `<span><svg width="28" height="10" aria-hidden="true"><line x1="1" x2="27" y1="5" y2="5" stroke="${s.color}" stroke-width="2.4" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""}/></svg>${s.name}</span>`).join("");
+    CSD.exceedance($("#excBox"), {
+      xs, series, xLabel: "More than x% of the element quantity in the condition state", yLabel: `% of ${unit}`,
+      ariaLabel: `Share of ${unit} with more than x% in each condition state. ${series.map((s) => `${s.name}: ${pct(s.values[0])} have any, ${pct(s.values[2])} have more than 10%`).join("; ")}.`,
+      tip: (j) => `<b>More than ${xs[j]}% of the element</b><br>` + series.map((s) => `<span class="m">${s.name}:</span> ${pct(s.values[j])} of ${unit}`).join("<br>"),
+      onHover: (html, x, y) => (html ? showTip(html, x, y) : hideTip()),
+    });
+  }
+}
+$("#distView").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-v]"); if (b) { distView = b.dataset.v; hideTip(); drawDist(); } });
+$("#distWeight").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-w]"); if (b) { distW = b.dataset.w; drawDist(); } });
+$("#distAge").addEventListener("change", (ev) => { distAge = ev.target.value; drawDist(); });
+$("#distGrid").addEventListener("mousemove", (ev) => { const g = ev.target.closest(".d-bar"); if (g) showTip(g.dataset.tip, ev.clientX, ev.clientY); else hideTip(); });
+$("#distGrid").addEventListener("mouseleave", hideTip);
+$("#distGrid").addEventListener("click", (ev) => { const g = ev.target.closest(".d-bar"); if (g) { const r = g.getBoundingClientRect(); showTip(g.dataset.tip, r.left + r.width / 2, r.top); } });
+$("#distCsv").addEventListener("click", () => {
+  const D = buildDist(); if (!D || !D.totN) return;
+  const age = distAge === "all" ? "all" : BINS.age[+distAge].label.replace("–", "-");
+  const rows = ["state,element_number,element_name,period,age_band_years,condition_state,cs_range,bridges,share_of_bridges_pct,deck_area_sqft,share_of_deck_area_pct,bridges_more_than_range_start_pct,deck_area_more_than_range_start_pct"];
+  for (let k = 0; k < 4; k++) {
+    const mN = moreThan(D.n[k], D.totN), mA = moreThan(D.area[k], D.totA);
+    for (let r = 0; r < 21; r++) {
+      // "more than" uses the range's lower bound: >0–5% → more than 0%, >5–10% → more than 5% …
+      const more = r === 0 ? ["", ""] : [sig3(mN[r - 1]), sig3(mA[r - 1])];
+      rows.push([sel.st, sel.en, `"${elData.name.replace(/"/g, '""')}"`, sel.win, age, CSN[k], RANGE_LABEL[r].replace("–", "-").replace(">", "gt "), D.n[k][r], sig3((D.n[k][r] / D.totN) * 100), D.area[k][r], sig3(D.totA ? (D.area[k][r] / D.totA) * 100 : 0), ...more].join(","));
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
+  a.download = `${sel.st}_EN${sel.en}_${sel.win}_cs_ranges${age === "all" ? "" : "_age" + age}.csv`; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 });
 
@@ -927,6 +1100,7 @@ function resetFilters() {
   $$("#normSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.norm === "raw")));
   $("#normByWrap").hidden = true;
   if (tab !== "insights") setTab("insights", { hash: false });
+  distView = "hist"; distW = "n"; distAge = "all";
 }
 function pickState(st) {
   resetFilters();
