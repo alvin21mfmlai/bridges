@@ -1,1 +1,1 @@
-{"en":144,"name":"Reinforced Concrete Arch","unit":"ft","state":"GU","ends":{"2024":{"2024":{"bridges":0,"deckArea":0,"excluded":{"no_deck_area":2},"cells":[]}}}}
+{"en":144,"name":"Reinforced Concrete Arch","unit":"ft","state":"GU","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2024":{"2024":[0,0,[0,0,2,0,0],[],[],[]]}}}

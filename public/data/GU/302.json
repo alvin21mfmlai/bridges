@@ -1,1 +1,1 @@
-{"en":302,"name":"Compression Joint Seal","unit":"ft","state":"GU","ends":{"2024":{"2024":{"bridges":2,"deckArea":8402,"excluded":{},"cells":[140,3610,1,153,4792,1,540,8402,2,946,4792,1,959,3610,1,1340,8402,2]}}}}
+{"en":302,"name":"Compression Joint Seal","unit":"ft","state":"GU","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2024":{"2024":[2,8402,0,[140,3610,1,153,4792,1,540,8402,2,946,4792,1,959,3610,1,1340,8402,2],[],[7,2,92,0,126,0]]}}}

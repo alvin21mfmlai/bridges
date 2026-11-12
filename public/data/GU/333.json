@@ -1,1 +1,1 @@
-{"en":333,"name":"Other Bridge Railing","unit":"ft","state":"GU","ends":{"2024":{"2024":{"bridges":1,"deckArea":8719,"excluded":{},"cells":[179,8719,1,560,8719,1,960,8719,1,1360,8719,1]}}}}
+{"en":333,"name":"Other Bridge Railing","unit":"ft","state":"GU","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2024":{"2024":[1,8719,0,[179,8719,1,560,8719,1,960,8719,1,1360,8719,1],[48,8719,1],[8,1,321,0,7,0]]}}}

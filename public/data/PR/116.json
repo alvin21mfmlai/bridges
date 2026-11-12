@@ -1,1 +1,1 @@
-{"en":116,"name":"Reinforced Concrete Stringer","unit":"ft","state":"PR","ends":{"2025":{"2025":{"bridges":1,"deckArea":2233,"excluded":{},"cells":[339,2233,1,720,2233,1,1120,2233,1,1520,2233,1]}}}}
+{"en":116,"name":"Reinforced Concrete Stringer","unit":"ft","state":"PR","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2025":{"2025":[1,2233,0,[339,2233,1,720,2233,1,1120,2233,1,1520,2233,1],[],[16,1,108,0,0,0]]}}}

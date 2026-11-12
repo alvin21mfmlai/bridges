@@ -1,1 +1,1 @@
-{"en":229,"name":"Other Pile","unit":"each","state":"TN","ends":{"2024":{"2024":{"bridges":0,"deckArea":0,"excluded":{"no_deck_area":2},"cells":[]}},"2025":{"2025":{"bridges":0,"deckArea":0,"excluded":{"no_deck_area":2},"cells":[]}}}}
+{"en":229,"name":"Other Pile","unit":"each","state":"TN","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2024":{"2024":[0,0,[0,0,2,0,0],[],[],[]]},"2025":{"2025":[0,0,[0,0,2,0,0],[],[],[]]}}}

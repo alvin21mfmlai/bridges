@@ -1,1 +1,1 @@
-{"en":220,"name":"Reinforced Concrete Pile Cap/Footing","unit":"ft","state":"DC","ends":{"2025":{"2025":{"bridges":1,"deckArea":176818,"excluded":{},"cells":[15,176818,1,404,176818,1,800,176818,1,1200,176818,1]}}}}
+{"en":220,"name":"Reinforced Concrete Pile Cap/Footing","unit":"ft","state":"DC","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2025":{"2025":[1,176818,0,[15,176818,1,404,176818,1,800,176818,1,1200,176818,1],[],[0,1,282,80,0,0]]}}}

@@ -1,1 +1,1 @@
-{"en":15,"name":"Prestressed Concrete Top Flange","unit":"sq ft","state":"GU","ends":{"2024":{"2024":{"bridges":1,"deckArea":9376,"excluded":{},"cells":[81,9376,1,498,9376,1,880,9376,1,1280,9376,1]}}}}
+{"en":15,"name":"Prestressed Concrete Top Flange","unit":"sq ft","state":"GU","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2024":{"2024":[1,9376,0,[81,9376,1,498,9376,1,880,9376,1,1280,9376,1],[44,9376,1],[4,1,686,8707,4,0]]}}}

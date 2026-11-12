@@ -37,15 +37,31 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
        than the axis it is drawn with a white break and its value is printed beside it.
      - *More than x%*: one chart with a line per condition state, showing the share of
        bridges with more than x% of the element in that state (x = 0, 5 … 95).
+       **Switched off for now:** set `SHOW_MORE_THAN = true` in `public/index.html` to bring
+       back the View switch and this chart.
      - *Measure*: % of bridges, or % of deck area (each bridge weighted by its deck area,
        as in the 3D charts).
      - *Bridge age*: all ages, or one 5-year age band.
      - Hover for exact counts and deck area; Download CSV gives the table for the current
        age filter. Picking a new state resets these controls.
-   - **Basic Analytics** and **Advanced Analytics:** placeholders for now. Add their
-     content in `renderBasicAnalytics(ctx)` and `renderAdvancedAnalytics(ctx)` in
-     `public/index.html`. Both run whenever the selection changes; `ctx` (documented above
-     the functions) carries the state, period, element and the decoded profile data.
+   - **Basic Analytics:**
+     1. **CS1 → CS2: time in the best condition state (Weibull)** (`public/weibull.js`).
+        For each 5-year age band, the observed share of the element quantity still in CS1
+        (sum of CS1 quantity ÷ sum of total quantity over the band's bridges), plotted at the
+        band midpoint (3, 8 … 98 years). A Weibull survival curve
+        S(t) = exp(−(t/η)^β) is fitted to these shares by maximum likelihood (binomial,
+        each band weighted by its number of bridges, Nelder–Mead on log β and log η).
+        Shown: median time in CS1 (η·(ln 2)^(1/β); "Beyond 100 years" when the fit puts it
+        past the data), share still in CS1 at age 50, shape β, scale η, the chart with the
+        median marked, a "How this is calculated" list directly below the chart, a table by
+        age band, and a CSV. Warnings appear for fewer than 3 age
+        bands, fewer than 20 bridges, or when nothing has left CS1.
+     2. CS2 → CS3 → CS4 (Markov) and 3. CS quantity propagation: still to come.
+   - **Advanced Analytics:** placeholder. Both analytics tabs are filled by
+     `renderBasicAnalytics(ctx)` and `renderAdvancedAnalytics(ctx)` in `public/index.html`,
+     which run whenever the selection changes; `ctx` (documented above the functions)
+     carries the state, period, element, the period data (including CS quantities by age
+     band) and the decoded profile.
 
 Selections are kept in the URL, for example `/#/TX/2016-2025/107` (state / period /
 element number), with an optional fourth part for the tab: `/#/TX/2016-2025/107/analytics`.
@@ -71,20 +87,21 @@ public/
   index.html            the site (HTML, CSS and app script)
   profile3d.js          3D bar chart renderer (SVG, drag to rotate)
   csdist.js             condition-state range histograms and "more than x%" curves (SVG)
+  weibull.js            CS1 → CS2 Weibull fit and chart (also runs in Node for testing)
   usmap.js              US state shapes (us-atlas, ISC licence, notice inside)
   assets/               logo
   data/
     index.json          jurisdictions, data years, bridge counts
     <ST>/index.json     the state's periods, bridges per year, element types and bridges per period
-    <ST>/<EN>.json      profile cells and >0–5% counts for one element type, grouped by end
-                        year and record year
+    <ST>/<EN>.json      one element type: profile cells, >0–5% counts and CS quantities by age
+                        band, grouped by end year and record year
 scripts/
   prepare_nbi.py        builds public/data/ from the NBI export
 vercel.json
 ```
 
-The data files total about 79 MB across roughly 3,840 files (under the Hobby plan's
-100 MB limit for static files). Each `<EN>.json` is at most about 230 KB, and the browser
+The data files total about 85 MB across roughly 3,840 files (under the Hobby plan's
+100 MB limit for static files). Each `<EN>.json` is at most about 245 KB, and the browser
 loads only the file for the element type you select.
 
 Periods are not stored one by one (21 periods per state would be about 160 MB). Instead,
@@ -94,8 +111,14 @@ record up to `e` whenever it is from year `s` or later, so the browser builds an
 by adding up `ends[e][s]` … `ends[e][e]` (`periodData()` in `index.html`). The result is
 identical to computing the period directly.
 
-Cells
-are stored as flat triples `[code, deckAreaSqFt, bridges]`, where
+Each group `ends[e][g]` is a list, in the order given by the file's `groupFields`:
+`[bridges, deckArea, excluded, cells, low, qty]` (names are not repeated in every group, to
+save about 6 MB). `excluded` is `[no_quantity, quantity_check, no_deck_area, no_age,
+age_out_of_range]`, or `0` when nothing was left out. `qty` holds flat 6-tuples per age band
+`[ageBin, bridges, qCS1, qCS2, qCS3, qCS4]`: the element quantity in each condition state,
+in the element's unit, for the analytics.
+
+Cells are stored as flat triples `[code, deckAreaSqFt, bridges]`, where
 `code = (cs − 1)·400 + ageBin·20 + csBin`. CS% band 0 is [0, 5] and so holds both the
 bridges with exactly 0% and those with >0–5%. To split them, each group also has `low`:
 triples `[code, deckAreaSqFt, bridges]` with `code = (cs − 1)·20 + ageBin` for the bridges

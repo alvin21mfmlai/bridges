@@ -1,1 +1,1 @@
-{"en":65,"name":"Other Slab","unit":"sq ft","state":"SC","ends":{"2025":{"2025":{"bridges":0,"deckArea":0,"excluded":{"age_out_of_range":1},"cells":[]}}}}
+{"en":65,"name":"Other Slab","unit":"sq ft","state":"SC","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2025":{"2025":[0,0,[0,0,0,0,1],[],[],[]]}}}

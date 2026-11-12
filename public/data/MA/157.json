@@ -1,1 +1,1 @@
-{"en":157,"name":"Other Floor Beam","unit":"ft","state":"MA","ends":{"2025":{"2025":{"bridges":1,"deckArea":2855,"excluded":{},"cells":[340,2855,1,758,2855,1,1140,2855,1,1541,2855,1]}}}}
+{"en":157,"name":"Other Floor Beam","unit":"ft","state":"MA","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2025":{"2025":[1,2855,0,[340,2855,1,758,2855,1,1140,2855,1,1541,2855,1],[],[17,1,0,161,0,15]]}}}

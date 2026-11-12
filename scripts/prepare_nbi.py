@@ -30,6 +30,8 @@ Requires: pip install duckdb
 """
 import duckdb, json, os, shutil, sys, tempfile, time, zipfile
 
+GROUP_FIELDS = ["bridges", "deckArea", "excluded", "cells", "low", "qty"]
+EXCLUSIONS = ["no_quantity", "quantity_check", "no_deck_area", "no_age", "age_out_of_range"]
 AGE_MIN, AGE_MAX, AGE_W, CS_W, WIN = 1, 100, 5, 5, 5
 MIN_YEAR = 2016  # data years before this are dropped (2015 is too sparse)
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "data")
@@ -161,6 +163,12 @@ def main(src):
         FROM pick GROUP BY ALL ORDER BY st, en, e, g""").fetchall()
     cells = con.execute("SELECT st, en, e, g, k, u, v, area, n FROM cells ORDER BY st, en, e, g, k, u, v").fetchall()
     zeros = con.execute("SELECT st, en, e, g, k, u, area, n FROM zeros ORDER BY st, en, e, g, k, u").fetchall()
+    # element quantity in each condition state, summed per age band, for the analytics
+    # (Weibull CS1 survival, Markov transitions, quantity propagation)
+    qty = con.execute(f"""
+        SELECT st, en, e, g, ((age - {AGE_MIN}) // {AGE_W})::INTEGER AS u, count(*) AS n,
+               sum(cs1), sum(cs2), sum(cs3), sum(cs4)
+        FROM pick WHERE excl IS NULL GROUP BY ALL ORDER BY st, en, e, g, u""").fetchall()
     bridges_state = dict(con.execute("SELECT st, count(DISTINCT sn) FROM y GROUP BY st").fetchall())
     rows_year = {}
     for st, yr, n in con.execute("SELECT st, yr, count(DISTINCT sn) FROM y GROUP BY st, yr").fetchall():
@@ -172,6 +180,10 @@ def main(src):
     for st, en, e, g, k, u, v, area, n in cells:
         # packed cell: code = (cs − 1)·nu·nv + ageBin·nv + csBin, then deck area (sq ft, rounded), then bridges
         by_group.setdefault((st, en, e, g), []).extend([(k - 1) * nu * nv + u * nv + v, round(area), n])
+    qty_group = {}
+    for st, en, e, g, u, n, q1, q2, q3, q4 in qty:
+        # [ageBin, bridges, CS1 qty, CS2 qty, CS3 qty, CS4 qty], quantities rounded
+        qty_group.setdefault((st, en, e, g), []).extend([u, n, round(q1), round(q2), round(q3), round(q4)])
     zero_group = {}
     for st, en, e, g, k, u, area, n in zeros:
         # packed low count: code = (cs − 1)·nu + ageBin, then deck area (sq ft, rounded), then bridges
@@ -179,18 +191,19 @@ def main(src):
 
     files = {}
     for st, en, e, g, n, a, e1, e2, e3, e4, e5 in groups:
-        f = files.setdefault((st, en), {"en": en, **el_info[en], "state": st, "ends": {}})
-        # ends[e][g]: bridges whose latest record up to end year e is from year g
-        f["ends"].setdefault(str(e), {})[str(g)] = {
-            "bridges": n, "deckArea": round(a),
-            "excluded": {k: v for k, v in zip(["no_quantity", "quantity_check", "no_deck_area", "no_age", "age_out_of_range"],
-                                               [e1, e2, e3, e4, e5]) if v},
-            # flat triples [code, deckAreaSqFt, bridges, …]; code = (cs−1)·400 + ageBin·20 + csBin
-            "cells": by_group.get((st, en, e, g), []),
-            # flat triples [code, deckAreaSqFt, bridges, …] for bridges with a CS share above 0%
-            # and up to 5%; code = (cs−1)·20 + ageBin. csBin 0 of "cells" minus these = exactly 0%.
-            "low": zero_group.get((st, en, e, g), []),
-        }
+        f = files.setdefault((st, en), {"en": en, **el_info[en], "state": st, "groupFields": GROUP_FIELDS, "ends": {}})
+        # ends[e][g]: bridges whose latest record up to end year e is from year g.
+        # Each group is a list in GROUP_FIELDS order (names are not repeated, to save space):
+        #   bridges, deckArea (sq ft),
+        #   excluded: [no_quantity, quantity_check, no_deck_area, no_age, age_out_of_range], or 0 if none,
+        #   cells: flat triples [code, deckAreaSqFt, bridges]; code = (cs−1)·400 + ageBin·20 + csBin,
+        #   low: flat triples [code, deckAreaSqFt, bridges] for a CS share above 0% and up to 5%;
+        #        code = (cs−1)·20 + ageBin. csBin 0 of cells minus low = exactly 0%,
+        #   qty: flat 6-tuples per age band [ageBin, bridges, qCS1, qCS2, qCS3, qCS4] in the element's unit.
+        ex = [e1, e2, e3, e4, e5]
+        f["ends"].setdefault(str(e), {})[str(g)] = [
+            n, round(a), ex if any(ex) else 0,
+            by_group.get((st, en, e, g), []), zero_group.get((st, en, e, g), []), qty_group.get((st, en, e, g), [])]
 
     states_index = {}
     for st in sorted(years):
@@ -200,7 +213,7 @@ def main(src):
             if s_ != st:
                 continue
             els.append({"en": en, "name": f["name"], "unit": f["unit"],
-                        "bridges": [sum(grp["bridges"] for gy, grp in f["ends"].get(str(e), {}).items() if int(gy) >= s)
+                        "bridges": [sum(grp[0] for gy, grp in f["ends"].get(str(e), {}).items() if int(gy) >= s)
                                     for _, s, e in sw]})
             os.makedirs(os.path.join(OUT, st), exist_ok=True)
             with open(os.path.join(OUT, st, f"{en}.json"), "w") as fh:

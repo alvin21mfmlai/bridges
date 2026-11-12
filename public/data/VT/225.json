@@ -1,1 +1,1 @@
-{"en":225,"name":"Steel Pile","unit":"each","state":"VT","ends":{"2025":{"2025":{"bridges":1,"deckArea":7127,"excluded":{},"cells":[240,7127,1,659,7127,1,1040,7127,1,1440,7127,1]}}}}
+{"en":225,"name":"Steel Pile","unit":"each","state":"VT","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2025":{"2025":[1,7127,0,[240,7127,1,659,7127,1,1040,7127,1,1440,7127,1],[],[12,1,0,2,0,0]]}}}

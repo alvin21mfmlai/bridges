@@ -1,1 +1,1 @@
-{"en":143,"name":"Prestressed Concrete Arch","unit":"ft","state":"PR","ends":{"2025":{"2025":{"bridges":1,"deckArea":11964,"excluded":{},"cells":[19,11964,1,400,11964,1,800,11964,1,1200,11964,1]}}}}
+{"en":143,"name":"Prestressed Concrete Arch","unit":"ft","state":"PR","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2025":{"2025":[1,11964,0,[19,11964,1,400,11964,1,800,11964,1,1200,11964,1],[],[0,1,121,0,0,0]]}}}

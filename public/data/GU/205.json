@@ -1,1 +1,1 @@
-{"en":205,"name":"Reinforced Concrete Column","unit":"each","state":"GU","ends":{"2024":{"2024":{"bridges":2,"deckArea":13291,"excluded":{},"cells":[35,4572,1,161,8719,1,424,4572,1,560,8719,1,820,4572,1,966,8719,1,1220,4572,1,1371,8719,1]}}}}
+{"en":205,"name":"Reinforced Concrete Column","unit":"each","state":"GU","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2024":{"2024":[2,13291,0,[35,4572,1,161,8719,1,424,4572,1,560,8719,1,820,4572,1,966,8719,1,1220,4572,1,1371,8719,1],[],[1,1,20,6,0,0,8,1,3,0,14,24]]}}}

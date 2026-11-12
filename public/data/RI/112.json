@@ -1,1 +1,1 @@
-{"en":112,"name":"Other Girder/Beam","unit":"ft","state":"RI","ends":{"2025":{"2025":{"bridges":1,"deckArea":31694,"excluded":{},"cells":[398,31694,1,781,31694,1,1180,31694,1,1580,31694,1]}}}}
+{"en":112,"name":"Other Girder/Beam","unit":"ft","state":"RI","groupFields":["bridges","deckArea","excluded","cells","low","qty"],"ends":{"2025":{"2025":[1,31694,0,[398,31694,1,781,31694,1,1180,31694,1,1580,31694,1],[],[19,1,98,10,0,0]]}}}

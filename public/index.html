@@ -124,6 +124,32 @@ select:hover{border-color:#6b6b6b}
 .d-pt{opacity:0}.d-pt.on{opacity:1}
 .d-guide{stroke:#9ba5af;stroke-width:1;stroke-dasharray:3 3}
 .d-over{fill:transparent;cursor:crosshair}
+/* Basic Analytics: CS1 → CS2 Weibull */
+.wb-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:4px 0 16px}
+@media (max-width:900px){.wb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.wb-stat{border:1px solid var(--border-subtle);border-radius:var(--r);padding:12px 14px;background:#fff}
+.wb-stat .k{font-size:12.5px;color:var(--text-muted);margin:0 0 4px}
+.wb-stat .v{font-size:22px;font-weight:600;margin:0;line-height:1.2}
+.wb-stat .s{font-size:12px;color:var(--text-muted);margin:4px 0 0}
+.wb-box{width:100%;min-height:280px}
+.wb-box svg{display:block;width:100%;height:auto;overflow:visible}
+.wb-fit{fill:none;stroke:#0071b8;stroke-width:2.6;stroke-linejoin:round}
+.wb-obs{fill:none;stroke:#1d3047;stroke-width:1.6;stroke-linejoin:round}
+.wb-dot{fill:#1d3047;stroke:#fff;stroke-width:1.2}
+.wb-dot.on{fill:#e8892b}
+.wb-med{fill:none;stroke:#0071b8;stroke-width:1;stroke-dasharray:4 4}
+.wb-medlbl{font-size:12px;fill:#0071b8;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.wb-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--text-muted);margin:0 0 6px}
+.wb-legend span{display:inline-flex;align-items:center;gap:6px}
+.wb-warn{font-size:13px;color:var(--text);border-left:3px solid #e8892b;padding:2px 0 2px 10px;margin:0 0 12px}
+.an-next{margin-top:28px}
+.wb-method{margin:14px 0 0;padding:14px 18px;border:1px solid var(--border-subtle);border-radius:var(--r);background:var(--bg-zebra)}
+.wb-method h4{margin:0 0 8px;font-size:14px;font-weight:600}
+.wb-method ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.55}
+.wb-method li{margin:0 0 6px}
+.wb-method li:last-child{margin-bottom:0}
+.wb-method ul ul{margin:4px 0 0;padding-left:18px}
+.wb-method ul ul li{margin:0 0 2px}
 .exc-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--text-muted);margin:0 0 6px}
 .exc-legend span{display:inline-flex;align-items:center;gap:6px}
 details.prof-tbl{margin-top:16px;border:1px solid var(--border-subtle);border-radius:var(--r);background:#fff}
@@ -449,7 +475,44 @@ table.data tr.hl td{background:var(--accent-muted)}
       <div class="tab-pane" role="tabpanel" id="pane-analytics" aria-labelledby="tab-analytics" hidden>
         <div class="pane-head"><div><h3 class="pane-title">Basic Analytics</h3></div></div>
         <div id="analyticsBody">
-          <div class="placeholder"><p><b>This view is still being built.</b></p><p class="ctx" data-ctx></p></div>
+          <!-- 1. CS1 → CS2 with a Weibull time-based model. Drawn by drawWeibull() with weibull.js. -->
+          <section class="an-sec" id="wbSec" aria-labelledby="h-wb">
+            <div class="pane-head">
+              <div><h3 class="pane-title" id="h-wb">CS1 → CS2: time in the best condition state (Weibull)</h3><div class="prof-facts" id="wbFacts"></div></div>
+              <div class="tools"><button class="btn" id="wbCsv">Download CSV</button></div>
+            </div>
+            <p class="mode-help">How long the element stays in CS1 before it starts moving to CS2?</p>
+            <p class="mode-help">Each dot is the share of the element quantity still in CS1 for bridges in a 5-year age band (bigger dots mean more bridges).</p>
+            <p class="mode-help">The blue line is the fitted Weibull curve, S(t) = exp(−(t/η)<sup>β</sup>).</p>
+            <p class="wb-warn" id="wbWarn" hidden></p>
+            <div class="wb-stats" id="wbStats"></div>
+            <div class="chart-card">
+              <div class="wb-legend"><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1d3047" stroke-width="1.6"/><circle cx="14" cy="6" r="4" fill="#1d3047"/></svg>Observed share in CS1</span><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0071b8" stroke-width="2.6"/></svg>Fitted Weibull</span></div>
+              <div class="wb-box" id="wbBox"></div>
+            </div>
+            <div class="wb-method" aria-labelledby="h-wbm">
+              <h4 id="h-wbm">How this is calculated</h4>
+              <ul>
+                <li><b>Data:</b> the selected state, period and element type. Each bridge counts once, using its most recent inspection in the period. Bridges with no element quantity, deck area or age, a failed quantity check, or an age outside 1 to 100 years are left out.</li>
+                <li><b>Observed share in CS1:</b> bridges are grouped into 5-year age bands. For each band, share in CS1 = total CS1 quantity ÷ total element quantity (CS1 to CS4). Each band is plotted at its midpoint age (3, 8 … 98 years).</li>
+                <li><b>Model:</b> S(t) = exp(−(t/η)<sup>β</sup>), the expected share of the element quantity still in CS1 at age t. It assumes the element is all in CS1 when new.
+                  <ul>
+                    <li>Shape β: above 1, the element leaves CS1 faster as it ages; below 1, more slowly; about 1, at a steady rate.</li>
+                    <li>Scale η: the age by which 63.2% of the quantity has left CS1.</li>
+                  </ul>
+                </li>
+                <li><b>Fitting:</b> β and η are estimated by maximum likelihood (binomial), treating each band's share as the part that has not yet left CS1 by that age. Each band is weighted by its number of bridges.</li>
+                <li><b>Results:</b> median time in CS1 = η·(ln 2)<sup>1/β</sup>; mean time in CS1 = η·Γ(1 + 1/β); fit error = weighted root-mean-square difference between observed and fitted shares.</li>
+                <li><b>Limitations:</b> each bridge is seen once, so the curve compares bridges of different ages rather than following one bridge over time. Repairs return quantity to CS1 and flatten the curve at older ages. Age bands with few bridges make the ends of the curve less certain.</li>
+              </ul>
+            </div>
+            <p class="prof-note" id="wbNote"></p>
+            <details class="prof-tbl">
+              <summary>Observed and fitted values by age band</summary>
+              <div class="tbl-wrap"><table class="data" id="wbTable"></table></div>
+            </details>
+          </section>
+          <!-- <div class="placeholder an-next"><p><b>Coming next:</b> CS2 → CS3 → CS4 with a Markov transition model, and element quantities with CS quantity propagation.</p><p class="ctx" data-ctx></p></div> -->
         </div>
       </div>
 
@@ -530,6 +593,7 @@ table.data tr.hl td{background:var(--accent-muted)}
 <script src="usmap.js"></script>
 <script src="profile3d.js"></script>
 <script src="csdist.js"></script>
+<script src="weibull.js"></script>
 <script>
 (() => {
 "use strict";
@@ -746,22 +810,30 @@ const MODES = {
 let prof = null; // { w, cells:[[{u,v,area,n,pTot,pBand,value}]×4], bands, maxBy }
 // Data for one period [s, e]: add up the groups ends[e][g] for g = s … e (see method notes).
 // Returns { bridges, deckArea, excluded, cells } with cells as packed triples, or null.
+const EXCL_KEYS = ["no_quantity", "quantity_check", "no_deck_area", "no_age", "age_out_of_range"];
 function periodData(d, key) {
   const [s, e] = key.split("-").map(Number), groups = d.ends[e];
   if (!groups) return null;
-  const out = { bridges: 0, deckArea: 0, excluded: {}, cells: [], low: [] }, acc = new Map(), lowAcc = new Map();
+  const out = { bridges: 0, deckArea: 0, excluded: {}, cells: [], low: [],
+    // qty[u] = { n: bridges, q: [CS1, CS2, CS3, CS4] element quantity } for age band u
+    qty: BINS.age.map(() => ({ n: 0, q: [0, 0, 0, 0] })) };
+  const acc = new Map(), lowAcc = new Map();
+  const add = (map, arr) => {
+    for (let i = 0; i < arr.length; i += 3) {
+      const c = map.get(arr[i]);
+      if (c) { c[0] += arr[i + 1]; c[1] += arr[i + 2]; } else map.set(arr[i], [arr[i + 1], arr[i + 2]]);
+    }
+  };
   for (const [g, x] of Object.entries(groups)) {
     if (+g < s) continue;
-    out.bridges += x.bridges; out.deckArea += x.deckArea;
-    for (const [k, v] of Object.entries(x.excluded)) out.excluded[k] = (out.excluded[k] || 0) + v;
-    for (let i = 0; i < x.cells.length; i += 3) {
-      const c = acc.get(x.cells[i]);
-      if (c) { c[0] += x.cells[i + 1]; c[1] += x.cells[i + 2]; } else acc.set(x.cells[i], [x.cells[i + 1], x.cells[i + 2]]);
-    }
-    const lo = x.low || [];
-    for (let i = 0; i < lo.length; i += 3) {
-      const c = lowAcc.get(lo[i]);
-      if (c) { c[0] += lo[i + 1]; c[1] += lo[i + 2]; } else lowAcc.set(lo[i], [lo[i + 1], lo[i + 2]]);
+    // each group is a list in d.groupFields order: bridges, deckArea, excluded, cells, low, qty
+    const [bridges, deckArea, excl, cells, low, qty] = x;
+    out.bridges += bridges; out.deckArea += deckArea;
+    if (excl) excl.forEach((v, i) => { if (v) out.excluded[EXCL_KEYS[i]] = (out.excluded[EXCL_KEYS[i]] || 0) + v; });
+    add(acc, cells); add(lowAcc, low);
+    for (let i = 0; i < qty.length; i += 6) {
+      const r = out.qty[qty[i]]; r.n += qty[i + 1];
+      for (let k = 0; k < 4; k++) r.q[k] += qty[i + 2 + k];
     }
   }
   [...acc.keys()].sort((a, b) => a - b).forEach((k) => out.cells.push(k, ...acc.get(k)));
@@ -826,7 +898,9 @@ function renderProfile() {
      ctx.state, ctx.stateName          "TX", "Texas"
      ctx.period                        { key: "2016-2025", start: 2016, end: 2025, years: 10 }
      ctx.element                       { en: 107, name: "Steel Open Girder/Beam", unit: "ft" }
-     ctx.windowData                    raw data for the period: bridges, deckArea, excluded, cells
+     ctx.windowData                    raw data for the period: bridges, deckArea, excluded, cells,
+                                       low, and qty[u] = { n: bridges, q: [CS1..CS4 quantity] }
+                                       for each 5-year age band u (0 = ages 1–5 … 19 = 96–100)
      ctx.profile                       decoded cells per CS (u = age band, v = CS% band, area, n),
                                        age-band totals and total deck area (null if no bridges)
      ctx.label                         "Steel Open Girder/Beam in Texas, 2016 to 2025"            */
@@ -842,8 +916,72 @@ function analysisContext() {
   };
 }
 function renderBasicAnalytics(ctx) {
-  $$("#analyticsBody [data-ctx]").forEach((e) => (e.textContent = `It will use the same selection: ${ctx.label}.`));
+  $$("#analyticsBody [data-ctx]").forEach((e) => (e.textContent = `They will use the same selection: ${ctx.label}.`));
+  wb = buildWeibull(ctx);
+  if (tab === "analytics") drawWeibull();
 }
+
+/* ---------- Basic Analytics 1: CS1 → CS2 Weibull ---------- */
+// Observed share of element quantity in CS1 per 5-year age band, plotted at the band midpoint
+// (3, 8 … 98 years), and the Weibull curve fitted to it (weibull.js).
+let wb = null;
+function buildWeibull(ctx) {
+  const w = ctx.windowData; if (!w || !w.qty) return null;
+  const points = [];
+  w.qty.forEach((r, u) => {
+    const tot = r.q[0] + r.q[1] + r.q[2] + r.q[3];
+    if (r.n && tot > 0) points.push({ u, t: BINS.age[u].lo + 2, p: r.q[0] / tot, w: r.n, q1: r.q[0], tot, label: BINS.age[u].label });
+  });
+  const unit = ctx.element.unit || "units";
+  return { points, model: WB.fit(points), unit, bridges: points.reduce((a, d) => a + d.w, 0), qty: points.reduce((a, d) => a + d.tot, 0), label: ctx.label };
+}
+const ages = (v) => `${sig3(v)} years`;
+function drawWeibull() {
+  if (!wb) return;
+  const { points, model: m, unit } = wb;
+  $("#wbFacts").innerHTML = `<span><b>${int(wb.bridges)}</b> bridges</span><span><b>${sig3(wb.qty)}</b> ${esc(unit)} of element</span><span><b>${points.length}</b> age band${points.length === 1 ? "" : "s"}</span>`;
+  const warn = !points.length ? "There are no bridges with element quantities in this selection."
+    : points.length < 3 ? "Only " + points.length + " age band" + (points.length === 1 ? " has" : "s have") + " bridges, so the fitted curve is not reliable."
+    : m && !m.departed ? "None of the element has left CS1 in this selection, so no curve can be fitted."
+    : wb.bridges < 20 ? `Only ${wb.bridges} bridges, so treat the fitted curve with caution.` : "";
+  $("#wbWarn").hidden = !warn; $("#wbWarn").textContent = warn;
+  const tile = (k, v, sub) => `<div class="wb-stat"><p class="k">${k}</p><p class="v">${v}</p><p class="s">${sub}</p></div>`;
+  if (m && m.departed) {
+    const beyond = m.median > 100, s50 = WB.S(50, m.beta, m.eta);
+    const shape = m.beta > 1.05 ? "Above 1: the element leaves CS1 faster as it ages." : m.beta < 0.95 ? "Below 1: the element leaves CS1 more slowly as it ages." : "About 1: a steady rate at every age.";
+    $("#wbStats").innerHTML =
+      tile("Median time in CS1", beyond ? "Beyond 100 years" : ages(m.median), beyond ? `The fitted value, ${sig3(m.median)} years, is far outside the data.` : "Half of the element quantity has left CS1 by this age.") +
+      tile("Still in CS1 at age 50", pct(s50 * 100), "Share of the element quantity, from the fitted curve.") +
+      tile("Shape β", sig3(m.beta), shape) +
+      tile("Scale η", m.eta > 1000 ? "Over 1,000 years" : ages(m.eta), "Age by which 63.2% has left CS1.");
+    // $("#wbNote").textContent = `For this selection: mean time in CS1 ${m.mean > 1000 ? "over 1,000 years" : ages(m.mean)}; fit error (weighted RMSE) ${sig3(m.rmse)}.`;
+  } else {
+    $("#wbStats").innerHTML = ""; $("#wbNote").textContent = "";
+  }
+  WB.chart($("#wbBox"), {
+    points, model: m, fmt: sig3,
+    ariaLabel: m && m.departed ? `Proportion of ${wb.label} still in CS1 by age. Fitted Weibull shape ${sig3(m.beta)}, scale ${sig3(m.eta)} years, median ${sig3(m.median)} years.` : `Proportion still in CS1 by age for ${wb.label}.`,
+    tip: (i) => { const d = points[i]; return `<b>Age ${d.label} years</b> (plotted at ${d.t})<br><span class="m">Bridges:</span> ${int(d.w)}<br><span class="m">Observed in CS1:</span> ${sig3(d.p)}${m && m.departed ? `<br><span class="m">Weibull:</span> ${sig3(WB.S(d.t, m.beta, m.eta))}` : ""}`; },
+    onHover: (html, x, y) => (html ? showTip(html, x, y) : hideTip()),
+  });
+  $("#wbTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Plotted at</th><th>Bridges</th><th>CS1 quantity (${esc(unit)})</th><th>Total quantity (${esc(unit)})</th><th>Observed in CS1</th><th>Weibull</th></tr></thead><tbody>` +
+    points.map((d) => `<tr><td>${d.label}</td><td>${d.t}</td><td>${int(d.w)}</td><td>${sig3(d.q1)}</td><td>${sig3(d.tot)}</td><td>${sig3(d.p)}</td><td>${m && m.departed ? sig3(WB.S(d.t, m.beta, m.eta)) : "—"}</td></tr>`).join("") + "</tbody>";
+}
+$("#wbCsv").addEventListener("click", () => {
+  if (!wb || !wb.points.length) return;
+  const m = wb.model, fitOk = m && m.departed;
+  const rows = [
+    `# ${wb.label}. Weibull S(t) = exp(-(t/eta)^beta)` + (fitOk ? `: beta=${sig3(m.beta)}, eta=${sig3(m.eta)} years, median=${sig3(m.median)} years, mean=${sig3(m.mean)} years, weighted RMSE=${sig3(m.rmse)}` : ": not fitted"),
+    `age_band_years,plotted_age_years,bridges,cs1_quantity_${wb.unit.replace(/\s+/g, "_")},total_quantity,observed_share_cs1,weibull_share_cs1`,
+    ...wb.points.map((d) => [d.label.replace("–", "-"), d.t, d.w, d.q1, d.tot, sig3(d.p), fitOk ? sig3(WB.S(d.t, m.beta, m.eta)) : ""].join(",")),
+  ];
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
+  a.download = `${sel.st}_EN${sel.en}_${sel.win}_weibull_cs1.csv`; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+let wrz = 0;
+new ResizeObserver(() => { if (tab === "analytics") { cancelAnimationFrame(wrz); wrz = requestAnimationFrame(drawWeibull); } }).observe($("#wbBox"));
 function renderAdvancedAnalytics(ctx) {
   $$("#advancedBody [data-ctx]").forEach((e) => (e.textContent = `It will use the same selection: ${ctx.label}.`));
 }
@@ -867,6 +1005,7 @@ function setTab(t, { focus = false, hash = true } = {}) {
   });
   hideTip();
   if (t === "insights") requestAnimationFrame(drawProfiles);
+  if (t === "analytics") requestAnimationFrame(drawWeibull);
   if (hash) writeHash();
 }
 $(".tabs").addEventListener("click", (ev) => { const b = ev.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
