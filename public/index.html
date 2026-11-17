@@ -644,13 +644,16 @@ table.data tr.hl td{background:var(--accent-muted)}
               <div class="chart-card">
                 <h4>Annual transition probability by age category</h4>
                 <div class="tbl-wrap"><table class="mk-mat" id="mkCatTable"></table></div>
-                <p class="mk-cap">Each value is the chance of moving to the next condition state within one year. The chance of staying is 100% minus this.</p>
+                <p class="mk-cap">Each value is the chance of moving to the next condition state within one year.</p>
+                <p class="mk-cap">The chance of staying in the current state = 100% minus value.</p>
               </div>
               <div class="chart-card">
                 <div class="mk-tpm-head"><h4 id="h-mkTpm">Transition probability matrix</h4>
                   <label class="sr-only" for="mkCat">Age category</label><select id="mkCat"></select></div>
                 <div class="tbl-wrap"><table class="mk-mat" id="mkTpm" aria-labelledby="h-mkTpm"></table></div>
-                <p class="mk-cap">Rows are this year's condition state, columns next year's. Highlighted cells are moves to a worse state; every row adds up to 100%.</p>
+                <p class="mk-cap">Rows are this year's condition state, columns are next year's.</p>
+                <p class="mk-cap">Highlighted cells are moves to a worse state.</p>
+                <p class="mk-cap">Every row adds up to 100%.</p>
               </div>
             </div>
             <div class="chart-card mk-fit">
