@@ -56,7 +56,20 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
         median marked, a "How this is calculated" list directly below the chart, a table by
         age band, and a CSV. Warnings appear for fewer than 3 age
         bands, fewer than 20 bridges, or when nothing has left CS1.
-     2. CS2 → CS3 → CS4 (Markov) and 3. CS quantity propagation: still to come.
+     2. **CS2 → CS3 → CS4: movement to worse condition states (Markov)** (`public/markov.js`).
+        A yearly Markov chain on the share of element quantity in CS1–CS4, starting all in
+        CS1 when new. CS1 → CS2 uses the Weibull curve above (yearly chance at age a =
+        1 − S(a+1)/S(a)). CS2 → CS3 and CS3 → CS4 have one yearly chance per 20-year age
+        category (1–20 … 81–100), giving one transition probability matrix (TPM) per
+        category. These are fitted by maximum likelihood (multinomial) so the predicted
+        CS1–CS4 mix matches the observed mix in each 5-year age band, each band weighted by
+        its bridges, with a small penalty on jumps between neighbouring categories
+        (Nelder–Mead in logit space; chances kept between 0.001% and 50% a year).
+        Shown: the three yearly chances at ages 41–60, the fit error, a chart of the yearly
+        chances by age category, a table by category, the 4×4 TPM for a chosen category, a
+        chart of predicted against observed shares by age, a "How this is calculated" list,
+        a table by age band and a CSV.
+     3. CS quantity propagation: still to come.
    - **Advanced Analytics:** placeholder. Both analytics tabs are filled by
      `renderBasicAnalytics(ctx)` and `renderAdvancedAnalytics(ctx)` in `public/index.html`,
      which run whenever the selection changes; `ctx` (documented above the functions)
@@ -88,6 +101,7 @@ public/
   profile3d.js          3D bar chart renderer (SVG, drag to rotate)
   csdist.js             condition-state range histograms and "more than x%" curves (SVG)
   weibull.js            CS1 → CS2 Weibull fit and chart (also runs in Node for testing)
+  markov.js             CS2 → CS3 → CS4 Markov fit, TPMs and line charts (also runs in Node)
   usmap.js              US state shapes (us-atlas, ISC licence, notice inside)
   assets/               logo
   data/
