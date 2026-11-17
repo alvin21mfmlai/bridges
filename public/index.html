@@ -124,6 +124,7 @@ select:hover{border-color:#6b6b6b}
 .d-pt{opacity:0}.d-pt.on{opacity:1}
 .d-guide{stroke:#9ba5af;stroke-width:1;stroke-dasharray:3 3}
 .d-over{fill:transparent;cursor:crosshair}
+
 /* Basic Analytics: CS1 → CS2 Weibull */
 .wb-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:4px 0 16px}
 @media (max-width:900px){.wb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -401,6 +402,10 @@ table.data tr.hl td{background:var(--accent-muted)}
     <p>(2) Select the targeted period of five years or more.</p>
     <p>(3) Select the element type available from the targeted period.</p>
     <p>(4) Select the type of analytics to view.</p>
+    <ul>
+      <li>Basic Insights: To investigate how condition state varies with bridge age and across condition-state ranges.</li>
+      <li>Basic Analytics: Deterioration prediction models fitted to the condition state data.</li>
+    </ul>
     <p class="source">Data: FHWA National Bridge Inventory element data, 2016 to 2025.</p>
   </div>
 </section>
@@ -472,8 +477,9 @@ table.data tr.hl td{background:var(--accent-muted)}
     </div>
     <div class="panel-body">
       <div class="tabs" role="tablist" aria-label="Analysis views">
-        <button role="tab" id="tab-insights" data-tab="insights" aria-controls="pane-insights" aria-selected="true"><span class="t-name">Basic Insights</span><span class="t-sub">How condition varies with bridge age and across condition-state ranges</span></button>
-        <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-sub">Weibull and Markov deterioration models fitted to the data</span></button>
+        <button role="tab" id="tab-insights" data-tab="insights" aria-controls="pane-insights" aria-selected="true"><span class="t-name">Basic Insights</span><span class="t-sub">To investigate how condition state varies with bridge age and across condition-state ranges.</span></button>
+        <!-- <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-sub">Weibull and Markov deterioration models fitted to the data</span></button> -->
+         <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-sub">Deterioration prediction models fitted to the condition state data.</span></button>
         <button role="tab" id="tab-advanced" data-tab="advanced" aria-controls="pane-advanced" aria-selected="false" tabindex="-1"><span class="t-name">Advanced Analytics</span><span class="t-sub">More models, still being built</span></button>
       </div>
 
@@ -567,25 +573,30 @@ table.data tr.hl td{background:var(--accent-muted)}
       <!-- Basic Analytics: add content inside #analyticsBody. renderBasicAnalytics(ctx) in the script runs whenever the selection changes. -->
       <div class="tab-pane" role="tabpanel" id="pane-analytics" aria-labelledby="tab-analytics" hidden>
         <nav class="feat-nav" aria-label="Features in Basic Analytics"><span>In this view:</span>
-          <button data-go-feat="wbSec"><b>1</b>CS1 → CS2 (Weibull)</button>
-          <button data-go-feat="mkSec"><b>2</b>CS2 → CS3 → CS4 (Markov)</button>
+          <!-- <button data-go-feat="wbSec"><b>1</b>CS1 → CS2 (Weibull)</button> -->
+          <button data-go-feat="wbSec"><b>1</b>CS1 → CS2 (Prediction Method #1)</button>
+          <!-- <button data-go-feat="mkSec"><b>2</b>CS2 → CS3 → CS4 (Markov)</button> -->
+          <button data-go-feat="mkSec"><b>2</b>CS2 → CS3 → CS4 (Prediction Method #2)</button>
         </nav>
         <div id="analyticsBody">
           <!-- 1. CS1 → CS2 with a Weibull time-based model. Drawn by drawWeibull() with weibull.js. -->
           <section class="an-sec feature" id="wbSec" aria-labelledby="h-wb">
             <div class="pane-head">
-              <div><p class="feat-kicker"><span class="feat-badge">1</span>Basic Analytics</p><h3 class="pane-title" id="h-wb">CS1 → CS2: time in the best condition state (Weibull)</h3><div class="prof-facts" id="wbFacts"></div></div>
+              <!-- <div><p class="feat-kicker"><span class="feat-badge">1</span>Basic Analytics</p><h3 class="pane-title" id="h-wb">CS1 → CS2: time in the best condition state (Weibull)</h3><div class="prof-facts" id="wbFacts"></div></div> -->
+              <div><p class="feat-kicker"><span class="feat-badge">1</span>Basic Analytics</p><h3 class="pane-title" id="h-wb">CS1 → CS2: time in the best condition state (Prediction Method #1)</h3><div class="prof-facts" id="wbFacts"></div></div>
               <div class="tools"><button class="btn" id="wbCsv">Download CSV</button></div>
             </div>
             <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
               <p class="lead">How long the element stays in CS1 before it starts moving to CS2?</p>
               <p>Each dot is the share of the element quantity still in CS1 for bridges in a 5-year age band (bigger dots mean more bridges).</p>
-              <p>The blue line is the fitted Weibull curve, S(t) = exp(−(t/η)<sup>β</sup>).</p>
+              <!-- <p>The blue line is the fitted Weibull curve, S(t) = exp(−(t/η)<sup>β</sup>).</p> -->
+              <p>The blue line is the prediction curve.</p>
             </div></div>
             <p class="wb-warn" id="wbWarn" hidden></p>
             <div class="wb-stats" id="wbStats"></div>
             <div class="chart-card">
-              <div class="wb-legend"><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1d3047" stroke-width="1.6"/><circle cx="14" cy="6" r="4" fill="#1d3047"/></svg>Observed share in CS1</span><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0071b8" stroke-width="2.6"/></svg>Fitted Weibull</span></div>
+              <!-- <div class="wb-legend"><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1d3047" stroke-width="1.6"/><circle cx="14" cy="6" r="4" fill="#1d3047"/></svg>Observed share in CS1</span><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0071b8" stroke-width="2.6"/></svg>Fitted Weibull</span></div> -->
+              <div class="wb-legend"><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1d3047" stroke-width="1.6"/><circle cx="14" cy="6" r="4" fill="#1d3047"/></svg>Observed share in CS1</span><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0071b8" stroke-width="2.6"/></svg>Prediction Line</span></div>
               <div class="wb-box" id="wbBox"></div>
             </div>
             <div class="wb-method" aria-labelledby="h-wbm">
@@ -614,12 +625,14 @@ table.data tr.hl td{background:var(--accent-muted)}
           <!-- 2. CS2 → CS3 → CS4 with a Markov transition model. Drawn by drawMarkov() with markov.js. -->
           <section class="an-sec mk-sec feature" id="mkSec" aria-labelledby="h-mk">
             <div class="pane-head">
-              <div><p class="feat-kicker"><span class="feat-badge">2</span>Basic Analytics</p><h3 class="pane-title" id="h-mk">CS2 → CS3 → CS4: movement to worse condition states (Markov)</h3><div class="prof-facts" id="mkFacts"></div></div>
+              <!-- <div><p class="feat-kicker"><span class="feat-badge">2</span>Basic Analytics</p><h3 class="pane-title" id="h-mk">CS2 → CS3 → CS4: movement to worse condition states (Markov)</h3><div class="prof-facts" id="mkFacts"></div></div> -->
+              <div><p class="feat-kicker"><span class="feat-badge">2</span>Basic Analytics</p><h3 class="pane-title" id="h-mk">CS2 → CS3 → CS4: movement to worse condition states (Prediction Method #2)</h3><div class="prof-facts" id="mkFacts"></div></div>
               <div class="tools"><button class="btn" id="mkCsv">Download CSV</button></div>
             </div>
             <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
               <p class="lead">How quickly the element moves on from CS2 to CS3, and from CS3 to CS4, at different ages.</p>
-              <p>Each line is the chance that a unit of the element moves to the next condition state within one year, for each 20-year age category. CS1 → CS2 comes from the Weibull model above.</p>
+              <p>Each line represents the chance that a unit of the element moves to the next condition state within one year. </p>
+              <p>For each assumed 20-year age category, the respective CS1 → CS2 transition is computed from the prediction model.</p>
             </div></div>
             <p class="wb-warn" id="mkWarn" hidden></p>
             <div class="wb-stats" id="mkStats"></div>
@@ -1139,7 +1152,7 @@ function drawWeibull() {
     tip: (i) => { const d = points[i]; return `<b>Age ${d.label} years</b> (plotted at ${d.t})<br><span class="m">Bridges:</span> ${int(d.w)}<br><span class="m">Observed in CS1:</span> ${sig3(d.p)}${m && m.departed ? `<br><span class="m">Weibull:</span> ${sig3(WB.S(d.t, m.beta, m.eta))}` : ""}`; },
     onHover: (html, x, y) => (html ? showTip(html, x, y) : hideTip()),
   });
-  $("#wbTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Plotted at</th><th>Bridges</th><th>CS1 quantity (${esc(unit)})</th><th>Total quantity (${esc(unit)})</th><th>Observed in CS1</th><th>Weibull</th></tr></thead><tbody>` +
+  $("#wbTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Plotted at</th><th>Bridges</th><th>CS1 quantity (${esc(unit)})</th><th>Total quantity (${esc(unit)})</th><th>Observed in CS1</th><th>Prediction</th></tr></thead><tbody>` +
     points.map((d) => `<tr><td>${d.label}</td><td>${d.t}</td><td>${int(d.w)}</td><td>${sig3(d.q1)}</td><td>${sig3(d.tot)}</td><td>${sig3(d.p)}</td><td>${m && m.departed ? sig3(WB.S(d.t, m.beta, m.eta)) : "—"}</td></tr>`).join("") + "</tbody>";
 }
 $("#wbCsv").addEventListener("click", () => {
@@ -1378,7 +1391,10 @@ function drawDist() {
   const hist = distView === "hist";
   $("#distGrid").hidden = !hist; $("#excCard").hidden = hist;
   $("#distHelp").textContent = hist
-    ? `How the ${unit} spread across shares of the element quantity in each condition state. The gray bar is the share with none of the element in that state (0%). Each chart has its own scale; a white break on the gray bar means it is taller than the axis.`
+    ? `Analyze the spread of the ${unit} across shares of the element quantity in each condition state (CS1 to CS4). 
+    The gray bar is the share with none of the element in that state (0%). 
+    Each chart has its own scale. 
+    Note that a white break on the gray bar means it is taller than the axis.`
     : `Share of ${unit} with more than x% of the element quantity in each condition state. For example, the CS3 line at 10 shows the share of ${unit} with more than 10% of the element in CS3.`;
   $("#distNote").textContent = byArea
     ? "Each bridge is weighted by its deck area, as in the 3D charts. Ranges include their upper bound: >5–10% means more than 5% and up to 10%."
