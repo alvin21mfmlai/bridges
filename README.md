@@ -85,10 +85,16 @@ Only data years from **2016** onwards are used (`MIN_YEAR` in the script); 2015 
 because it is too sparse.
 
 For each state × element type × period:
-- Each bridge counts **once**, at its **latest data year inside the period**.
+- Each bridge counts **once**, at its **latest data year inside the period**. A bridge is
+  identified by state + structure number with spaces and leading zeros removed: some states
+  report the same bridge as `000037SR0010004` in one year and `37SR0010004` in another.
 - Age = `BRIDGE_AGE_YEARS` at that year (data year − year built).
 - CSk share = CSk / TOTALQTY × 100. Bins: age 1–5 … 96–100; CS% [0,5], (5,10] … (95,100].
 - Each cell stores the summed deck area (sq ft) and the number of bridges.
+- Missing ages and deck areas are filled from the NBI inventory when its folder is given
+  (`scripts/nbi_inventory.py`): age = data year − year built (item 27), deck area = structure
+  length × deck width (items 49 × 52, the export's own formula); otherwise from the same
+  bridge's other years. Values the export already has are never changed.
 - Records are excluded, and counted, for: no element quantity, a failed quantity check, no
   deck area, no year built, or an age outside 1–100.
 - All figures on the page are shown to 3 significant figures.
@@ -104,18 +110,29 @@ public/
   markov.js             CS2 → CS3 → CS4 Markov fit, TPMs and line charts (also runs in Node)
   usmap.js              US state shapes (us-atlas, ISC licence, notice inside)
   assets/               logo
-  data/
-    index.json          jurisdictions, data years, bridge counts
-    <ST>/index.json     the state's periods, bridges per year, element types and bridges per period
-    <ST>/<EN>.json      one element type: profile cells, >0–5% counts and CS quantities by age
+  data/                 every file is gzip-compressed JSON (<name>.json.gz)
+    index.json.gz       jurisdictions, data years, bridge counts
+    <ST>/index.json.gz  the state's periods, bridges per year, element types and bridges per period
+    <ST>/<EN>.json.gz   one element type: profile cells, >0–5% counts and CS quantities by age
                         band, grouped by end year and record year
+    <ST>/bridges.json.gz  every bridge in the element data: position and the years it is in the
+                        NBI inventory and in the element data (see "Bridge positions" below)
 scripts/
-  prepare_nbi.py        builds public/data/ from the NBI export
+  prepare_nbi.py        builds public/data/ from the NBI export (and the NBI inventory, if given)
+  nbi_inventory.py      reads the NBI inventory files: positions, year built, deck area
+  geo/states-10m.geojson  state outlines (US Census via us-atlas) for checking positions
 vercel.json
 ```
 
-The data files total about 85 MB across roughly 3,840 files (under the Hobby plan's
-100 MB limit for static files). Each `<EN>.json` is at most about 245 KB, and the browser
+The data files are stored gzip-compressed: about 25 MB across roughly 3,890 files (about
+102 MB unpacked), well inside the Hobby plan's 100 MB limit for static files. The site asks
+for `<file>.json.gz` and unpacks it in the browser with `DecompressionStream`
+(`loadJSON()` in `index.html`; current Chrome, Edge, Firefox and Safari). If a server
+unpacks the file itself (`Content-Encoding: gzip`), the site reads it as plain JSON.
+`vercel.json` serves the `.gz` files as `application/gzip`. To look inside a file:
+`python -c "import gzip,json,sys; print(json.dumps(json.load(gzip.open(sys.argv[1])), indent=1)[:2000])" public/data/TX/index.json.gz`.
+
+Each `<EN>.json.gz` is at most about 105 KB, and the browser
 loads only the file for the element type you select.
 
 Periods are not stored one by one (21 periods per state would be about 160 MB). Instead,
@@ -143,16 +160,46 @@ would have added about 19 MB.)
 ## Updating the data
 
 ```
-pip install duckdb
-python scripts/prepare_nbi.py path/to/summary_states_nbi_data.zip   # or an extracted folder
+pip install duckdb shapely
+python scripts/prepare_nbi.py path/to/summary_states_nbi_data.zip path/to/nbi_inventory
 ```
 
-On Windows: `py -m pip install duckdb`, then
-`py scripts\prepare_nbi.py "C:\path\to\summary_states_nbi_data.zip"`.
+On Windows: `py -m pip install duckdb shapely`, then
+`py scripts\prepare_nbi.py "C:\path\to\summary_states_nbi_data.zip" "C:\path\to\nbi_inventory"`.
 
-The script reads `<STATE>/bridge_element_yearly.csv` only. The `by_element/` files hold
-the same rows and are ignored. It replaces everything in `public/data/` and takes about
-2 minutes. Commit the new `public/data/` and push.
+The first argument is the element export (zip or extracted folder); the script reads
+`<STATE>/bridge_element_yearly.csv` only (the `by_element/` files hold the same rows and are
+ignored). The second, optional argument is the NBI inventory folder: one sub-folder per year
+(`2015/` … `2025/`) holding the FHWA delimited state files such as `2025/TX25.txt`. Without
+it, no `bridges.json` is written and missing ages and deck areas stay missing.
+
+The script replaces everything in `public/data/` and takes about 4–5 minutes with the
+inventory. The database part uses up to 40% of the machine's RAM (between 3 and 8 GB); if it
+stops with "Out of Memory", set a higher limit first, for example in PowerShell
+`$env:NBI_MEMORY_LIMIT = "6GB"`, and run it again. Commit the new `public/data/` and push
+(`git add -A public/data` so that removed files are removed in git too).
+
+## Bridge positions (`<ST>/bridges.json.gz`)
+
+One file per state, columns of equal length, one entry per bridge in the element data,
+sorted by `id`:
+
+| Field | Meaning |
+| --- | --- |
+| `years` | the years the bit masks refer to (bit 0 = first year, 2015) |
+| `id` | structure number with spaces and leading zeros removed |
+| `lat`, `lon` | position in degrees × 100,000 (integers), from the bridge's latest NBI year with a usable position; `null` if none |
+| `nbi` | bit mask of the years the bridge is in the NBI inventory (built / removed over time) |
+| `el` | bit mask of the years it has element data |
+| `flag` | 0 position from its latest NBI year · 1 latest year unusable, position from an earlier year · 2 no usable position · 3 not in the NBI inventory |
+| `moved` | `{"<row>": [[firstYear, lastYear, lat, lon], …]}` for years whose position differs by more than 100 m (relocations and coordinate corrections) |
+
+Positions come from NBI items 16 and 17 (DDMMSSss and DDDMMSSss; longitudes under 100°
+sometimes lose their leading zero; Guam is east longitude). A position is unusable if it
+does not decode, is a placeholder such as `00000000`, or lies more than 10 km outside its
+own state (a few km outside is normal for bridges on state lines and coasts). To draw them
+on the site's map, project with the same projection as `usmap.js`:
+`d3.geoAlbersUsa().scale(1300).translate([487.5, 305])` (Puerto Rico and Guam fall outside it).
 
 ## Run locally
 
@@ -207,5 +254,10 @@ with no build step. Every push to `main` redeploys.
 
 - 49 jurisdictions: 46 states, DC, Puerto Rico and Guam. There is no data for Georgia,
   Iowa, Maryland or Pennsylvania.
+- 295,468 distinct bridges (334,838 structure numbers as written; the difference is the same
+  bridge reported with and without leading zeros, mostly in SC, TN, AR and VA).
+- Positions: 294,316 bridges (99.6%) have one. The NBI inventory files run 2015–2025; Iowa
+  is missing from 2019, Maryland from 2022 and Pennsylvania from 2024, and Guam in most
+  years.
 - Data years 2016–2025 on the site. The export also has 2015, which the script drops.
 - Unknown element numbers (88–90, 321, 600–610) appear under "Unclassified".

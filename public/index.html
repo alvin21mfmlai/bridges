@@ -798,9 +798,24 @@ const shortNum = (v) => v >= 1e9 ? `${+(v / 1e9).toPrecision(3)}B` : v >= 1e6 ? 
 const compact = (v) => v >= 1e9 ? `${sig3(v / 1e9)}B` : v >= 1e6 ? `${sig3(v / 1e6)}M` : v >= 1e3 ? `${sig3(v / 1e3)}k` : int(v);
 
 /* ---------- data ---------- */
+// Data files are stored gzip-compressed (<name>.json.gz) to stay well inside the hosting size
+// limit. The browser unpacks them with DecompressionStream. If a server has already unpacked
+// the file (Content-Encoding: gzip), the bytes no longer start with the gzip mark (1f 8b) and
+// are read as plain JSON.
 const cache = new Map();
+async function loadJSON(url) {
+  const r = await fetch(`${url}.gz`);
+  if (!r.ok) throw new Error(`${r.status} ${url}.gz`);
+  const buf = new Uint8Array(await r.arrayBuffer());
+  if (buf[0] === 0x1f && buf[1] === 0x8b) {
+    if (typeof DecompressionStream === "undefined") throw new Error("This browser cannot unpack the data files. Please use a current version of Chrome, Edge, Firefox or Safari.");
+    const text = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+    return JSON.parse(text);
+  }
+  return JSON.parse(new TextDecoder().decode(buf));
+}
 async function getJSON(url) {
-  if (!cache.has(url)) cache.set(url, fetch(url).then((r) => { if (!r.ok) throw new Error(`${r.status} ${url}`); return r.json(); }));
+  if (!cache.has(url)) cache.set(url, loadJSON(url));
   try { return await cache.get(url); } catch (e) { cache.delete(url); throw e; }
 }
 let IDX = null;

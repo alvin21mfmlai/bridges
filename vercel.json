@@ -17,6 +17,10 @@
     {
       "source": "/data/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
+    },
+    {
+      "source": "/data/(.*)\\.gz",
+      "headers": [{ "key": "Content-Type", "value": "application/gzip" }]
     }
   ]
 }
