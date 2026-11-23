@@ -89,7 +89,9 @@ def load(con, folder, work):
     con.execute(f"""
         CREATE TABLE inv_raw AS
         WITH d AS (
-          SELECT st, yr::INTEGER AS yr, ltrim(upper(replace(sn, ' ', '')), '0') AS k, yb, len_m, width_m,
+          SELECT st, yr::INTEGER AS yr, ltrim(upper(replace(sn, ' ', '')), '0') AS k,
+            (length(replace(sn, ' ', '')) - length(ltrim(replace(sn, ' ', ''), '0')))::UTINYINT AS pad,
+            yb, len_m, width_m,
             CASE WHEN regexp_full_match(lat_s, '[0-9]{{8}}') AND substr(lat_s,3,2)::INT < 60 AND substr(lat_s,5,2)::INT < 60
                  THEN substr(lat_s,1,2)::INT + substr(lat_s,3,2)::INT/60.0 + substr(lat_s,5,4)::INT/360000.0 END AS lat,
             CASE WHEN regexp_full_match(lon_s, '[0-9]{{9}}') AND substr(lon_s,4,2)::INT < 60 AND substr(lon_s,6,2)::INT < 60
@@ -97,7 +99,7 @@ def load(con, folder, work):
                  WHEN regexp_full_match(lon_s, '[0-9]{{8}}') AND substr(lon_s,3,2)::INT < 60 AND substr(lon_s,5,2)::INT < 60
                       THEN substr(lon_s,1,2)::INT + substr(lon_s,3,2)::INT/60.0 + substr(lon_s,5,4)::INT/360000.0 END AS lon_abs
           FROM read_csv('{tmp}', header=true, all_varchar=true))
-        SELECT st, yr, k,
+        SELECT st, yr, k, pad,
           lat, CASE WHEN st = 'GU' THEN lon_abs ELSE -lon_abs END AS lon,
           CASE WHEN lat IS NULL OR lon_abs IS NULL THEN false
                WHEN st = 'GU' THEN lat BETWEEN 13 AND 14 AND lon_abs BETWEEN 144 AND 146
@@ -110,10 +112,23 @@ def load(con, folder, work):
                THEN round(len_m::DOUBLE * width_m::DOUBLE, 2) * {SQFT_PER_M2} END AS area_sqft
         FROM d""")
     os.remove(tmp)
-    # one row per bridge and year: prefer a record with a usable position
+    # Structure numbers spelled with and without leading zeros in the same year of the element
+    # data are two bridges (table splitk, from prepare_nbi.py): keep their zeros here too.
+    con.execute("CREATE TEMP TABLE elsp AS SELECT DISTINCT st, repeat('0', pad) || sn AS raw FROM y")
+    con.execute("""ALTER TABLE inv_raw ADD COLUMN el_spelling BOOLEAN DEFAULT false;
+                   UPDATE inv_raw SET el_spelling = true FROM elsp
+                   WHERE elsp.st = inv_raw.st AND elsp.raw = repeat('0', inv_raw.pad) || inv_raw.k""")
+    con.execute("DROP TABLE elsp")
+    con.execute("UPDATE inv_raw SET k = repeat('0', inv_raw.pad) || inv_raw.k FROM splitk WHERE splitk.st = inv_raw.st AND splitk.k = inv_raw.k")
+    # one row per bridge and year. Where the inventory has the number spelled two ways in a year
+    # (the element data never does), prefer the spelling the element data uses (AR "3001" and
+    # "000000000003001" in 2015-2016); then a record with a usable position, then one with a deck
+    # area; the remaining columns only make the pick independent of the order rows are read in
     con.execute("""
         CREATE TABLE inv AS SELECT st, yr, k, lat, lon, rough_ok AS pos_ok, yb, area_sqft FROM (
-          SELECT *, row_number() OVER (PARTITION BY st, k, yr ORDER BY rough_ok DESC, area_sqft IS NOT NULL DESC) AS rn
+          SELECT *, row_number() OVER (PARTITION BY st, k, yr ORDER BY el_spelling DESC, rough_ok DESC,
+                                       area_sqft IS NOT NULL DESC, area_sqft DESC, yb DESC NULLS LAST,
+                                       lat NULLS LAST, lon NULLS LAST, pad) AS rn
           FROM inv_raw) WHERE rn = 1""")
     con.execute("DROP TABLE inv_raw")
     _check_boundaries(con)
@@ -169,8 +184,17 @@ def fill_age_and_area(con):
                    WHERE y.age IS NULL AND i.st = y.st AND i.k = y.sn AND i.yr = y.yr AND i.yb IS NOT NULL""")
     con.execute("""UPDATE y SET area = i.area_sqft FROM inv i
                    WHERE y.area IS NULL AND i.st = y.st AND i.k = y.sn AND i.yr = y.yr AND i.area_sqft IS NOT NULL""")
-    con.execute("""CREATE TEMP TABLE ref AS SELECT st, sn, mode(yr - age) FILTER (WHERE age IS NOT NULL) AS yb,
-                     arg_max(area, yr) FILTER (WHERE area IS NOT NULL) AS area FROM y GROUP BY st, sn""")
+    # year built: the most common one among the bridge's records (ties: the latest); deck area:
+    # from its latest year (ties: the largest)
+    con.execute("""CREATE TEMP TABLE ref AS
+                   SELECT st, sn, b.yb, a.area FROM
+                     (SELECT st, sn, arg_max(yb, n * 10000 + yb) AS yb FROM
+                        (SELECT st, sn, yr - age AS yb, count(*) AS n FROM y WHERE age IS NOT NULL GROUP BY ALL)
+                      GROUP BY st, sn) b
+                   FULL JOIN
+                     (SELECT st, sn, area FROM y WHERE area IS NOT NULL
+                      QUALIFY row_number() OVER (PARTITION BY st, sn ORDER BY yr DESC, area DESC) = 1) a
+                   USING (st, sn)""")
     con.execute("UPDATE y SET age = y.yr - r.yb FROM ref r WHERE y.age IS NULL AND r.st = y.st AND r.sn = y.sn AND r.yb IS NOT NULL")
     con.execute("UPDATE y SET area = r.area FROM ref r WHERE y.area IS NULL AND r.st = y.st AND r.sn = y.sn AND r.area IS NOT NULL")
     con.execute("DROP TABLE ref")
@@ -183,7 +207,8 @@ def write_locations(con, out_dir, years_all, write_json):
     """Write <out_dir>/<ST>/bridges.json for every bridge in the element data.
 
     Columns (one entry per bridge, sorted by id):
-      id    structure number with spaces and leading zeros removed (the key used everywhere)
+      id    structure number with spaces and leading zeros removed (the key used everywhere); the
+            zeros stay where both spellings occur in the same year, as those are two bridges
       lat, lon  position in degrees × 1e5 (integers), from the bridge's latest NBI year with a usable
             position; null if it never has one
       nbi   bit mask of the years in which the bridge is in the NBI inventory (bit 0 = first year)
@@ -192,6 +217,9 @@ def write_locations(con, out_dir, years_all, write_json):
             earlier year; 2 = no usable position; 3 = not found in the NBI inventory
     moved: {"<row>": [[firstYear, lastYear, lat, lon], ...]} for years whose usable position differs
            by more than MOVE_KM from lat/lon (relocations and coordinate corrections).
+
+    Also writes <out_dir>/all-bridges.json, every bridge with a usable position in one file, for the
+    "Every bridge" view of the step 1 map (see write_national).
     """
     y0 = years_all[0]
     el = con.execute("SELECT st, sn, list(DISTINCT yr) FROM y GROUP BY st, sn").fetchall()
@@ -202,7 +230,7 @@ def write_locations(con, out_dir, years_all, write_json):
     by_state = {}
     for st, sn, yrs in el:
         by_state.setdefault(st, []).append((sn, yrs))
-    summary = {}
+    summary, national = {}, []
     for st, rows in by_state.items():
         rows.sort()
         out = {"state": st, "years": years_all, "id": [], "lat": [], "lon": [], "nbi": [], "el": [], "flag": [], "moved": {}}
@@ -236,7 +264,118 @@ def write_locations(con, out_dir, years_all, write_json):
             out["nbi"].append(sum(1 << (yr - y0) for yr, *_ in recs if yr >= y0))
             out["el"].append(sum(1 << (yr - y0) for yr in yrs if yr >= y0))
             out["flag"].append(flag)
+            if lat is not None:
+                national.append((st, lat, lon, max(yrs)))
         os.makedirs(os.path.join(out_dir, st), exist_ok=True)
         write_json(os.path.join(out_dir, st, "bridges.json"), out)
         summary[st] = {"bridges": len(rows), "withPosition": counts[0] + counts[1], "noPosition": counts[2], "notInInventory": counts[3]}
+    write_national(out_dir, national, write_json)
     return summary
+
+
+def write_national(out_dir, points, write_json):
+    """Write <out_dir>/all-bridges.json: every bridge in the element data with a usable position.
+
+    It feeds the "Every bridge" view of the step 1 map, a national preview, so positions are rounded
+    to 0.01 degree (about 1 km, finer than a pixel at that scale), which halves the file.
+      first   first year with element data; `last` values are offsets from it
+      states  state codes in order, and count: the number of bridges of each, in the same order
+      lon, lat  degrees x 100, delta-encoded over the whole list (each value minus the one before);
+            bridges grouped by state, then sorted by longitude and latitude
+      last    latest year with element data, as an offset from `first`
+    """
+    first = min(p[3] for p in points)
+    states = sorted({p[0] for p in points})
+    out = {"first": first, "states": states, "count": [], "lon": [], "lat": [], "last": []}
+    px = py = 0
+    for st in states:
+        rows = sorted((round(lon * 100), round(lat * 100), last) for s, lat, lon, last in points if s == st)
+        out["count"].append(len(rows))
+        for x, y, last in rows:
+            out["lon"].append(x - px); out["lat"].append(y - py); px, py = x, y
+            out["last"].append(last - first)
+    write_json(os.path.join(out_dir, "all-bridges.json"), out)
+
+
+def _sig3(v):
+    """Round a positive number to 3 significant figures (as the site displays it)."""
+    if not v:
+        return 0
+    d = len(str(int(v))) - 3
+    return int(round(v, -d)) if d > 0 else int(v)
+
+
+def write_element_locations(con, out_dir, base_year, age_min, age_max, write_json, tiebreak):
+    """Write <out_dir>/<ST>/loc/<EN>.json(.gz): which bridges have the element and their record
+    for every data year, so the site can map the bridges of any period.
+
+    One record per bridge, element and year, picked as in prepare_nbi.py (positive quantity first,
+    then the larger quantity). Consecutive years with identical values (the element is usually
+    inspected every two years and carried over in between) are stored once as a run.
+
+      base   first data year; run years are offsets from it
+      row    for each bridge: its row in <ST>/bridges.json (sorted ids), delta-encoded
+             (each value is the difference from the previous row)
+      nrun   for each bridge: how many runs it has (runs are listed bridge by bridge)
+      Per run, one column each (stored as columns because they compress far better):
+      yy     y0·100 + y1, as offsets from base (first and last year of the run)
+      yb     year built (0 if unknown)
+      q      element quantity in the element's unit, to 3 significant figures
+      s1, s2, s3  CS1, CS2, CS3 share in 0.1% (CS4 = 1000 − the others)
+      ex     exclusion: 0 none, 1 no quantity, 2 quantity check, 3 no deck area, 4 no age
+    Age at a record year = year − year built; ages outside age_min..age_max are left out as in
+    the charts ("age out of range"), which the site checks itself.
+    """
+    con.execute(f"""
+        CREATE TABLE locrec AS
+        WITH d AS (
+          SELECT st, en, sn, yr, tot, cs1, cs2, cs3, age, area, qc FROM y
+          QUALIFY row_number() OVER (PARTITION BY st, en, sn, yr ORDER BY {tiebreak}) = 1),
+        v AS (
+          SELECT st, en, sn, yr,
+            CASE WHEN tot IS NULL OR tot <= 0 THEN 1
+                 WHEN qc IS NOT NULL AND qc <> 'ok' THEN 2
+                 WHEN area IS NULL OR area <= 0 THEN 3
+                 WHEN age IS NULL THEN 4 ELSE 0 END AS ex,
+            CASE WHEN age IS NULL THEN 0 ELSE yr - age END AS yb,
+            CASE WHEN tot > 0 THEN round(tot)::BIGINT ELSE 0 END AS q,
+            CASE WHEN tot > 0 THEN round(coalesce(cs1, 0) / tot * 1000)::INTEGER ELSE 0 END AS s1,
+            CASE WHEN tot > 0 THEN round(coalesce(cs2, 0) / tot * 1000)::INTEGER ELSE 0 END AS s2,
+            CASE WHEN tot > 0 THEN round(coalesce(cs3, 0) / tot * 1000)::INTEGER ELSE 0 END AS s3
+          FROM d),
+        f AS (
+          SELECT *, CASE WHEN lag(yr) OVER w = yr - 1 AND lag(ex) OVER w = ex AND lag(yb) OVER w = yb
+                          AND lag(q) OVER w = q AND lag(s1) OVER w = s1 AND lag(s2) OVER w = s2
+                          AND lag(s3) OVER w = s3 THEN 0 ELSE 1 END AS brk
+          FROM v WINDOW w AS (PARTITION BY st, en, sn ORDER BY yr)),
+        g AS (SELECT *, sum(brk) OVER (PARTITION BY st, en, sn ORDER BY yr) AS run FROM f)
+        SELECT st, en, sn, run, min(yr) AS y0, max(yr) AS y1, any_value(yb) AS yb, any_value(q) AS q,
+               any_value(s1) AS s1, any_value(s2) AS s2, any_value(s3) AS s3, any_value(ex) AS ex
+        FROM g GROUP BY st, en, sn, run""")
+    nrec, nruns = con.execute("SELECT (SELECT count(*) FROM y), count(*) FROM locrec").fetchone()
+    states = [r[0] for r in con.execute("SELECT DISTINCT st FROM locrec ORDER BY st").fetchall()]
+    nfiles = 0
+    for st in states:
+        ids = [r[0] for r in con.execute("SELECT DISTINCT sn FROM y WHERE st = ? ORDER BY sn", [st]).fetchall()]
+        row_of = {sn: i for i, sn in enumerate(ids)}
+        cur = None
+        for en, sn, y0, y1, yb, q, s1, s2, s3, ex in con.execute(
+                "SELECT en, sn, y0, y1, yb, q, s1, s2, s3, ex FROM locrec WHERE st = ? ORDER BY en, sn, y0", [st]).fetchall():
+            if cur is None or cur["en"] != en:
+                if cur:
+                    write_json(os.path.join(out_dir, st, "loc", f"{cur['en']}.json"), cur); nfiles += 1
+                os.makedirs(os.path.join(out_dir, st, "loc"), exist_ok=True)
+                cur = {"en": en, "state": st, "base": base_year, "row": [], "nrun": [],
+                       "yy": [], "yb": [], "q": [], "s1": [], "s2": [], "s3": [], "ex": []}
+                last = None; prev_row = 0
+            if sn != last:
+                r_ = row_of[sn]
+                cur["row"].append(r_ - prev_row); prev_row = r_
+                cur["nrun"].append(0); last = sn
+            cur["nrun"][-1] += 1
+            cur["yy"].append((y0 - base_year) * 100 + (y1 - base_year)); cur["yb"].append(yb)
+            cur["q"].append(_sig3(q)); cur["s1"].append(s1); cur["s2"].append(s2); cur["s3"].append(s3); cur["ex"].append(ex)
+        if cur:
+            write_json(os.path.join(out_dir, st, "loc", f"{cur['en']}.json"), cur); nfiles += 1
+    con.execute("DROP TABLE locrec")
+    return nfiles, nrec, nruns

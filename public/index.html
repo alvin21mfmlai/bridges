@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <style>
 /* Tokens follow Bentley's iTwinUI design system (light theme). */
 :root{
@@ -237,6 +238,31 @@ footer a{color:var(--text-muted)}
 .class-list i{width:16px;height:12px;border-radius:2px;display:block}
 .class-list span:nth-child(3n){text-align:right;font-variant-numeric:tabular-nums}
 .usmap.dim .st:not(.hl):not(.sel):not(.nodata){opacity:.25}
+/* "Every bridge" view */
+.map-view-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:10px}
+.usmap .dots-only{display:none}
+.usmap.dots .dots-only{display:inline}
+.usmap.dots .st:not(.nodata):not(.sel){fill:#f7f9fb!important}
+.usmap.dots .st{stroke:#cdd7df;stroke-width:.8}
+.usmap.dots #mapInsets .st{stroke:#9fb3c3}
+.usmap.dots .st.sel{fill:#fbd6ae!important}
+.usmap.dots .st.nodata{fill:url(#hatchNo)!important}
+.usmap.dots .hov{fill:none!important}
+.usmap.dots .lbl{display:none}
+.usmap .nd-lbl{font-size:11px;font-weight:700;fill:#a3271c;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.usmap .nd-line{stroke:#a3271c;stroke-width:1;fill:none}
+.usmap .inset-frame{fill:#fff;fill-opacity:.5;stroke:#c3d3df;stroke-width:1}
+.usmap .inset-lbl{font-size:10px;font-weight:600;fill:#4b5b68;pointer-events:none}
+@media (max-width:640px){.usmap .nd-lbl,.usmap .nd-line,.usmap .inset-lbl{display:none}}
+.usmap.dots.busy::after{content:"Loading every bridge…";position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);padding:8px 14px;border-radius:var(--r);background:#fff;box-shadow:0 2px 10px rgba(10,30,50,.18);font-size:13.5px;font-weight:600}
+#dotLegend .dl-lead{margin:6px 0 12px;font-size:14px;line-height:1.5;display:flex;gap:6px;align-items:flex-start}
+#dotLegend .dl-title{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px}
+#dotLegend .dl-row{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:center;font-size:13.5px;padding:3px 0}
+#dotLegend .dl-row i{width:11px;height:11px;border-radius:50%;display:inline-block}
+#dotLegend .dl-row .n{color:var(--text-muted);font-variant-numeric:tabular-nums}
+#dotLegend .dl-foot{margin:10px 0 0;font-size:12.5px;color:var(--text-muted)}
+.nodata-note{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:10px 12px;border:1px solid #e3a59e;border-left:4px solid #c4302b;background:#fdf0ee;border-radius:var(--r);font-size:13.5px;line-height:1.5;color:#6e1c14}
+.nodata-note .sw{flex:none;width:18px;height:18px;margin-top:2px;border-radius:3px;border:1px solid #d98c84;background:repeating-linear-gradient(45deg,#fbe3df 0 3px,#d9534f 3px 5px)}
 .top-list{margin-top:16px;padding-top:14px;border-top:1px solid var(--backdrop)}
 .top-list h3{margin:0 0 8px}
 .top-list button{display:grid;grid-template-columns:34px minmax(0,1fr) 56px;align-items:center;gap:8px;width:100%;border:0;background:none;padding:4px 0;font:inherit;font-size:12.5px;cursor:pointer;text-align:left;color:var(--text)}
@@ -280,6 +306,14 @@ footer a{color:var(--text-muted)}
 .search{flex:1;min-width:220px;max-width:420px;height:36px;padding:0 12px 0 34px;border:1px solid var(--border-fg);border-radius:var(--r);font:inherit;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Ccircle cx='6' cy='6' r='4.6' fill='none' stroke='%23595959' stroke-width='1.6'/%3E%3Cpath d='M9.5 9.5l3.5 3.5' stroke='%23595959' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat 11px center}
 #catSelect{min-width:200px}
 .el-group{margin-bottom:18px}
+.el-top{padding-bottom:16px;border-bottom:1px solid var(--border-subtle)}
+.el-picked{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:16px;border:1px solid var(--accent);border-radius:var(--r);background:var(--accent-muted)}
+.el-picked[hidden]{display:none}
+.el-chosen{display:flex;flex-direction:column;gap:2px;min-width:0}
+.el-chosen .lbl{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+.el-chosen .nm{font-weight:600;font-size:15px}
+.el-chosen .mt{font-size:13px;color:var(--text-muted)}
+#elBrowse[hidden]{display:none}
 .el-group h3{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--text)}
 .el-group h3 small{font-weight:400;color:var(--text-muted);margin-left:6px}
 .el-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
@@ -331,6 +365,73 @@ footer a{color:var(--text-muted)}
 .feat-intro .lead{font-size:22px;font-weight:600;line-height:1.6;color:#14202c;margin-bottom:6px}
 .feat-intro sup{line-height:0}
 @media (max-width:600px){.feat-intro{padding:12px;gap:10px}.feat-intro .lead{font-size:19px}.feat-intro p{font-size:16px;line-height:1.65}}
+/* bridge locations map (top of step 4) */
+.bm{border:1px solid var(--border-subtle);border-radius:var(--r);padding:16px 18px 18px;margin:0 0 20px;background:var(--bg)}
+.bm-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.bm-head h3{margin:0;font-size:17px}
+.bm-sub{margin:3px 0 0;color:var(--text-muted);font-size:14px}
+.bm-tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px;color:var(--text-muted)}
+.bm-seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.bm-seg button{border:0;border-left:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;font-size:14px;padding:5px 11px;cursor:pointer}
+.bm-seg button:first-child{border-left:0}
+.bm-seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.bm-body{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
+.bm-map{position:relative;overflow:hidden;height:520px;border:1px solid var(--backdrop);border-radius:6px;background:#eef3f6;z-index:0}
+.bm-side{font-size:14px}
+.bm-leg-title{margin:0 0 4px;font-size:14px;font-weight:600}
+.bm-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--backdrop)}
+.bm-dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 1px #fff,0 0 0 2px rgba(0,0,0,.08)}
+.bm-n{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text-muted)}
+.bm-opt{display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--text)}
+.bm-opt label{display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+.bm-age-row{margin-bottom:6px}
+.bm-find{margin-top:14px}
+.bm-find label{display:block;margin-bottom:6px}
+.bm-find-row{display:flex;gap:6px}
+.bm-find-in{flex:1;min-width:0;font:inherit;font-size:14px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)}
+.bm-find-row .btn{padding:6px 12px}
+.bm-find-out{font-size:13px;color:var(--text-muted);margin-top:6px;line-height:1.45}
+.bm-find-out:empty{display:none}
+.bm-sugg{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.bm-sugg button{font:inherit;font-size:12.5px;padding:3px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);cursor:pointer}
+.bm-sugg button:hover{border-color:var(--accent);color:var(--accent)}
+.bm-pop .leaflet-popup-content{margin:10px 12px;font-size:12.5px;line-height:1.45;min-width:220px}
+.bm-pop .leaflet-popup-content b{font-size:13px}
+.bm-side select.bm-age{width:100%}
+.bm-dot-other{width:9px;height:9px;background:#8a52c9}
+.info-i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;flex:none;border:1px solid var(--border);border-radius:50%;background:var(--bg);color:var(--text-muted);font:italic 700 11px/1 Georgia,serif;cursor:help;vertical-align:middle}
+.info-i:hover,.info-i:focus-visible,.info-i[aria-expanded="true"]{border-color:var(--accent);color:var(--accent);outline:none}
+#tip ul{margin:5px 0 0;padding-left:16px}
+#tip li{margin:2px 0}
+.change-row{margin-top:4px}
+.change-row .linkbtn{font-size:inherit}
+.tabs-lbl{margin:22px 0 8px;font-size:15px;font-weight:600}
+.findings{margin:14px 0 18px;padding:12px 16px 12px 18px;border:1px solid var(--border-subtle);border-left:3px solid var(--tc, var(--accent));border-radius:var(--r);background:#fff}
+.findings h4{margin:0 0 6px;font-size:15px}
+.findings h4 small{font-weight:400;color:var(--text-muted);margin-left:6px;font-size:13px}
+.findings ul{margin:0;padding-left:18px}
+.findings li{margin:4px 0;font-size:15.5px;line-height:1.55}
+@media (max-width:600px){.findings li{font-size:14.5px}}
+.bm-hint{font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.5}
+.bm-tilenote{font-size:13px;color:var(--text-muted);margin:8px 0 0}
+.bm-tip{font-size:12.5px;line-height:1.45;padding:8px 10px;max-width:250px;white-space:normal}
+.bm-tip b{font-size:13px}
+.bm-bar{display:flex;height:8px;border-radius:2px;overflow:hidden;margin:7px 0 5px;width:220px}
+.bm-kv{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin-top:4px;font-variant-numeric:tabular-nums}
+.bm-kv .k{color:var(--text-muted)}
+.bm-cs{grid-template-columns:auto auto;justify-content:start;margin-top:0}
+.bm-cs .k i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
+.bm-bar i{display:block;height:100%}
+.bm-reset{font-size:16px;line-height:30px !important;text-align:center;color:var(--text) !important}
+.bm-compact .leaflet-control-attribution{position:relative;width:20px;height:20px;margin:0 6px 6px 0;padding:0;border-radius:10px;overflow:hidden;white-space:nowrap;font-size:0;cursor:pointer;background:rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.bm-compact .leaflet-control-attribution::before{content:"i";position:absolute;top:0;right:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font:italic 700 12px/1 Georgia,serif;color:#5b6670}
+.bm-compact .leaflet-control-attribution.bm-open{width:auto;height:auto;min-height:20px;padding:3px 24px 3px 8px;font-size:11px;line-height:14px}
+.bm-compact .leaflet-control-attribution:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.bm.bm-collapsed .bm-body,.bm.bm-collapsed .bm-tools .bm-colour{display:none}
+.bm.bm-collapsed .bm-head{margin-bottom:0}
+.leaflet-container{font-family:var(--font-sans)}
+@media (max-width:900px){.bm-body{grid-template-columns:minmax(0,1fr)}.bm-map{height:420px}}
+@media (max-width:600px){.bm{padding:12px}.bm-map{height:340px}.bm-seg button{padding:5px 8px;font-size:13px}}
 .wb-method[hidden]{display:none}
 @media (max-width:600px){
   .tabs{gap:6px}.tabs button{padding:9px 8px;align-items:center;text-align:center}.tabs button .t-sub{display:none}.tabs button .t-name{font-size:13px}
@@ -397,14 +498,14 @@ table.data tr.hl td{background:var(--accent-muted)}
 <section class="intro">
   <div class="wrap">
     <h1>Bridge Deterioration Insights and Modelling</h1>
-    <p>To visualize how the condition of a bridge element type of a given state in the United States (US) varies with bridge age.</p>
-    <p>(1) Select the US state from the map or the dropdown menu.</p>
-    <p>(2) Select the targeted period of five years or more.</p>
-    <p>(3) Select the element type available from the targeted period.</p>
-    <p>(4) Select the type of analytics to view.</p>
+    <p>See how the condition of a bridge element type in a US state changes with bridge age.</p>
+    <p>(1) Choose a state on the map or from the list.</p>
+    <p>(2) Choose a period of at least five years.</p>
+    <p>(3) Choose an element type inspected in that period.</p>
+    <p>(4) Choose a view:</p>
     <ul>
-      <li>Basic Insights: To investigate how condition state varies with bridge age and across condition-state ranges.</li>
-      <li>Basic Analytics: Deterioration prediction models fitted to the condition state data.</li>
+      <li>Basic Insights: how condition varies with bridge age.</li>
+      <li>Basic Analytics: models that predict how the element deteriorates.</li>
     </ul>
     <p class="source">Data: FHWA National Bridge Inventory element data, 2016 to 2025.</p>
   </div>
@@ -414,22 +515,29 @@ table.data tr.hl td{background:var(--accent-muted)}
 
   <section class="panel" id="panel-state" aria-labelledby="h-state">
     <div class="panel-head">
-      <div><h2 id="h-state"><span class="num">1</span>Choose a state</h2><p class="sub">Colours group the states into seven bands by the number of bridges with element inspection data, from light green (fewest) to deep indigo (most). Hatched states have no data in this release.</p></div>
+      <div><h2 id="h-state"><span class="num">1</span>Choose a state</h2><p class="sub" id="stateSub">Click a state on the map or pick one from the list. Darker states have more bridges with inspection data, and hatched states have no data.</p></div>
     </div>
     <div class="panel-body map-layout">
       <div>
+        <div class="map-view-row">
+          <div class="seg" id="mapView" role="group" aria-label="Map view"><button type="button" data-view="states" aria-pressed="true">Bridges per state</button><button type="button" data-view="dots" aria-pressed="false">Every bridge</button></div>
+        </div>
         <div class="usmap" id="usmap"><div class="loading">Loading the map…</div></div>
         <div class="chips-row" id="smallStates"></div>
       </div>
       <div class="map-side">
         <h3>Bridges with element data</h3>
-        <div class="classes" id="mapClasses" role="group" aria-label="Colour bands; hover one to pick out its states"></div>
-        <div class="class-ticks" id="classTicks"></div>
-        <div class="class-list" id="classList"></div>
-        <div class="legend">
-          <span><i style="background:#e8892b;border-color:#242b2e"></i>Selected</span>
-          <span><i style="background:repeating-linear-gradient(45deg,#eef0f1 0 3px,#d5dadd 3px 6px)"></i>No data in this release</span>
+        <div id="bandLegend">
+          <div class="classes" id="mapClasses" role="group" aria-label="Colour bands. Hover one to pick out its states"></div>
+          <div class="class-ticks" id="classTicks"></div>
+          <div class="class-list" id="classList"></div>
+          <div class="legend">
+            <span><i style="background:#e8892b;border-color:#242b2e"></i>Selected</span>
+            <span><i style="background:repeating-linear-gradient(45deg,#eef0f1 0 3px,#d5dadd 3px 6px)"></i>No data in this release</span>
+          </div>
         </div>
+        <div id="dotLegend" hidden></div>
+        <div class="sr-only" id="infoCoverage"><b>Why some states look fuller</b><ul><li>Element inspections are required for bridges on the National Highway System.</li><li>Some states report them for every bridge, others mainly for those bridges.</li><li>So a dense state has more data, not necessarily more bridges.</li><li>Older colours mark bridges that a state no longer reports in its element data.</li></ul></div>
         <dl class="kv" id="stateInfo"></dl>
         <select id="stateSelect" aria-label="Select a state from the list"></select>
         <div class="top-list"><h3>Most bridges</h3><div id="topStates"></div></div>
@@ -444,7 +552,7 @@ table.data tr.hl td{background:var(--accent-muted)}
     <div class="panel-body years">
       <div>
         <div class="yearbars" id="yearbars" role="group" aria-label="Data years"></div>
-        <p class="note-inline" style="margin:10px 0 0">Bars show how many bridges were inspected each year.</p>
+        <p class="note-inline" style="margin:10px 0 0">Bars show how many bridges were inspected each year. Click a bar to move the start or end year to it.</p>
       </div>
       <div class="year-ctl">
         <div class="period-badge" id="periodBadge"></div>
@@ -461,26 +569,63 @@ table.data tr.hl td{background:var(--accent-muted)}
       <div><h2 id="h-type"><span class="num">3</span>Choose an element type</h2><p class="sub" id="typeSub">Choose a period first.</p></div>
     </div>
     <div class="panel-body">
-      <div class="el-tools">
-        <input type="search" class="search" id="elSearch" placeholder="Search by name or number" aria-label="Search element types">
-        <select id="catSelect" aria-label="Category"></select>
-        <span class="note-inline" id="elCount"></span>
+      <div class="el-picked" id="elPicked" hidden></div>
+      <div id="elBrowse">
+        <div class="el-tools">
+          <input type="search" class="search" id="elSearch" placeholder="Search by name or number" aria-label="Search element types">
+          <select id="catSelect" aria-label="Category"></select>
+          <span class="note-inline" id="elCount"></span>
+        </div>
+        <div id="elList"></div>
       </div>
-      
-      <div id="elList"></div>
     </div>
   </section>
 
   <section class="panel locked" id="panel-profile" aria-labelledby="h-prof">
     <div class="panel-head">
-      <div><h2 id="h-prof"><span class="num">4</span>Analysis</h2><p class="sub" id="profSub">Choose an element type first.</p></div>
+      <div><h2 id="h-prof"><span class="num">4</span>Analysis</h2><p class="sub" id="profSub">Choose an element type first.</p>
+        <p class="sub change-row" id="profChange" hidden>Change: <button class="linkbtn" data-go="state">state</button> · <button class="linkbtn" data-go="years">period</button> · <button class="linkbtn" data-go="type">element type</button></p></div>
     </div>
     <div class="panel-body">
-      <div class="tabs" role="tablist" aria-label="Analysis views">
-        <button role="tab" id="tab-insights" data-tab="insights" aria-controls="pane-insights" aria-selected="true"><span class="t-name">Basic Insights</span><span class="t-sub">To investigate how condition state varies with bridge age and across condition-state ranges.</span></button>
+      <section class="bm" id="bridgeMap" aria-labelledby="h-bm" hidden>
+        <div class="bm-head">
+          <div><h3 id="h-bm">Bridge locations</h3><p class="bm-sub" aria-live="polite"></p></div>
+          <div class="bm-tools">
+            <span class="bm-colour">Colour by
+              <span class="bm-seg" role="group" aria-label="Colour the bridges by">
+                <button type="button" data-colour="cond" aria-pressed="true">Condition</button><button type="button" data-colour="age" aria-pressed="false">Bridge age</button><button type="button" data-colour="one" aria-pressed="false">One colour</button>
+              </span></span>
+            <button type="button" class="linkbtn bm-toggle" aria-expanded="true" aria-controls="bridgeMapBody">Hide map</button>
+          </div>
+        </div>
+        <div class="bm-body" id="bridgeMapBody">
+          <div class="bm-map" role="region" aria-label="Map of the bridges"></div>
+          <div class="bm-side">
+            <p class="bm-leg-title"></p>
+            <div class="bm-leg-rows"></div>
+            <div class="bm-opt"><label><input type="checkbox" class="bm-others"> Show other bridges <span class="bm-dot bm-dot-other" aria-hidden="true"></span></label>
+              <button type="button" class="info-i" aria-label="Which bridges are shown in purple" aria-describedby="infoOthers">i</button>
+              <div class="sr-only" id="infoOthers"><b>Purple dots: other bridges in the state inspected in this period</b><ul><li>Bridges without the selected element</li><li>Bridges with the element that are left out of the charts (missing quantity, deck area or age, a failed quantity check, or older than 100 years)</li><li>Bridges outside the selected age band</li></ul></div></div>
+            <div class="bm-opt bm-age-row"><label for="bmAge">Age band</label>
+              <button type="button" class="info-i" aria-label="About the age band" aria-describedby="infoBmAge">i</button>
+              <div class="sr-only" id="infoBmAge">Shows only bridges in this age band. It also filters the chart "Bridges by condition-state range" below.</div></div>
+            <select class="bm-age" id="bmAge"></select>
+            <form class="bm-find" role="search" autocomplete="off">
+              <label for="bmFind">Find a bridge</label>
+              <div class="bm-find-row"><input type="search" id="bmFind" class="bm-find-in" placeholder="Structure number" spellcheck="false"><button type="submit" class="btn">Find</button></div>
+              <div class="bm-find-out" aria-live="polite"></div>
+            </form>
+            <p class="bm-hint">Each dot is one bridge, at its latest inspection in the period. Hover a dot for details, or click it to keep them open. Click the map, then scroll to zoom.</p>
+            <p class="bm-tilenote" hidden>The background map could not be loaded on this network. The bridges are shown on the state border instead.</p>
+          </div>
+        </div>
+      </section>
+      <p class="tabs-lbl" id="tabsLbl">Choose a view</p>
+      <div class="tabs" role="tablist" aria-labelledby="tabsLbl">
+        <button role="tab" id="tab-insights" data-tab="insights" aria-controls="pane-insights" aria-selected="true"><span class="t-name">Basic Insights</span><span class="t-sub">How condition varies with bridge age</span></button>
         <!-- <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-sub">Weibull and Markov deterioration models fitted to the data</span></button> -->
-         <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-sub">Deterioration prediction models fitted to the condition state data.</span></button>
-        <button role="tab" id="tab-advanced" data-tab="advanced" aria-controls="pane-advanced" aria-selected="false" tabindex="-1"><span class="t-name">Advanced Analytics</span><span class="t-sub">More models, still being built</span></button>
+         <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-sub">Models that predict deterioration with age</span></button>
+        <button role="tab" id="tab-advanced" data-tab="advanced" aria-controls="pane-advanced" aria-selected="false" tabindex="-1"><span class="t-name">Advanced Analytics</span><span class="t-sub">More models, coming soon</span></button>
       </div>
 
       <!-- Basic Insights: condition by bridge age (3D profiles) -->
@@ -495,21 +640,22 @@ table.data tr.hl td{background:var(--accent-muted)}
           <div class="tools"><button class="btn" id="profReset">Reset view</button><button class="btn" id="profCsv">Download CSV</button></div>
         </div>
         <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
-          <p class="lead">How is the deck area spread across bridge age and the condition of the element?</p>
-          <p>Each bar represents one age band and CS% band.</p>
+          <p class="lead">How is deck area spread across bridge age and element condition?</p>
+          <p>Each bar is one age band and one CS% band (the share of the element in that condition state).</p>
           <p>Every bridge appears once in each chart, with its full deck area.</p>
-          <p>Drag any chart to rotate all four, or hover a bar to see its numbers and pick out that age band in the other charts.</p>
+          <p>Drag a chart to rotate all four. Hover a bar to see its values and highlight its age band in every chart.</p>
         </div></div>
+        <div class="findings" id="profFind" hidden></div>
         <div class="mode-row">
           <span class="lbl" id="zLbl">Z-axis (deck area)</span>
           <div class="seg" id="normSeg" role="group" aria-labelledby="zLbl">
-            <button data-norm="raw" aria-pressed="true">Non-normalized (sq ft)</button>
-            <button data-norm="norm" aria-pressed="false">Normalized (%)</button>
+            <button data-norm="raw" aria-pressed="true">Total (sq ft)</button>
+            <button data-norm="norm" aria-pressed="false">Share (%)</button>
           </div>
           <span class="norm-by" id="normByWrap" hidden>
-            <label class="lbl" for="normBy">Normalize by</label>
+            <label class="lbl" for="normBy">Share of</label>
             <select id="normBy">
-              <option value="tot">All deck area in the profile</option>
+              <option value="tot">All deck area</option>
               <option value="band">Deck area in each age band</option>
             </select>
           </span>
@@ -526,10 +672,11 @@ table.data tr.hl td{background:var(--accent-muted)}
           <div class="chart-card"><h3>CS4 (Severe)</h3><p class="csub">Share of the element quantity in condition state 4</p><div class="prof-box" id="prof3"></div></div>
         </div>
         <details class="prof-tbl">
-          <summary id="bandTitle">Bridges and deck area by age band (same for all condition states)</summary>
+          <summary id="bandTitle">Table: bridges and deck area by age band</summary>
           <div class="tbl-wrap"><table class="data" id="bandTable"></table></div>
           <div class="tbl-note" id="exclNote"></div>
         </details>
+        <div class="sr-only" id="infoExcl"></div>
         </section>
 
         <!-- Bridges by condition-state range (2nd Basic Insights view). Drawn by drawDist() with csdist.js. -->
@@ -542,6 +689,7 @@ table.data tr.hl td{background:var(--accent-muted)}
             <p class="lead">How much of each bridge's element is in each condition state?</p>
             <p id="distHelp"></p>
           </div></div>
+        <div class="findings" id="distFind" hidden></div>
           <div class="mode-row">
             <span class="ctl" id="distViewCtl"><span class="lbl" id="dvLbl">View</span>
               <span class="seg" id="distView" role="group" aria-labelledby="dvLbl">
@@ -587,16 +735,17 @@ table.data tr.hl td{background:var(--accent-muted)}
               <div class="tools"><button class="btn" id="wbCsv">Download CSV</button></div>
             </div>
             <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
-              <p class="lead">How long the element stays in CS1 before it starts moving to CS2?</p>
-              <p>Each dot is the share of the element quantity still in CS1 for bridges in a 5-year age band (bigger dots mean more bridges).</p>
+              <p class="lead">How long does the element stay in CS1 (good) before moving to CS2?</p>
+              <p>Each dot is the share of the element still in CS1 for bridges in one 5-year age band. Bigger dots mean more bridges.</p>
               <!-- <p>The blue line is the fitted Weibull curve, S(t) = exp(−(t/η)<sup>β</sup>).</p> -->
               <p>The blue line is the prediction curve.</p>
             </div></div>
+        <div class="findings" id="wbFind" hidden></div>
             <p class="wb-warn" id="wbWarn" hidden></p>
             <div class="wb-stats" id="wbStats"></div>
             <div class="chart-card">
               <!-- <div class="wb-legend"><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1d3047" stroke-width="1.6"/><circle cx="14" cy="6" r="4" fill="#1d3047"/></svg>Observed share in CS1</span><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0071b8" stroke-width="2.6"/></svg>Fitted Weibull</span></div> -->
-              <div class="wb-legend"><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1d3047" stroke-width="1.6"/><circle cx="14" cy="6" r="4" fill="#1d3047"/></svg>Observed share in CS1</span><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0071b8" stroke-width="2.6"/></svg>Prediction Line</span></div>
+              <div class="wb-legend"><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1d3047" stroke-width="1.6"/><circle cx="14" cy="6" r="4" fill="#1d3047"/></svg>Observed share in CS1</span><span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0071b8" stroke-width="2.6"/></svg>Prediction curve</span></div>
               <div class="wb-box" id="wbBox"></div>
             </div>
             <div class="wb-method" aria-labelledby="h-wbm">
@@ -606,18 +755,18 @@ table.data tr.hl td{background:var(--accent-muted)}
                 <li><b>Observed share in CS1:</b> bridges are grouped into 5-year age bands. For each band, share in CS1 = total CS1 quantity ÷ total element quantity (CS1 to CS4). Each band is plotted at its midpoint age (3, 8 … 98 years).</li>
                 <li><b>Model:</b> S(t) = exp(−(t/η)<sup>β</sup>), the expected share of the element quantity still in CS1 at age t. It assumes the element is all in CS1 when new.
                   <ul>
-                    <li>Shape β: above 1, the element leaves CS1 faster as it ages; below 1, more slowly; about 1, at a steady rate.</li>
+                    <li>Shape β: above 1, the element leaves CS1 faster as it ages. Below 1, it leaves more slowly, and about 1 means a steady rate.</li>
                     <li>Scale η: the age by which 63.2% of the quantity has left CS1.</li>
                   </ul>
                 </li>
                 <li><b>Fitting:</b> β and η are estimated by maximum likelihood (binomial), treating each band's share as the part that has not yet left CS1 by that age. Each band is weighted by its number of bridges.</li>
-                <li><b>Results:</b> median time in CS1 = η·(ln 2)<sup>1/β</sup>; mean time in CS1 = η·Γ(1 + 1/β); fit error = weighted root-mean-square difference between observed and fitted shares.</li>
+                <li><b>Results:</b> median time in CS1 = η·(ln 2)<sup>1/β</sup>, and mean time in CS1 = η·Γ(1 + 1/β). The fit error is the weighted root-mean-square difference between observed and fitted shares.</li>
                 <li><b>Limitations:</b> each bridge is seen once, so the curve compares bridges of different ages rather than following one bridge over time. Repairs return quantity to CS1 and flatten the curve at older ages. Age bands with few bridges make the ends of the curve less certain.</li>
               </ul>
             </div>
             <p class="prof-note" id="wbNote"></p>
             <details class="prof-tbl">
-              <summary>Observed and fitted values by age band</summary>
+              <summary>Table: observed and predicted values by age band</summary>
               <div class="tbl-wrap"><table class="data" id="wbTable"></table></div>
             </details>
           </section>
@@ -630,10 +779,11 @@ table.data tr.hl td{background:var(--accent-muted)}
               <div class="tools"><button class="btn" id="mkCsv">Download CSV</button></div>
             </div>
             <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
-              <p class="lead">How quickly the element moves on from CS2 to CS3, and from CS3 to CS4, at different ages.</p>
-              <p>Each line represents the chance that a unit of the element moves to the next condition state within one year. </p>
-              <p>For each assumed 20-year age category, the respective CS1 → CS2 transition is computed from the prediction model.</p>
+              <p class="lead">How quickly does the element move from CS2 to CS3, and from CS3 to CS4?</p>
+              <p>Each line is the yearly chance that part of the element moves to the next condition state.</p>
+              <p>CS1 → CS2 comes from Prediction Method #1. CS2 → CS3 and CS3 → CS4 are fitted for each 20-year age group.</p>
             </div></div>
+        <div class="findings" id="mkFind" hidden></div>
             <p class="wb-warn" id="mkWarn" hidden></p>
             <div class="wb-stats" id="mkStats"></div>
             <div class="chart-card">
@@ -642,33 +792,31 @@ table.data tr.hl td{background:var(--accent-muted)}
             </div>
             <div class="mk-row">
               <div class="chart-card">
-                <h4>Annual transition probability by age category</h4>
+                <h4>Yearly chance of moving to the next state, by age group</h4>
                 <div class="tbl-wrap"><table class="mk-mat" id="mkCatTable"></table></div>
-                <p class="mk-cap">Each value is the chance of moving to the next condition state within one year.</p>
-                <p class="mk-cap">The chance of staying in the current state = 100% minus value.</p>
+                <p class="mk-cap">The chance of staying in the current state is 100% minus the value.</p>
               </div>
               <div class="chart-card">
                 <div class="mk-tpm-head"><h4 id="h-mkTpm">Transition probability matrix</h4>
                   <label class="sr-only" for="mkCat">Age category</label><select id="mkCat"></select></div>
                 <div class="tbl-wrap"><table class="mk-mat" id="mkTpm" aria-labelledby="h-mkTpm"></table></div>
-                <p class="mk-cap">Rows are this year's condition state, columns are next year's.</p>
-                <p class="mk-cap">Highlighted cells are moves to a worse state.</p>
-                <p class="mk-cap">Every row adds up to 100%.</p>
+                <p class="mk-cap">Rows: this year's condition state. Columns: next year's. Each row adds up to 100%.</p>
+                <p class="mk-cap">Shaded cells are moves to a worse state.</p>
               </div>
             </div>
             <div class="chart-card mk-fit">
               <h4>How well the model matches the data</h4>
               <div class="wb-legend" id="mkFitLegend"></div>
               <div class="mk-box" id="mkFitBox"></div>
-              <p class="mk-cap">Lines: the share of the element in each condition state predicted by the model, starting all in CS1 when new. Dots: the observed share in each 5-year age band.</p>
+              <p class="mk-cap">Lines: shares predicted by the model, starting fully in CS1 when new. Dots: observed shares in each 5-year age band.</p>
             </div>
             <div class="wb-method" aria-labelledby="h-mkm">
               <h4 id="h-mkm">How this is calculated</h4>
               <ul>
-                <li><b>Data:</b> the same bridges as the Weibull model above. For each 5-year age band, the observed share in each condition state = total quantity in that state ÷ total element quantity.</li>
-                <li><b>Model:</b> a yearly Markov chain on the share of the element in CS1 to CS4. Each year a fraction of CS1 moves to CS2, of CS2 to CS3, and of CS3 to CS4; nothing moves back and CS4 stays.
+                <li><b>Data:</b> the same bridges as Prediction Method #1 above. For each 5-year age band, the observed share in each condition state = total quantity in that state ÷ total element quantity.</li>
+                <li><b>Model:</b> a yearly step-by-step model of the share of the element in CS1 to CS4. Each year a fraction of CS1 moves to CS2, of CS2 to CS3, and of CS3 to CS4. Nothing moves back, and CS4 stays.
                   <ul>
-                    <li>CS1 → CS2 uses the Weibull curve above: the yearly chance at age a is 1 − S(a+1) ÷ S(a). The table shows its average over each age category.</li>
+                    <li>CS1 → CS2 uses the Prediction Method #1 curve above: the yearly chance at age a is 1 − S(a+1) ÷ S(a). The table shows its average over each age category.</li>
                     <li>CS2 → CS3 and CS3 → CS4 have one yearly chance per 20-year age category (1–20, 21–40, 41–60, 61–80, 81–100), giving one transition probability matrix per category.</li>
                   </ul>
                 </li>
@@ -678,7 +826,7 @@ table.data tr.hl td{background:var(--accent-muted)}
               </ul>
             </div>
             <details class="prof-tbl">
-              <summary>Observed and predicted shares by age band</summary>
+              <summary>Table: observed and predicted shares by age band</summary>
               <div class="tbl-wrap"><table class="data" id="mkTable"></table></div>
             </details>
           </section>
@@ -690,8 +838,8 @@ table.data tr.hl td{background:var(--accent-muted)}
       <div class="tab-pane" role="tabpanel" id="pane-advanced" aria-labelledby="tab-advanced" hidden>
         <div id="advancedBody">
           <section class="feature" aria-labelledby="h-adv">
-            <div class="pane-head"><div><p class="feat-kicker">Advanced Analytics</p><h3 class="pane-title" id="h-adv">Still being built</h3></div></div>
-            <div class="placeholder"><p><b>This view is still being built.</b></p><p class="ctx" data-ctx></p></div>
+            <div class="pane-head"><div><p class="feat-kicker">Advanced Analytics</p><h3 class="pane-title" id="h-adv">Coming soon</h3></div></div>
+            <div class="placeholder"><p><b>More prediction models will appear here.</b></p><p class="ctx" data-ctx></p></div>
           </section>
         </div>
       </div>
@@ -767,6 +915,10 @@ table.data tr.hl td{background:var(--accent-muted)}
 <script src="csdist.js"></script>
 <script src="weibull.js"></script>
 <script src="markov.js"></script>
+<script src="bridgedots.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="mapconfig.js"></script>
+<script src="bridgemap.js"></script>
 <script>
 (() => {
 "use strict";
@@ -862,7 +1014,12 @@ const SMALL = ["VT", "NH", "MA", "RI", "CT", "NJ", "DE", "MD", "DC", "HI", "PR",
 function stateTip(st) {
   const s = IDX.states[st];
   if (!s) return `<b>${esc(nameOf(st))}</b><br><span class="m">No element data in this release</span>`;
-  return `<b>${esc(s.name)}</b><br><span class="m">Bridges:</span> ${int(s.bridges)}<br><span class="m">Data years:</span> ${s.years[0]}–${s.years[s.years.length - 1]} (${s.years.length})<br><span class="m">Element types:</span> ${s.elementTypes}`;
+  let more = "";
+  if (mapView === "dots" && dots && dots.perState[st]) {
+    const t = dots.perState[st], g0 = t.groups[0];
+    more = `<br><span class="m">On the map:</span> ${int(t.shown)}<br><span class="m">Data up to 2025:</span> ${int(g0)} (${pct(t.shown ? (g0 / t.shown) * 100 : 0)})`;
+  }
+  return `<b>${esc(s.name)}</b><br><span class="m">Bridges:</span> ${int(s.bridges)}<br><span class="m">Data years:</span> ${s.years[0]}–${s.years[s.years.length - 1]} (${s.years.length})<br><span class="m">Element types:</span> ${s.elementTypes}${more}`;
 }
 function renderMap() {
   maxBridges = Math.max(...Object.values(IDX.states).map((s) => s.bridges));
@@ -953,7 +1110,7 @@ function renderYears() {
   const fixed = stIdx.windows.length === 1;
   $("#yearsSub").textContent = fixed
     ? `${stIdx.name} only has data for ${ys.length === 2 ? ys.join(" and ") : ys.join(", ")}, so ${ys.length === 2 ? "both years are" : "all of its years are"} used.`
-    : `${stIdx.name} has data from ${ys[0]} to ${ys[ys.length - 1]}. Pick any start and end year, as long as the period covers at least five years.`;
+    : `${stIdx.name} has data from ${ys[0]} to ${ys[ys.length - 1]}. Choose a start and end year that cover at least five years.`;
   const span = []; for (let y = ys[0]; y <= ys[ys.length - 1]; y++) span.push(y);
   const maxN = Math.max(...Object.values(stIdx.bridgesPerYear));
   $("#yearbars").innerHTML = span.map((y) => {
@@ -976,14 +1133,16 @@ function renderYears() {
 }
 
 /* ---------- step 3: element types ---------- */
+const TOP_TYPES = 8;   // "Most inspected" group at the top of step 3
+let typesOpen = false; // step 3 list open while a type is selected
 function renderTypes() {
   const panel = $("#panel-type");
-  if (!stIdx || !sel.win) { panel.classList.add("locked"); $("#typeSub").textContent = "Choose a period first."; return; }
+  if (!stIdx || !sel.win) { panel.classList.add("locked"); $("#typeSub").textContent = "Choose a period first."; $("#elPicked").hidden = true; $("#elBrowse").hidden = false; return; }
   panel.classList.remove("locked");
   const all = stIdx.elements.map((e) => ({ ...e, n: e.bridges[winIdx()] || 0, cat: catOf(e.en) })).filter((e) => e.n > 0);
   const none = stIdx.elements.length - all.length;
   const [ws, we] = sel.win.split("-");
-  $("#typeSub").textContent = `${all.length} element types were inspected in ${stIdx.name} between ${ws} and ${we}. The number under each is how many bridges have it.`;
+  $("#typeSub").textContent = `${all.length} element types were inspected in ${stIdx.name} from ${ws} to ${we}. Each card shows how many bridges have that element.`;
   const counts = {}; all.forEach((e) => (counts[e.cat.id] = (counts[e.cat.id] || 0) + 1));
   if (catFilter !== "all" && !counts[catFilter]) catFilter = "all";
   $("#catSelect").innerHTML = `<option value="all">All categories (${all.length})</option>` +
@@ -991,13 +1150,53 @@ function renderTypes() {
   $("#catSelect").value = catFilter;
   const q = $("#elSearch").value.trim().toLowerCase();
   const shown = all.filter((e) => (catFilter === "all" || e.cat.id === catFilter) && (!q || e.name.toLowerCase().includes(q) || String(e.en).includes(q)));
-  const maxN = Math.max(1, ...all.map((e) => e.n));
+  const card = (e) => `<button class="el" data-en="${e.en}" aria-pressed="${sel.en === e.en}">
+      <span class="nm">${esc(e.name)}</span><span class="mt">Element ${e.en}${e.unit ? `, measured in ${esc(e.unit)}` : ""}</span><span class="cnt">${int(e.n)} bridge${e.n === 1 ? "" : "s"}</span></button>`;
   const groups = CATS.map((c) => ({ c, items: shown.filter((e) => e.cat.id === c.id).sort((a, b) => b.n - a.n) })).filter((g) => g.items.length);
-  $("#elList").innerHTML = groups.length ? groups.map((g) => `<div class="el-group"><h3>${esc(g.c.name)}<small>${g.items.length}</small></h3><div class="el-grid">` +
-    g.items.map((e) => `<button class="el" data-en="${e.en}" aria-pressed="${sel.en === e.en}">
-      <span class="nm">${esc(e.name)}</span><span class="mt">Element ${e.en}${e.unit ? `, measured in ${esc(e.unit)}` : ""}</span><span class="cnt">${int(e.n)} bridge${e.n === 1 ? "" : "s"}</span></button>`).join("") + `</div></div>`).join("")
+  // the most inspected types first (only when the full list is shown); they also stay in their own category
+  const top = !q && catFilter === "all" && all.length > TOP_TYPES * 2 ? all.slice().sort((a, b) => b.n - a.n).slice(0, TOP_TYPES) : [];
+  $("#elList").innerHTML = groups.length
+    ? (top.length ? `<div class="el-group el-top"><h3>Most inspected<small>${top.length}</small></h3><div class="el-grid">${top.map(card).join("")}</div></div>` : "") +
+      groups.map((g) => `<div class="el-group"><h3>${esc(g.c.name)}<small>${g.items.length}</small></h3><div class="el-grid">${g.items.map(card).join("")}</div></div>`).join("")
     : `<p class="note-inline">Nothing matches “${esc(q)}”.</p>`;
+  // once a type is chosen the list folds to that type, with a button to open it again
+  const cur = sel.en != null ? all.find((e) => e.en === sel.en) : null;
+  $("#elPicked").hidden = !cur;
+  if (cur) $("#elPicked").innerHTML = `<div class="el-chosen"><span class="lbl">Selected</span><span class="nm">${esc(cur.name)}</span><span class="mt">Element ${cur.en}${cur.unit ? `, measured in ${esc(cur.unit)}` : ""} · ${int(cur.n)} bridge${cur.n === 1 ? "" : "s"}</span></div>
+    <button class="btn" id="elToggle" aria-expanded="${typesOpen}" aria-controls="elBrowse">${typesOpen ? "Hide the list" : "Change element type"}</button>`;
+  $("#elBrowse").hidden = !!cur && !typesOpen;
   $("#elCount").textContent = shown.length === all.length ? (none ? `${none} other type${none === 1 ? " has" : "s have"} no inspections in this period.` : "") : `Showing ${shown.length} of ${all.length}.`;
+}
+
+/* ---------- key findings: plain-language takeaways computed from the same numbers as each chart ---------- */
+const FIND_MIN = 10; // bridges needed in a group before it is compared
+const fpct = (v) => (v > 0 && v < 0.1 ? "less than 0.1%" : pct(v)); // shares in findings
+function setFindings(id, items, note) {
+  const el = $(id), list = items.filter(Boolean);
+  el.hidden = !list.length;
+  el.innerHTML = list.length ? `<h4>Key findings${note ? `<small>${esc(note)}</small>` : ""}</h4><ul>${list.map((t) => `<li>${t}</li>`).join("")}</ul>` : "";
+}
+// share of element quantity in CS1–CS4 (%) for the age bands whose lower bound is within lo..hi
+function qtyGroup(qty, lo, hi) {
+  const q = [0, 0, 0, 0]; let n = 0;
+  qty.forEach((r, u) => { const a = BINS.age[u].lo; if (a >= lo && a <= hi) { n += r.n; r.q.forEach((v, k) => (q[k] += v)); } });
+  const t = q[0] + q[1] + q[2] + q[3];
+  return { n, s: q.map((v) => (t ? (v / t) * 100 : 0)) };
+}
+function profileFindings() {
+  if (!prof) return [];
+  const B = prof.bands, tot = B.reduce((a, b) => a + b.area, 0); if (!tot) return [];
+  let top = 0; B.forEach((b, u) => { if (b.area > B[top].area) top = u; });
+  const over50 = (B.reduce((a, b, u) => a + (BINS.age[u].lo > 50 ? b.area : 0), 0) / tot) * 100;
+  const out = [`The ${BINS.age[top].label}-year age band holds the most deck area (${fpct((B[top].area / tot) * 100)} of the total), and bridges over 50 years old carry ${fpct(over50)} of it.`];
+  if (prof.w.qty) {
+    const yng = qtyGroup(prof.w.qty, 1, 40), old = qtyGroup(prof.w.qty, 61, 100);
+    if (yng.n >= FIND_MIN && old.n >= FIND_MIN) {
+      out.push(`On bridges up to 40 years old, ${fpct(yng.s[0])} of the element is in CS1 (good), compared with ${fpct(old.s[0])} on bridges over 60.`);
+      out.push(`CS3 or CS4 (poor or severe) makes up ${fpct(old.s[2] + old.s[3])} of the element on bridges over 60, against ${fpct(yng.s[2] + yng.s[3])} on bridges up to 40.`);
+    }
+  }
+  return out;
 }
 
 /* ---------- step 4: profiles ---------- */
@@ -1006,9 +1205,9 @@ const BINS = { aMin: 1, aMax: 100, aw: 5, cw: 5, age: [], cs: [] };
 for (let lo = 1; lo <= 100; lo += 5) BINS.age.push({ lo, label: `${lo}–${lo + 4}` });
 for (let lo = 0; lo < 100; lo += 5) BINS.cs.push({ lo, label: lo === 0 ? "0–5" : `>${lo}–${lo + 5}` });
 const MODES = {
-  abs: { label: "Deck area (sq ft)", z: "Total deck area (sq ft)", help: "Non-normalized: bar height is the total deck area of the bridges in each cell, in square feet. All four charts share one scale.", fmt: (v) => sig3(v), tick: (v) => shortNum(v), end: (v) => shortNum(v) },
-  tot: { label: "Normalized deck area (% of all deck area)", z: "Deck area, % of total", help: "Normalized by all deck area: bar height is the cell's share of all the deck area in the profile, so each chart adds up to 100%.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(2)}%` },
-  band: { label: "Normalized deck area (% of the age band)", z: "Deck area, % of age band", help: "Normalized by age band: bar height is the cell's share of the deck area in its age band, so each age band adds up to 100%. Use this to compare age bands with very different numbers of bridges.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(1)}%` },
+  abs: { label: "Deck area (sq ft)", z: "Total deck area (sq ft)", help: "Bar height is the total deck area of the bridges in each cell. All four charts share one scale.", fmt: (v) => sig3(v), tick: (v) => shortNum(v), end: (v) => shortNum(v) },
+  tot: { label: "Share of all deck area (%)", z: "Deck area, % of total", help: "Bar height is each cell's share of all the deck area, so each chart adds up to 100%.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(2)}%` },
+  band: { label: "Share of the age band's deck area (%)", z: "Deck area, % of age band", help: "Bar height is each cell's share of its age band's deck area, so each age band adds up to 100%. Useful for comparing age bands with very different numbers of bridges.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(1)}%` },
 };
 let prof = null; // { w, cells:[[{u,v,area,n,pTot,pBand,value}]×4], bands, maxBy }
 // Data for one period [s, e]: add up the groups ends[e][g] for g = s … e (see method notes).
@@ -1067,23 +1266,30 @@ function applyMode() {
 }
 function renderProfile() {
   const panel = $("#panel-profile");
-  if (!elData || !sel.win) { panel.classList.add("locked"); $("#profSub").textContent = "Choose an element type first."; prof = null; return; }
+  if (!elData || !sel.win) { panel.classList.add("locked"); $("#profSub").textContent = "Choose an element type first."; $("#profChange").hidden = true; prof = null; if (bmap) bmap.update({ en: null }); return; }
   panel.classList.remove("locked");
   prof = buildProfile();
   const el = stIdx.elements.find((e) => e.en === sel.en);
   $("#profSub").textContent = `${el ? el.name : elData.name} (element ${sel.en}) in ${stIdx.name}, ${sel.win.replace("-", " to ")}.`;
+  $("#profChange").hidden = false;
+  if (bmap) {
+    const [s0, e0] = sel.win.split("-").map(Number);
+    bmap.update({ st: sel.st, stateName: stIdx.name, en: sel.en, name: el ? el.name : elData.name, unit: elData.unit, s: s0, e: e0, age: distAge });
+  }
   if (!prof || !prof.w.bridges) {
     $("#profFacts").innerHTML = `<span class="warn-text">No bridges have usable records for this element in this period.</span>`;
-    $$(".prof-box, .dist-box, .exc-box").forEach((b) => (b.innerHTML = "")); $("#distFacts").innerHTML = ""; renderOtherTabs(); return;
+    $$(".prof-box, .dist-box, .exc-box").forEach((b) => (b.innerHTML = "")); $("#distFacts").innerHTML = ""; setFindings("#profFind", []); setFindings("#distFind", []); renderOtherTabs(); return;
   }
   const ex = prof.w.excluded || {}, exN = Object.values(ex).reduce((a, b) => a + b, 0);
   const EXL = { no_quantity: "no element quantity", quantity_check: "failed quantity check", no_deck_area: "no deck area", no_age: "no year built", age_out_of_range: "age outside 1–100 years" };
   $("#profFacts").innerHTML = `<span><b>${int(prof.w.bridges)}</b> bridge${prof.w.bridges === 1 ? "" : "s"}</span><span><b>${sig3(prof.total)}</b> sq ft of deck</span>` +
-    (exN ? `<span title="${esc(Object.entries(ex).map(([k, v]) => `${int(v)} ${EXL[k] || k}`).join("; "))}"><b>${int(exN)}</b> left out (see the table below)</span>` : "") +
+    (exN ? `<span><b>${int(exN)}</b> left out <button type="button" class="info-i" aria-label="Why bridges are left out" aria-describedby="infoExcl">i</button></span>` : "") +
     (elData.unit ? `<span>Element quantity in ${esc(elData.unit)}</span>` : "");
   $("#exclNote").textContent = exN ? `Left out: ${Object.entries(ex).map(([k, v]) => `${int(v)} with ${EXL[k] || k}`).join(", ")}.` : "No bridges were left out.";
+  setFindings("#profFind", profileFindings());
+  $("#infoExcl").innerHTML = exN ? `<b>Left out of the charts</b><ul>${Object.entries(ex).map(([k, v]) => `<li>${int(v)} with ${esc(EXL[k] || k)}</li>`).join("")}</ul>` : "";
   const rows = prof.bands.map((b, u) => b.n ? `<tr><td>${BINS.age[u].label}</td><td>${int(b.n)}</td><td>${sig3(b.area)}</td><td>${pct((b.area / prof.total) * 100)}</td></tr>` : "").join("");
-  $("#bandTitle").textContent = "Bridges and deck area by age band (same for all condition states)";
+  $("#bandTitle").textContent = "Table: bridges and deck area by age band";
   $("#bandTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Bridges</th><th>Deck area (sq ft)</th><th>Share of deck area</th></tr></thead><tbody>${rows}</tbody>`;
   // age filter for the condition-state range view: all ages, or one band that has bridges
   if (distAge !== "all" && !prof.bands[+distAge]?.n) distAge = "all";
@@ -1157,17 +1363,27 @@ function drawWeibull() {
     const shape = m.beta > 1.05 ? "Above 1: the element leaves CS1 faster as it ages." : m.beta < 0.95 ? "Below 1: the element leaves CS1 more slowly as it ages." : "About 1: a steady rate at every age.";
     $("#wbStats").innerHTML =
       tile("Median time in CS1", beyond ? "Beyond 100 years" : ages(m.median), beyond ? `The fitted value, ${sig3(m.median)} years, is far outside the data.` : "Half of the element quantity has left CS1 by this age.") +
-      tile("Still in CS1 at age 50", pct(s50 * 100), "Share of the element quantity, from the fitted curve.") +
+      tile("Still in CS1 at age 50", pct(s50 * 100), "Predicted share of the element still in CS1.") +
       tile("Shape β", sig3(m.beta), shape) +
       tile("Scale η", m.eta > 1000 ? "Over 1,000 years" : ages(m.eta), "Age by which 63.2% has left CS1.");
+    const S = (t) => WB.S(t, m.beta, m.eta), rate = (a) => (1 - S(a + 1) / S(a)) * 100;
+    setFindings("#wbFind", [
+      beyond ? "More than half of the element is predicted to still be in CS1 (good) at age 100."
+        : `Half of the element is predicted to have left CS1 (good) by age ${sig3(m.median)} years.`,
+      `Predicted share still in CS1: ${pct(S(25) * 100)} at age 25, ${pct(S(50) * 100)} at 50 and ${pct(S(75) * 100)} at 75.`,
+      m.beta > 1.05 ? `The loss from CS1 speeds up with age: each year, ${pct(rate(10))} of what is left moves to CS2 at age 10, rising to ${pct(rate(60))} at age 60.`
+        : m.beta < 0.95 ? `The loss from CS1 slows down with age: each year, ${pct(rate(10))} of what is left moves to CS2 at age 10, falling to ${pct(rate(60))} at age 60.`
+        : `The loss from CS1 is steady, at about ${pct(rate(50))} of what is left each year.`,
+      `The curve's typical gap from the observed shares is ${sig3(m.rmse * 100)} percentage points.`,
+    ]);
     // $("#wbNote").textContent = `For this selection: mean time in CS1 ${m.mean > 1000 ? "over 1,000 years" : ages(m.mean)}; fit error (weighted RMSE) ${sig3(m.rmse)}.`;
   } else {
-    $("#wbStats").innerHTML = ""; $("#wbNote").textContent = "";
+    $("#wbStats").innerHTML = ""; $("#wbNote").textContent = ""; setFindings("#wbFind", []);
   }
   WB.chart($("#wbBox"), {
     points, model: m, fmt: sig3,
-    ariaLabel: m && m.departed ? `Proportion of ${wb.label} still in CS1 by age. Fitted Weibull shape ${sig3(m.beta)}, scale ${sig3(m.eta)} years, median ${sig3(m.median)} years.` : `Proportion still in CS1 by age for ${wb.label}.`,
-    tip: (i) => { const d = points[i]; return `<b>Age ${d.label} years</b> (plotted at ${d.t})<br><span class="m">Bridges:</span> ${int(d.w)}<br><span class="m">Observed in CS1:</span> ${sig3(d.p)}${m && m.departed ? `<br><span class="m">Weibull:</span> ${sig3(WB.S(d.t, m.beta, m.eta))}` : ""}`; },
+    ariaLabel: m && m.departed ? `Share of ${wb.label} still in CS1 by age. Prediction Method #1: shape ${sig3(m.beta)}, scale ${sig3(m.eta)} years, median ${sig3(m.median)} years.` : `Share still in CS1 by age for ${wb.label}.`,
+    tip: (i) => { const d = points[i]; return `<b>Age ${d.label} years</b> (plotted at ${d.t})<br><span class="m">Bridges:</span> ${int(d.w)}<br><span class="m">Observed in CS1:</span> ${sig3(d.p)}${m && m.departed ? `<br><span class="m">Predicted:</span> ${sig3(WB.S(d.t, m.beta, m.eta))}` : ""}`; },
     onHover: (html, x, y) => (html ? showTip(html, x, y) : hideTip()),
   });
   $("#wbTable").innerHTML = `<thead><tr><th>Age band (years)</th><th>Plotted at</th><th>Bridges</th><th>CS1 quantity (${esc(unit)})</th><th>Total quantity (${esc(unit)})</th><th>Observed in CS1</th><th>Prediction</th></tr></thead><tbody>` +
@@ -1177,13 +1393,13 @@ $("#wbCsv").addEventListener("click", () => {
   if (!wb || !wb.points.length) return;
   const m = wb.model, fitOk = m && m.departed;
   const rows = [
-    `# ${wb.label}. Weibull S(t) = exp(-(t/eta)^beta)` + (fitOk ? `: beta=${sig3(m.beta)}, eta=${sig3(m.eta)} years, median=${sig3(m.median)} years, mean=${sig3(m.mean)} years, weighted RMSE=${sig3(m.rmse)}` : ": not fitted"),
-    `age_band_years,plotted_age_years,bridges,cs1_quantity_${wb.unit.replace(/\s+/g, "_")},total_quantity,observed_share_cs1,weibull_share_cs1`,
+    `# ${wb.label}. Prediction Method #1, S(t) = exp(-(t/eta)^beta)` + (fitOk ? `: beta=${sig3(m.beta)}, eta=${sig3(m.eta)} years, median=${sig3(m.median)} years, mean=${sig3(m.mean)} years, weighted RMSE=${sig3(m.rmse)}` : ": not fitted"),
+    `age_band_years,plotted_age_years,bridges,cs1_quantity_${wb.unit.replace(/\s+/g, "_")},total_quantity,observed_share_cs1,predicted_share_cs1`,
     ...wb.points.map((d) => [d.label.replace("–", "-"), d.t, d.w, d.q1, d.tot, sig3(d.p), fitOk ? sig3(WB.S(d.t, m.beta, m.eta)) : ""].join(",")),
   ];
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
-  a.download = `${sel.st}_EN${sel.en}_${sel.win}_weibull_cs1.csv`; document.body.appendChild(a); a.click(); a.remove();
+  a.download = `${sel.st}_EN${sel.en}_${sel.win}_prediction_method_1.csv`; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 });
 /* ---------- Basic Analytics 2: CS2 → CS3 → CS4 Markov ---------- */
@@ -1205,33 +1421,44 @@ function drawMarkov() {
   if (!mk) return;
   const { points, model: m } = mk;
   const maxBad = Math.max(0, ...points.map((d) => d.obs[2] + d.obs[3]));
-  $("#mkFacts").innerHTML = `<span><b>${int(mk.bridges)}</b> bridges</span><span><b>${MK.CATS.length}</b> age categories</span><span>up to <b>${pct(maxBad * 100)}</b> in CS3 or CS4 in any age band</span>`;
+  $("#mkFacts").innerHTML = `<span><b>${int(mk.bridges)}</b> bridges</span><span><b>${MK.CATS.length}</b> age groups</span><span>up to <b>${pct(maxBad * 100)}</b> in CS3 or CS4 in any age band</span>`;
   const warn = !points.length ? "There are no bridges with element quantities in this selection."
-    : !m ? "The Markov model starts from the CS1 → CS2 Weibull fit, which isn't available for this selection."
+    : !m ? "Prediction Method #2 starts from Prediction Method #1, which isn't available for this selection."
     : maxBad < 0.01 ? "Less than 1% of the element has reached CS3 or CS4 in every age band, so the CS2 → CS3 and CS3 → CS4 chances rest on very little data."
     : mk.bridges < 20 ? `Only ${mk.bridges} bridges, so treat these chances with caution.` : "";
   $("#mkWarn").hidden = !warn; $("#mkWarn").textContent = warn;
   const show = !!m;
   ["#mkStats", "#mkLegend", "#mkBox", "#mkCatTable", "#mkTpm", "#mkFitBox", "#mkFitLegend"].forEach((id) => { if (!show) $(id).innerHTML = ""; });
   $$("#mkSec .mk-row, #mkSec .mk-fit, #mkSec > .chart-card").forEach((e) => (e.hidden = !show));
-  if (!show) { $("#mkTable").innerHTML = ""; return; }
+  if (!show) { $("#mkTable").innerHTML = ""; setFindings("#mkFind", []); return; }
   const p = (v) => pct(v * 100), mid = 2;
+  {
+    const L = MK.CAT_LABELS, c = m.p12c.length - 1, r = m.p12c[c] / Math.max(1e-12, m.p12c[0]);
+    const bad = (t) => m.x[t][2] + m.x[t][3];
+    setFindings("#mkFind", [
+      r > 1.1 ? `The yearly chance of moving from CS1 to CS2 rises with age, from ${p(m.p12c[0])} at ages ${L[0]} to ${p(m.p12c[c])} at ages ${L[c]}.`
+        : r < 0.9 ? `The yearly chance of moving from CS1 to CS2 falls with age, from ${p(m.p12c[0])} at ages ${L[0]} to ${p(m.p12c[c])} at ages ${L[c]}.`
+        : `The yearly chance of moving from CS1 to CS2 stays about the same with age, near ${p(m.p12c[mid])}.`,
+      `At ages ${L[mid]}, about ${p(m.p23c[mid])} of the CS2 quantity moves on to CS3 each year, and ${p(m.p34c[mid])} of the CS3 quantity to CS4.`,
+      `The model predicts ${p(bad(50))} of the element in CS3 or CS4 (poor or severe) by age 50, and ${p(bad(100))} by age 100.`,
+    ]);
+  }
   const tile = (k, v, sub) => `<div class="wb-stat"><p class="k">${k}</p><p class="v">${v}</p><p class="s">${sub}</p></div>`;
   $("#mkStats").innerHTML =
-    tile(`CS1 → CS2, ages ${MK.CAT_LABELS[mid]}`, p(m.p12c[mid]), "Yearly chance, from the Weibull model.") +
-    tile(`CS2 → CS3, ages ${MK.CAT_LABELS[mid]}`, p(m.p23c[mid]), "Yearly chance that a unit in CS2 moves to CS3.") +
-    tile(`CS3 → CS4, ages ${MK.CAT_LABELS[mid]}`, p(m.p34c[mid]), "Yearly chance that a unit in CS3 moves to CS4.") +
-    tile("Fit error", sig3(m.rmse), "Weighted RMSE of the predicted CS1 to CS4 shares.");
+    tile(`CS1 → CS2, ages ${MK.CAT_LABELS[mid]}`, p(m.p12c[mid]), "Yearly chance, from Prediction Method #1.") +
+    tile(`CS2 → CS3, ages ${MK.CAT_LABELS[mid]}`, p(m.p23c[mid]), "Yearly chance that CS2 quantity moves to CS3.") +
+    tile(`CS3 → CS4, ages ${MK.CAT_LABELS[mid]}`, p(m.p34c[mid]), "Yearly chance that CS3 quantity moves to CS4.") +
+    tile("Fit error", sig3(m.rmse), "Gap between predicted and observed CS1–CS4 shares (weighted RMSE). Lower is better.");
   // chart 1: annual transition probability by age category, plotted at the category midpoints
   const mids = MK.CATS.map(([lo, hi]) => (lo + hi) / 2), cats = [m.p12c, m.p23c, m.p34c];
   $("#mkLegend").innerHTML = MK_TR.map((t, i) => `<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="${MK_COL[i]}" stroke-width="2.6" ${MK_DASH[i] ? `stroke-dasharray="${MK_DASH[i]}"` : ""}/><circle cx="14" cy="6" r="3.4" fill="${MK_COL[i]}"/></svg>${t}</span>`).join("");
   MK.lineChart($("#mkBox"), {
-    xMax: 100, yFmt: (v) => `${+(v * 100).toFixed(2)}%`, xLabel: "Element age (years)", yLabel: "Annual transition probability",
+    xMax: 100, yFmt: (v) => `${+(v * 100).toFixed(2)}%`, xLabel: "Bridge age (years)", yLabel: "Yearly chance of moving on",
     series: cats.map((c, i) => ({ color: MK_COL[i], dash: MK_DASH[i], line: c.map((v, j) => [mids[j], v]), dots: c.map((v, j) => [mids[j], v]) })),
     hoverXs: mids,
     tip: (j) => `<b>Ages ${MK.CAT_LABELS[j]} years</b><br>` + MK_TR.map((t, i) => `<span class="m">${t}:</span> ${p(cats[i][j])} a year`).join("<br>"),
     onHover: (html, x, y) => (html ? showTip(html, x, y) : hideTip()),
-    ariaLabel: `Annual transition probabilities by age category for ${mk.label}. ` + MK_TR.map((t, i) => `${t}: ${cats[i].map(p).join(", ")}`).join("; ") + ".",
+    ariaLabel: `Yearly chances of moving to the next condition state by age group for ${mk.label}. ` + MK_TR.map((t, i) => `${t}: ${cats[i].map(p).join(", ")}`).join("; ") + ".",
   });
   // category table and the matrix for one category
   $("#mkCatTable").innerHTML = `<thead><tr><th>Age (years)</th>${MK_TR.map((t) => `<th>${t}</th>`).join("")}</tr></thead><tbody>` +
@@ -1245,7 +1472,7 @@ function drawMarkov() {
   const CSC = DIST_COL, line = (k) => m.x.map((r, a) => [a, r[k]]);
   $("#mkFitLegend").innerHTML = CS.map((c, k) => `<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="${CSC[k]}" stroke-width="2.6"/><circle cx="14" cy="6" r="3.4" fill="#fff" stroke="${CSC[k]}" stroke-width="1.4"/></svg>${c}</span>`).join("");
   MK.lineChart($("#mkFitBox"), {
-    xMax: 100, yMax: 1, yFmt: (v) => `${Math.round(v * 100)}%`, xLabel: "Element age (years)", yLabel: "Share of element quantity",
+    xMax: 100, yMax: 1, yFmt: (v) => `${Math.round(v * 100)}%`, xLabel: "Bridge age (years)", yLabel: "Share of element quantity",
     series: CS.map((c, k) => ({ color: CSC[k], fill: "#fff", line: line(k), dots: points.map((d) => [d.t, d.obs[k]]) })),
     hoverXs: points.map((d) => d.t),
     tip: (j) => { const d = points[j]; return `<b>Age ${d.label} years</b> (plotted at ${d.t}), ${int(d.w)} bridges<br>` + CS.map((c, k) => `<span class="m">${c}:</span> observed ${p(d.obs[k])}, model ${p(m.x[d.t][k])}`).join("<br>"); },
@@ -1259,7 +1486,7 @@ $("#mkCat").addEventListener("change", (ev) => { mkCat = +ev.target.value; drawM
 $("#mkCsv").addEventListener("click", () => {
   if (!mk || !mk.model) return;
   const m = mk.model, CS = ["CS1", "CS2", "CS3", "CS4"];
-  const rows = [`# ${mk.label}. Markov chain: CS1->CS2 from the Weibull fit; CS2->CS3 and CS3->CS4 constant within 20-year age categories. Fit error (weighted RMSE) ${sig3(m.rmse)}.`,
+  const rows = [`# ${mk.label}. Prediction Method #2: CS1->CS2 from Prediction Method #1, and CS2->CS3 and CS3->CS4 constant within 20-year age groups. Fit error (weighted RMSE) ${sig3(m.rmse)}.`,
     "section,age_category_years,cs1_to_cs2_annual,cs2_to_cs3_annual,cs3_to_cs4_annual",
     ...MK.CAT_LABELS.map((l, c) => ["tpm_by_category", l.replace("–", "-"), sig3(m.p12c[c]), sig3(m.p23c[c]), sig3(m.p34c[c])].join(",")),
     "", "section,age_years,model_share_cs1,model_share_cs2,model_share_cs3,model_share_cs4,observed_share_cs1,observed_share_cs2,observed_share_cs3,observed_share_cs4,bridges",
@@ -1267,7 +1494,7 @@ $("#mkCsv").addEventListener("click", () => {
       return ["model_by_age", a, ...r.map(sig3), ...(d ? d.obs.map(sig3) : ["", "", "", ""]), d ? d.w : ""].join(","); })];
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
-  a.download = `${sel.st}_EN${sel.en}_${sel.win}_markov.csv`; document.body.appendChild(a); a.click(); a.remove();
+  a.download = `${sel.st}_EN${sel.en}_${sel.win}_prediction_method_2.csv`; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 });
 let mrz = 0;
@@ -1275,7 +1502,7 @@ new ResizeObserver(() => { if (tab === "analytics") { cancelAnimationFrame(mrz);
 let wrz = 0;
 new ResizeObserver(() => { if (tab === "analytics") { cancelAnimationFrame(wrz); wrz = requestAnimationFrame(drawWeibull); } }).observe($("#wbBox"));
 function renderAdvancedAnalytics(ctx) {
-  $$("#advancedBody [data-ctx]").forEach((e) => (e.textContent = `It will use the same selection: ${ctx.label}.`));
+  $$("#advancedBody [data-ctx]").forEach((e) => (e.textContent = `They will use the same selection: ${ctx.label}.`));
 }
 function renderOtherTabs() {
   if (!elData || !stIdx || !sel.win) return;
@@ -1409,14 +1636,26 @@ function drawDist() {
   const hist = distView === "hist";
   $("#distGrid").hidden = !hist; $("#excCard").hidden = hist;
   $("#distHelp").textContent = hist
-    ? `Analyze the spread of the ${unit} across shares of the element quantity in each condition state (CS1 to CS4). 
-    The gray bar is the share with none of the element in that state (0%). 
-    Each chart has its own scale. 
-    Note that a white break on the gray bar means it is taller than the axis.`
+    ? `Each bar is the share of ${unit} with that much of the element in the condition state. The grey bar is ${unit} with none of the element in that state (0%), and a white break means it runs past the top of the axis. Each chart has its own scale.`
     : `Share of ${unit} with more than x% of the element quantity in each condition state. For example, the CS3 line at 10 shows the share of ${unit} with more than 10% of the element in CS3.`;
   $("#distNote").textContent = byArea
-    ? "Each bridge is weighted by its deck area, as in the 3D charts. Ranges include their upper bound: >5–10% means more than 5% and up to 10%."
-    : "Each bridge counts once, using its most recent inspection in the period. Ranges include their upper bound: >5–10% means more than 5% and up to 10%.";
+    ? "Each bridge is weighted by its deck area, as in the 3D charts. A range such as >5–10% means more than 5%, up to 10%."
+    : "Each bridge counts once, at its latest inspection in the period. A range such as >5–10% means more than 5%, up to 10%.";
+  {
+    // key findings for the current measure and age filter (bin 0 = exactly 0%, bin 20 = more than 95%)
+    const sh = (k, i) => (tot ? (src[k][i] / tot) * 100 : 0);
+    const all1 = sh(0, 20), some3 = 100 - sh(2, 0), some4 = 100 - sh(3, 0), small3 = some3 > 0 ? (sh(2, 1) / some3) * 100 : 0;
+    const note = distAge === "all" ? "" : `bridges aged ${BINS.age[+distAge].label} years`;
+    setFindings("#distFind", byArea ? [
+      `${fpct(all1)} of the deck area is on bridges with more than 95% of the element in CS1 (good).`,
+      `${fpct(some3)} of the deck area is on bridges with some of the element in CS3 (poor), and ${fpct(some4)} on bridges with some in CS4 (severe).`,
+      some3 > 0 && `Of that CS3 deck area, ${fpct(small3)} is on bridges with 5% or less of the element in CS3.`,
+    ] : [
+      `${fpct(all1)} of the bridges have more than 95% of the element in CS1 (good).`,
+      `${fpct(some3)} of the bridges have some of the element in CS3 (poor), and ${fpct(some4)} have some in CS4 (severe).`,
+      some3 > 0 && `Of the bridges with some CS3, ${fpct(small3)} have 5% or less of the element in it.`,
+    ], note);
+  }
   if (hist) {
     for (let k = 0; k < 4; k++) {
       const vals = src[k].map((v) => (tot ? (v / tot) * 100 : 0));
@@ -1424,7 +1663,7 @@ function drawDist() {
       CSD.histogram($(`#dist${k}`), {
         values: vals, color: DIST_COL[k], zeroColor: DIST_ZERO,
         axisLabel: `Share of element quantity in ${CSN[k]} (%)`,
-        ariaLabel: `${CSN[k]}: ${pct(vals[0])} of ${unit} have none of the element in ${CSN[k]}; ${pct(vals[20])} have more than 95%.`,
+        ariaLabel: `${CSN[k]}: ${pct(vals[0])} of ${unit} have none of the element in ${CSN[k]}, and ${pct(vals[20])} have more than 95%.`,
       });
       $$(`#dist${k} .d-bar`).forEach((g) => (g.dataset.tip = distTipRange(D, k, +g.dataset.i)));
     }
@@ -1442,7 +1681,7 @@ function drawDist() {
 }
 $("#distView").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-v]"); if (b) { distView = b.dataset.v; hideTip(); drawDist(); } });
 $("#distWeight").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-w]"); if (b) { distW = b.dataset.w; drawDist(); } });
-$("#distAge").addEventListener("change", (ev) => { distAge = ev.target.value; drawDist(); });
+$("#distAge").addEventListener("change", (ev) => { distAge = ev.target.value; drawDist(); if (bmap) bmap.setAge(distAge); });
 $("#distGrid").addEventListener("mousemove", (ev) => { const g = ev.target.closest(".d-bar"); if (g) showTip(g.dataset.tip, ev.clientX, ev.clientY); else hideTip(); });
 $("#distGrid").addEventListener("mouseleave", hideTip);
 $("#distGrid").addEventListener("click", (ev) => { const g = ev.target.closest(".d-bar"); if (g) { const r = g.getBoundingClientRect(); showTip(g.dataset.tip, r.left + r.width / 2, r.top); } });
@@ -1474,6 +1713,19 @@ function showTip(html, x, y) {
 }
 function hideTip() { tip.classList.remove("on"); }
 addEventListener("scroll", hideTip, { passive: true });
+// info icons (.info-i): hovering, focusing or tapping one shows the hidden text it names in
+// aria-describedby, in the same tooltip box as the charts
+function infoShow(b) {
+  const t = document.getElementById(b.getAttribute("aria-describedby")); if (!t || !t.innerHTML) return;
+  const r = b.getBoundingClientRect(); showTip(t.innerHTML, r.left, r.top); b.setAttribute("aria-expanded", "true");
+}
+function infoHide(b) { hideTip(); b.setAttribute("aria-expanded", "false"); }
+document.addEventListener("mouseover", (ev) => { const b = ev.target.closest(".info-i"); if (b) infoShow(b); });
+document.addEventListener("mouseout", (ev) => { const b = ev.target.closest(".info-i"); if (b && !b.contains(ev.relatedTarget)) infoHide(b); });
+document.addEventListener("focusin", (ev) => { const b = ev.target.closest(".info-i"); if (b) infoShow(b); });
+document.addEventListener("focusout", (ev) => { const b = ev.target.closest(".info-i"); if (b) infoHide(b); });
+document.addEventListener("click", (ev) => { const b = ev.target.closest(".info-i"); if (b) { ev.preventDefault(); infoShow(b); } });
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") { const b = document.querySelector('.info-i[aria-expanded="true"]'); if (b) infoHide(b); } });
 
 /* ---------- chrome ---------- */
 function renderChrome() {
@@ -1487,6 +1739,18 @@ function writeHash() {
   const h = "#/" + [sel.st, sel.win, sel.en, sel.en != null && tab !== "insights" ? tab : null].filter((x) => x != null).join("/");
   if (location.hash !== h) history.replaceState(null, "", h);
 }
+
+/* ---------- bridge locations map (top of step 4, bridgemap.js) ----------
+   Its age band and the age filter of "Bridges by condition-state range" (distAge) follow each other. */
+const bmap = window.BridgeMap && window.L ? BridgeMap.create({
+  el: $("#bridgeMap"), load: getJSON, fmt: { int, sig3, esc }, ageLabel: (u) => BINS.age[u].label,
+  onAge: (v) => {
+    distAge = v;
+    if ([...$("#distAge").options].some((o) => o.value === v)) $("#distAge").value = v; else { distAge = "all"; $("#distAge").value = "all"; }
+    if (tab === "insights") drawDist();
+  },
+}) : null;
+window.bridgeMap = bmap; // handle for debugging and tests
 
 /* ---------- selection flow ---------- */
 let token = 0;
@@ -1514,7 +1778,7 @@ function selectWindow(key, scroll = false) {
 }
 async function selectElement(en, { scroll = true } = {}) {
   const my = ++token;
-  sel.en = en; renderTypes(); renderChrome(); writeHash();
+  sel.en = en; typesOpen = false; renderTypes(); renderChrome(); writeHash();
   $("#panel-profile").classList.remove("locked");
   $("#profSub").textContent = "Loading…";
   try { elData = await getJSON(`data/${sel.st}/${en}.json`); } catch (e) { showErr("#panel-profile", e); return; }
@@ -1569,6 +1833,79 @@ $("#topStates").addEventListener("mousemove", (ev) => { const b = ev.target.clos
 $("#topStates").addEventListener("mouseleave", () => { hideTip(); updateStateInfo(null); });
 mapBox.addEventListener("focusin", (ev) => { const p = ev.target.closest(".st"); if (p) updateStateInfo(p.dataset.st); });
 mapBox.addEventListener("focusout", () => hoverState(null));
+/* ---------- step 1: "Every bridge" view (bridgedots.js draws the dots) ---------- */
+const SUB_STATES = "Click a state on the map or pick one from the list. Darker states have more bridges with inspection data, and hatched states have no data.";
+const SUB_DOTS = "Click a state on the map or pick one from the list. Each dot is one bridge, coloured by its latest year with element data. States with red stripes have no data.";
+let mapView = "states", dots = null, dotsLoading = null, dotsW = 0, dotsUrl = null;
+// the bridge file and the outlines (for Puerto Rico and Guam) load the first time the view is opened
+function loadDots() {
+  if (!dotsLoading) dotsLoading = Promise.all([getJSON("data/all-bridges.json"), getJSON("geo/states.json")])
+    .then(([d, g]) => (dots = BridgeDots.load(d, g))).catch((e) => { dotsLoading = null; throw e; });
+  return dotsLoading;
+}
+const missingStates = () => Object.keys(ALL_NAMES).filter((st) => !IDX.states[st]).map(nameOf);
+const listWords = (a) => (a.length < 2 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
+// layers added to the state map once: the dots picture, the territory insets and the "No data" labels
+function addDotLayers() {
+  const svg = $("#usmap svg"); if (!svg || svg.querySelector("#dotImg")) return;
+  svg.querySelector("defs").insertAdjacentHTML("beforeend",
+    `<pattern id="hatchNo" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#fbe3df"/><line x1="0" y1="0" x2="0" y2="7" stroke="#d9534f" stroke-width="3"/></pattern>`);
+  const insets = Object.entries(BridgeDots.INSETS).map(([st, b]) => {
+    const has = !!IDX.states[st];
+    return `<rect class="inset-frame" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="4"/>` +
+      `<path class="st${has ? "" : " nodata"}" data-st="${st}" d="${dots.insetPaths[st] || ""}" ${has ? `tabindex="0" role="button" aria-label="${esc(b.name)}, ${int(IDX.states[st].bridges)} bridges"` : ""}/>` +
+      `<text class="inset-lbl" x="${b.x + 3}" y="${b.y - 5}">${esc(b.name)}</text>`;
+  }).join("");
+  svg.querySelector("#mapStates").insertAdjacentHTML("afterend",
+    `<g id="mapInsets" class="dots-only">${insets}</g><image id="dotImg" class="dots-only" x="0" y="0" width="975" height="610" preserveAspectRatio="none" pointer-events="none"/>`);
+  // "No data" on each state without element data: on the state when it is big enough, else beside it
+  const lbl = MAP.states.filter((s) => !IDX.states[s.id] && s.id !== "DC").map((s) => {
+    if (s.w > 90 && s.h > 60) return `<text class="nd-lbl" x="${s.cx}" y="${s.cy}">No data</text>`;
+    const x = s.cx + s.w / 2 + 34, y = s.cy + 28;
+    return `<path class="nd-line" d="M${s.cx + 8} ${s.cy + 4}L${x - 30} ${y - 4}"/><text class="nd-lbl" x="${x}" y="${y}">${esc(s.id)}: no data</text>`;
+  }).join("");
+  svg.insertAdjacentHTML("beforeend", `<g class="dots-only">${lbl}</g>`);
+}
+function renderDotLegend() {
+  const total = Object.values(IDX.states).reduce((a, s) => a + s.bridges, 0), miss = missingStates();
+  $("#dotLegend").innerHTML =
+    `<p class="dl-lead"><span><b>${int(dots.n)}</b> bridges with element data, one dot each</span> <button type="button" class="info-i" aria-label="Why some states look fuller" aria-describedby="infoCoverage">i</button></p>
+    <div class="dl-title">Latest year with element data</div>` +
+    BridgeDots.GROUPS.map((g, k) => `<div class="dl-row"><i style="background:${g.color}"></i><span>${g.label}</span><span class="n">${int(dots.perGroup[k])}</span></div>`).join("") +
+    (miss.length ? `<div class="nodata-note"><span class="sw" aria-hidden="true"></span><div><b>No element data</b><br>${esc(listWords(miss))} ${miss.length === 1 ? "has" : "have"} no element data in this release, so ${miss.length === 1 ? "it shows" : "they show"} red stripes.</div></div>` : "") +
+    (total > dots.n ? `<p class="dl-foot">${int(total - dots.n)} bridges without a usable position are not shown.</p>` : "");
+}
+// draw the dots at the map's size on screen; called again when the map's width changes
+function paintDots() {
+  const svg = $("#usmap svg"), img = $("#dotImg"); if (!svg || !img || !dots) return;
+  const w = svg.getBoundingClientRect().width; if (!w || Math.abs(w - dotsW) < 2) return;
+  dotsW = w;
+  BridgeDots.draw(dots, w, Math.min(2, window.devicePixelRatio || 1)).toBlob((b) => {
+    if (!b) return;
+    if (dotsUrl) URL.revokeObjectURL(dotsUrl);
+    dotsUrl = URL.createObjectURL(b); img.setAttribute("href", dotsUrl);
+  });
+}
+async function setMapView(v) {
+  mapView = v;
+  $$("#mapView button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
+  const on = v === "dots";
+  $("#stateSub").textContent = on ? SUB_DOTS : SUB_STATES;
+  $("#bandLegend").hidden = on; $("#dotLegend").hidden = !on;
+  mapBox.classList.toggle("dots", on);
+  if (!on) return;
+  if (!dots) {
+    mapBox.classList.add("busy");
+    try { await loadDots(); } catch (e) { mapBox.classList.remove("busy"); $("#dotLegend").innerHTML = `<p class="dl-foot">The bridge positions could not be loaded. Please try again.</p>`; return; }
+    mapBox.classList.remove("busy");
+  }
+  if (mapView !== "dots") return;
+  addDotLayers(); renderDotLegend(); paintDots();
+}
+$("#mapView").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-view]"); if (b && b.dataset.view !== mapView) setMapView(b.dataset.view); });
+let dotsTimer = 0;
+new ResizeObserver(() => { if (mapView !== "dots") return; clearTimeout(dotsTimer); dotsTimer = setTimeout(paintDots, 200); }).observe(mapBox);
+
 $("#smallStates").addEventListener("click", (ev) => { const c = ev.target.closest(".chip"); if (c && !c.disabled) pickState(c.dataset.st); });
 $("#smallStates").addEventListener("mousemove", (ev) => { const c = ev.target.closest(".chip"); if (c) { showTip(stateTip(c.dataset.st), ev.clientX, ev.clientY); updateStateInfo(c.dataset.st); } else hideTip(); });
 $("#smallStates").addEventListener("mouseleave", () => { hideTip(); updateStateInfo(null); });
@@ -1593,7 +1930,12 @@ $("#yAll").addEventListener("click", () => { const ys = stIdx.years; selectWindo
 $("#catSelect").addEventListener("change", (ev) => { catFilter = ev.target.value; renderTypes(); });
 $("#elSearch").addEventListener("input", () => renderTypes());
 $("#elList").addEventListener("click", (ev) => { const b = ev.target.closest(".el"); if (b) selectElement(+b.dataset.en); });
-document.addEventListener("click", (ev) => { const g = ev.target.closest("[data-go]"); if (g) jump({ state: "#panel-state", years: "#panel-years", type: "#panel-type", profile: "#panel-profile", method: "#method" }[g.dataset.go]); });
+$("#elPicked").addEventListener("click", (ev) => {
+  if (!ev.target.closest("#elToggle")) return;
+  typesOpen = !typesOpen; renderTypes();
+  if (typesOpen) $("#elSearch").focus({ preventScroll: true });
+});
+document.addEventListener("click", (ev) => { const g = ev.target.closest("[data-go]"); if (g && g.dataset.go === "type" && !typesOpen && sel.en != null) { typesOpen = true; renderTypes(); } if (g) jump({ state: "#panel-state", years: "#panel-years", type: "#panel-type", profile: "#panel-profile", method: "#method" }[g.dataset.go]); });
 window.addEventListener("hashchange", () => route(false));
 
 function route(scroll) {

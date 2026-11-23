@@ -13,6 +13,10 @@ are ignored) and writes small JSON files to public/data/:
                                       and record year
     public/data/<ST>/bridges.json     (with the inventory folder) every bridge's position and the years it
                                       appears in the NBI inventory and in the element data
+    public/data/all-bridges.json      (with the inventory folder) every bridge with a position, in one file,
+                                      for the "Every bridge" view of the state map
+    public/data/<ST>/loc/<EN>.json    (with the inventory folder) the bridges with that element and their
+                                      record for every data year, for the bridge map
 
 With the NBI inventory folder (one sub-folder per year, 2015 ... 2025, holding the FHWA delimited
 state files), missing ages and deck areas are also filled from it; see scripts/nbi_inventory.py.
@@ -43,6 +47,11 @@ GROUP_FIELDS = ["bridges", "deckArea", "excluded", "cells", "low", "qty"]
 EXCLUSIONS = ["no_quantity", "quantity_check", "no_deck_area", "no_age", "age_out_of_range"]
 AGE_MIN, AGE_MAX, AGE_W, CS_W, WIN = 1, 100, 5, 5, 5
 MIN_YEAR = 2016  # data years before this are dropped (2015 is too sparse)
+# Order for picking one of several records of the same bridge, element and year: a positive
+# quantity first, then the largest, then the rest of the values, so the pick never depends on
+# the order the database reads the rows in.
+TIEBREAK_Y = ("(y.tot > 0) DESC NULLS LAST, y.tot DESC NULLS LAST, y.cs1 DESC NULLS LAST, y.cs2 DESC NULLS LAST, "
+              "y.cs3 DESC NULLS LAST, y.cs4 DESC NULLS LAST, y.age NULLS LAST, y.area DESC NULLS LAST, y.qc NULLS LAST")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "data")
 STATE_NAMES = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado",
@@ -116,19 +125,36 @@ def main(src, inv_dir=None):
     mem = memory_limit()
     con.execute(f"SET memory_limit='{mem}'; SET threads=2; SET temp_directory='{work}'; SET preserve_insertion_order=false")
     print(f"database memory limit {mem} (set NBI_MEMORY_LIMIT, e.g. 6GB, to change it)")
+    # Quantities and areas are exact decimals, so sums do not depend on the order in which the
+    # database adds them up (parallel sums of floating-point numbers can differ in the last digit,
+    # which changed an occasional rounded value between two runs). The output is then identical
+    # byte for byte whenever the input is.
     con.execute(f"""
         CREATE TABLE y AS SELECT
-            STATE_CODE AS st, ltrim(upper(replace(STRUCNUM, ' ', '')), '0') AS sn, EN::INTEGER AS en, ELEMENT_NAME AS name, QUANTITY_UNIT AS unit,
-            DATA_YEAR::INTEGER AS yr, TOTALQTY::DOUBLE AS tot,
-            CS1::DOUBLE AS cs1, CS2::DOUBLE AS cs2, CS3::DOUBLE AS cs3, CS4::DOUBLE AS cs4,
-            BRIDGE_AGE_YEARS::INTEGER AS age, DECK_AREA_SQFT::DOUBLE AS area, QUANTITY_CHECK AS qc
+            STATE_CODE AS st, ltrim(upper(replace(STRUCNUM, ' ', '')), '0') AS sn,
+            (length(replace(STRUCNUM, ' ', '')) - length(ltrim(replace(STRUCNUM, ' ', ''), '0')))::UTINYINT AS pad,
+            EN::INTEGER AS en, ELEMENT_NAME AS name, QUANTITY_UNIT AS unit,
+            DATA_YEAR::INTEGER AS yr, TOTALQTY::DECIMAL(18,3) AS tot,
+            CS1::DECIMAL(18,3) AS cs1, CS2::DECIMAL(18,3) AS cs2, CS3::DECIMAL(18,3) AS cs3, CS4::DECIMAL(18,3) AS cs4,
+            BRIDGE_AGE_YEARS::INTEGER AS age, DECK_AREA_SQFT::DECIMAL(18,2) AS area, QUANTITY_CHECK AS qc
         FROM read_csv('{pattern}', header=true, union_by_name=true, sample_size=-1)
         WHERE DATA_YEAR >= {MIN_YEAR}""")
     print(f"loaded {con.execute('select count(*) from y').fetchone()[0]:,} rows in {time.time()-t0:.0f}s")
+    # Bridge key: structure number without spaces and leading zeros, because some states pad
+    # it in some years and not others ("0001826" one year, "1826" the next is one bridge). Where
+    # both spellings occur in the same year of a state they are two bridges (MN "02585" and
+    # "2585" are 120 km apart), so those keys keep their leading zeros.
+    con.execute("""CREATE TABLE splitk AS SELECT DISTINCT st, sn AS k FROM
+                   (SELECT st, sn, yr FROM y GROUP BY st, sn, yr HAVING count(DISTINCT pad) > 1)""")
     if inv_dir:
         import nbi_inventory
         nf, nr = nbi_inventory.load(con, inv_dir, work)
         print(f"loaded {nr:,} inventory records from {nf} files in {time.time()-t0:.0f}s")
+    nsplit = con.execute("SELECT count(*) FROM splitk").fetchone()[0]
+    con.execute("UPDATE y SET sn = repeat('0', y.pad) || y.sn FROM splitk WHERE splitk.st = y.st AND splitk.k = y.sn")
+    con.execute("ALTER TABLE y DROP COLUMN pad")
+    print(f"{nsplit} structure numbers are two bridges (with and without leading zeros in the same year)")
+    if inv_dir:
         nbi_inventory.fill_age_and_area(con)
         con.execute("CHECKPOINT")
 
@@ -162,7 +188,7 @@ def main(src, inv_dir=None):
         FROM (
           SELECT y.*, ends.e, y.yr AS g FROM y JOIN ends ON y.st = ends.st AND y.yr <= ends.e
           WHERE y.st = $st
-          QUALIFY row_number() OVER (PARTITION BY y.st, y.en, ends.e, y.sn ORDER BY y.yr DESC, (y.tot > 0) DESC, y.tot DESC) = 1
+          QUALIFY row_number() OVER (PARTITION BY y.st, y.en, ends.e, y.sn ORDER BY y.yr DESC, {TIEBREAK_Y}) = 1
         )"""
     # one state at a time keeps memory bounded
     con.execute(f"CREATE TABLE pick AS {pick_sql.replace('$st', repr(sorted(years)[0]))} LIMIT 0")
@@ -201,7 +227,9 @@ def main(src, inv_dir=None):
     assert bad == 0, f"{bad} groups have inconsistent totals across CS figures"
 
     meta_el = con.execute("""
-        SELECT en, mode(name) AS name, mode(unit) AS unit FROM y GROUP BY en""").fetchall()
+        SELECT en, arg_max(name, n) AS name, arg_max(unit, n) AS unit FROM (
+          SELECT en, name, unit, count(*) * 1000000 + row_number() OVER (PARTITION BY en ORDER BY name, unit) AS n
+          FROM y GROUP BY en, name, unit) GROUP BY en""").fetchall()
     el_info = {en: {"name": n, "unit": u} for en, n, u in meta_el}
 
     if os.path.isdir(OUT):
@@ -214,6 +242,7 @@ def main(src, inv_dir=None):
     rows_year = {}
     for st, yr, n in con.execute("SELECT st, yr, count(DISTINCT sn) FROM y GROUP BY st, yr").fetchall():
         rows_year.setdefault(st, {})[yr] = n
+    rows_year = {st: dict(sorted(d.items())) for st, d in rows_year.items()}
     nv = 100 // CS_W
     nu = (AGE_MAX - AGE_MIN + 1) // AGE_W
 
@@ -288,6 +317,9 @@ def main(src, inv_dir=None):
                 states_index[st]["locations"] = v
         print(f"wrote bridges.json for {len(loc)} states: {sum(v['withPosition'] for v in loc.values()):,} of "
               f"{sum(v['bridges'] for v in loc.values()):,} bridges have a position")
+        nf, nrec, nruns = nbi_inventory.write_element_locations(con, OUT, MIN_YEAR, AGE_MIN, AGE_MAX, write_json,
+        TIEBREAK_Y.replace("y.", ""))
+        print(f"wrote {nf} loc/<EN>.json files: {nrec:,} element records stored as {nruns:,} runs")
 
     write_json(os.path.join(OUT, "index.json"),
                {"generated": time.strftime("%Y-%m-%d"), "source": os.path.basename(src.rstrip("/")),

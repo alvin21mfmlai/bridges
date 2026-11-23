@@ -6,9 +6,10 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
 
 ## The four steps
 
-1. **State.** A US map coloured by the number of bridges with element data (√ scale).
+1. **State.** A US map coloured in seven bands by the number of bridges with element data.
    Small states and territories (VT, NH, MA, RI, CT, NJ, DE, MD, DC, HI, PR, GU) are also
-   offered as buttons. States without data are hatched.
+   offered as buttons. States without data are hatched. The "Every bridge" switch above the map
+   shows one dot per bridge instead (see "Every bridge view" below).
 2. **Period.** Any start and end year, as long as the period holds at least 5 data years
    (for 2016–2025 states that is 21 possible periods). Click a year bar to move the nearer
    end of the period there, use the start/end lists, slide the whole period with
@@ -88,6 +89,11 @@ For each state × element type × period:
 - Each bridge counts **once**, at its **latest data year inside the period**. A bridge is
   identified by state + structure number with spaces and leading zeros removed: some states
   report the same bridge as `000037SR0010004` in one year and `37SR0010004` in another.
+  Where both spellings occur in the **same** year they are two bridges (64 cases, nearly all in
+  MN: `02585` and `2585` are 120 km apart), and those keep their leading zeros.
+- Where the element data has two records of the same bridge, element and year, the one with a
+  positive and larger quantity counts (further ties go by the CS figures), so a rebuild from
+  the same input files gives byte-identical data.
 - Age = `BRIDGE_AGE_YEARS` at that year (data year − year built).
 - CSk share = CSk / TOTALQTY × 100. Bins: age 1–5 … 96–100; CS% [0,5], (5,10] … (95,100].
 - Each cell stores the summed deck area (sq ft) and the number of bridges.
@@ -108,15 +114,23 @@ public/
   csdist.js             condition-state range histograms and "more than x%" curves (SVG)
   weibull.js            CS1 → CS2 Weibull fit and chart (also runs in Node for testing)
   markov.js             CS2 → CS3 → CS4 Markov fit, TPMs and line charts (also runs in Node)
+  bridgedots.js         "Every bridge" view of the step 1 map (projection, insets, dot drawing)
+  bridgemap.js          bridge locations map at the top of step 4 (Leaflet)
+  mapconfig.js          your map settings: CARTO key, credits, state border (left out of updates)
+  vendor/leaflet/       Leaflet 1.9.4 (BSD-2-Clause licence inside)
+  geo/states.json.gz    state outlines (US Census via us-atlas), drawn on the bridge map
   usmap.js              US state shapes (us-atlas, ISC licence, notice inside)
   assets/               logo
   data/                 every file is gzip-compressed JSON (<name>.json.gz)
     index.json.gz       jurisdictions, data years, bridge counts
+    all-bridges.json.gz every bridge with a position, for the "Every bridge" view (about 290 KB)
     <ST>/index.json.gz  the state's periods, bridges per year, element types and bridges per period
     <ST>/<EN>.json.gz   one element type: profile cells, >0–5% counts and CS quantities by age
                         band, grouped by end year and record year
     <ST>/bridges.json.gz  every bridge in the element data: position and the years it is in the
                         NBI inventory and in the element data (see "Bridge positions" below)
+    <ST>/loc/<EN>.json.gz  the bridges with that element and their record for every data year,
+                        for the bridge map (see "Bridge locations map" below)
 scripts/
   prepare_nbi.py        builds public/data/ from the NBI export (and the NBI inventory, if given)
   nbi_inventory.py      reads the NBI inventory files: positions, year built, deck area
@@ -124,8 +138,8 @@ scripts/
 vercel.json
 ```
 
-The data files are stored gzip-compressed: about 25 MB across roughly 3,890 files (about
-102 MB unpacked), well inside the Hobby plan's 100 MB limit for static files. The site asks
+The data files are stored gzip-compressed: about 50 MB across roughly 7,690 files (the
+`loc/` files for the bridge map are about 25 MB of that), well inside the Hobby plan's 100 MB limit for static files. The site asks
 for `<file>.json.gz` and unpacks it in the browser with `DecompressionStream`
 (`loadJSON()` in `index.html`; current Chrome, Edge, Firefox and Safari). If a server
 unpacks the file itself (`Content-Encoding: gzip`), the site reads it as plain JSON.
@@ -179,6 +193,59 @@ stops with "Out of Memory", set a higher limit first, for example in PowerShell
 `$env:NBI_MEMORY_LIMIT = "6GB"`, and run it again. Commit the new `public/data/` and push
 (`git add -A public/data` so that removed files are removed in git too).
 
+## Every bridge view (step 1, `bridgedots.js`)
+
+The switch above the state map changes "Bridges per state" (the default) to "Every bridge": one
+dot per bridge with element data and a usable position (294,373), coloured by the latest year it
+appears in the element data (2025, 2022 to 2024, 2019 to 2021, 2016 to 2018). The data file loads
+only the first time the view is opened. States without element data get red stripes, a "No data"
+label and a note beside the map. Puerto Rico and Guam, which the map's projection leaves out, get
+two small insets that select the territory when clicked. Hovering a state adds how many of its
+bridges are on the map and how many have data up to 2025.
+
+The dots use the same projection as the state shapes in `usmap.js` (Albers USA, scale 1300,
+centre 487.5, 305), written out in `bridgedots.js` and checked against the d3-geo library on every
+bridge. They are painted once at the map's size on screen (about 45 ms on a laptop) and again only
+when the map's width changes. The coverage differs a lot between states: element data is required
+for National Highway System bridges, and some states report it for every bridge.
+
+`all-bridges.json.gz` (written by `nbi_inventory.write_national`): `first` (first year with
+element data), `states` and `count` (bridges per state, in order), `lon` and `lat` (degrees × 100,
+delta-encoded over the whole list, grouped by state then sorted west to east) and `last` (latest
+year with element data minus `first`). Positions are rounded to 0.01 degree, about 1 km, which is
+finer than a pixel at national scale.
+
+## Bridge locations map (top of step 4, `bridgemap.js`)
+
+When an element type is chosen, step 4 opens with "Where these bridges are": one dot per bridge
+that has the element in the period, at its latest record in the period, left out for the same
+reasons as the charts (so the count matches the figures above the charts). Colour by condition
+(share of the element in CS3 or CS4: none, above 0% to 5%, above 5%), bridge age (20-year
+groups) or one colour. Hover or tap a dot for the structure number, built year, age at the record, the
+element's quantity (labelled Length, Area or Count by its unit), latitude and longitude, and a
+bar with the CS1–CS4 shares listed under it. "Show other bridges" adds, in purple, the state's other bridges with element data in the
+period: those without the element, those left out of the charts and those outside the age band. The map's age band and the age filter of "Bridges by condition-state range" follow
+each other. "Hide map" folds the card away and is remembered in the browser.
+
+**Map settings: `public/mapconfig.js`.** This file holds your own settings, and site updates
+leave it out, so they stay as you set them:
+- `cartoKey`: a CARTO basemaps API key (https://carto.com/basemaps/) for the light grey Positron
+  map. Empty: OpenStreetMap's standard tiles, which are fine for testing but not for heavy use.
+  CARTO's free tier allows up to 1 million tile requests a month for commercial use.
+- `credits`: `"compact"` (a small (i) button that shows the credits when clicked), `"full"`
+  (credit line always shown) or `"none"`. CARTO and OpenStreetMap ask for their credit to be
+  visible on a published map.
+- `stateOutline`: draw the selected state's border (`false` by default). If no tiles load (a
+  blocked network), the border is drawn anyway so the dots still have a reference.
+
+`<ST>/loc/<EN>.json.gz` (written with the inventory folder): `row` (each bridge's row in
+`bridges.json`, delta-encoded), `nrun` (runs per bridge) and one column per run: `yy`
+(first and last year, `y0·100 + y1` as offsets from `base`), `yb` (year built), `q` (quantity, 3
+significant figures), `s1`, `s2`, `s3` (CS1–CS3 share in 0.1%; CS4 is the rest) and `ex`
+(exclusion: 0 none, 1 no quantity, 2 quantity check, 3 no deck area, 4 no age). A run is a
+stretch of consecutive years with identical values; most elements are inspected every two years
+and carried over in between, so 14.7 million yearly records fit in 4.7 million runs.
+
 ## Bridge positions (`<ST>/bridges.json.gz`)
 
 One file per state, columns of equal length, one entry per bridge in the element data,
@@ -187,7 +254,7 @@ sorted by `id`:
 | Field | Meaning |
 | --- | --- |
 | `years` | the years the bit masks refer to (bit 0 = first year, 2015) |
-| `id` | structure number with spaces and leading zeros removed |
+| `id` | structure number with spaces and leading zeros removed (zeros kept for the 64 numbers that are two bridges) |
 | `lat`, `lon` | position in degrees × 100,000 (integers), from the bridge's latest NBI year with a usable position; `null` if none |
 | `nbi` | bit mask of the years the bridge is in the NBI inventory (built / removed over time) |
 | `el` | bit mask of the years it has element data |
@@ -254,9 +321,9 @@ with no build step. Every push to `main` redeploys.
 
 - 49 jurisdictions: 46 states, DC, Puerto Rico and Guam. There is no data for Georgia,
   Iowa, Maryland or Pennsylvania.
-- 295,468 distinct bridges (334,838 structure numbers as written; the difference is the same
+- 295,532 distinct bridges (334,838 structure numbers as written; the difference is the same
   bridge reported with and without leading zeros, mostly in SC, TN, AR and VA).
-- Positions: 294,316 bridges (99.6%) have one. The NBI inventory files run 2015–2025; Iowa
+- Positions: 294,373 bridges (99.6%) have one. The NBI inventory files run 2015–2025; Iowa
   is missing from 2019, Maryland from 2022 and Pennsylvania from 2024, and Guam in most
   years.
 - Data years 2016–2025 on the site. The export also has 2015, which the script drops.
