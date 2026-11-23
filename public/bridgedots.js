@@ -10,12 +10,13 @@
 (function (root) {
   const RAD = Math.PI / 180, EPS = 1e-6;
 
-  // Latest year with element data, in four groups. Recent data in blue, older data in warm colours.
+  // Latest year with element data, in four groups: recent data in blue, older data in warm colours.
+  // The oldest group is brown, not red, so red on the map means only "no element data".
   const GROUPS = [
     { label: "2025", lo: 2025, hi: 2025, color: "#1d5f99" },
     { label: "2022 to 2024", lo: 2022, hi: 2024, color: "#4fa8d8" },
     { label: "2019 to 2021", lo: 2019, hi: 2021, color: "#e8a93a" },
-    { label: "2016 to 2018", lo: 2016, hi: 2018, color: "#d4612a" },
+    { label: "2016 to 2018", lo: 2016, hi: 2018, color: "#7a4a22" },
   ];
   const groupOf = (year) => { for (let k = 0; k < GROUPS.length; k++) if (year >= GROUPS[k].lo) return k; return GROUPS.length - 1; };
 

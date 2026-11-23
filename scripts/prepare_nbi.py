@@ -17,6 +17,8 @@ are ignored) and writes small JSON files to public/data/:
                                       for the "Every bridge" view of the state map
     public/data/<ST>/loc/<EN>.json    (with the inventory folder) the bridges with that element and their
                                       record for every data year, for the bridge map
+    public/data/<ST>/health.json      (with the inventory folder) every bridge's health score for each data
+                                      year, for Basic Analytics (Bridge Level); see scripts/health.py
 
 With the NBI inventory folder (one sub-folder per year, 2015 ... 2025, holding the FHWA delimited
 state files), missing ages and deck areas are also filled from it; see scripts/nbi_inventory.py.
@@ -320,6 +322,9 @@ def main(src, inv_dir=None):
         nf, nrec, nruns = nbi_inventory.write_element_locations(con, OUT, MIN_YEAR, AGE_MIN, AGE_MAX, write_json,
         TIEBREAK_Y.replace("y.", ""))
         print(f"wrote {nf} loc/<EN>.json files: {nrec:,} element records stored as {nruns:,} runs")
+        import health
+        nh, hrec, hruns = health.write_health(con, OUT, MIN_YEAR, write_json, TIEBREAK_Y.replace("y.", ""))
+        print(f"wrote health.json for {nh} states: {hrec:,} bridge scores stored as {hruns:,} runs")
 
     write_json(os.path.join(OUT, "index.json"),
                {"generated": time.strftime("%Y-%m-%d"), "source": os.path.basename(src.rstrip("/")),

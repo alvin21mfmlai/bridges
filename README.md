@@ -23,8 +23,9 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
    as `/#/TX/2016-2025/107`, still open exactly that.
 3. **Element type.** Every element type with records in that state and period, grouped by
    category, with a search box and the number of bridges.
-4. **Analysis**, in three tabs:
-   - **Basic Insights:** four 3D bar charts (CS1 Good, CS2 Fair, CS3 Poor, CS4 Severe).
+4. **Analysis**, in four tabs. The first two work at element type level (the element chosen in
+   step 3), the third at bridge level (every element type on each bridge):
+   - **Basic Insights (Element Type Level):** four 3D bar charts (CS1 Good, CS2 Fair, CS3 Poor, CS4 Severe).
      The floor axes are bridge age (5-year bands, 1–100) and CS% (5% bands). The z-axis
      (deck area) can be **non-normalized** (sq ft) or **normalized** (%), either by all
      deck area in the profile (each chart adds up to 100%) or by each age band (each age
@@ -45,7 +46,7 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
      - *Bridge age*: all ages, or one 5-year age band.
      - Hover for exact counts and deck area; Download CSV gives the table for the current
        age filter. Picking a new state resets these controls.
-   - **Basic Analytics:**
+   - **Basic Analytics (Element Type Level):**
      1. **CS1 → CS2: time in the best condition state (Weibull)** (`public/weibull.js`).
         For each 5-year age band, the observed share of the element quantity still in CS1
         (sum of CS1 quantity ÷ sum of total quantity over the band's bridges), plotted at the
@@ -71,14 +72,32 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
         chart of predicted against observed shares by age, a "How this is calculated" list,
         a table by age band and a CSV.
      3. CS quantity propagation: still to come.
-   - **Advanced Analytics:** placeholder. Both analytics tabs are filled by
+   - **Basic Analytics (Bridge Level):** health scores for whole bridges, from
+     `data/<ST>/health.json.gz` (loaded when the tab is first opened). The element type
+     chosen in step 3 does not change it, and a note at the top of the tab says so.
+     1. **Health score by data year.** Each bridge gets a score from 0 to 100: element score
+        = 100 × (CS1 + 0.67 CS2 + 0.33 CS3) ÷ total quantity, and the bridge score is the
+        average of its element scores, each element type counting equally (the NBI has no
+        unit costs). For each data year, the chart shows the average score of every bridge
+        with a score that year, and a shaded band for the interquartile range (25th to 75th
+        percentile, so half of those bridges score inside it), with a hover box per year. **Find a bridge** adds that bridge's
+        own line. Key findings, a facts line, and a note when a year has far fewer bridges
+        than the state's other years (under 60% of the usual count, such as Texas 2017).
+        Download CSV lists every bridge and data year of the period: structure number, year
+        built, age, score and element types counted. Drawn by `renderBridgeTab()` /
+        `drawHealth()` in `public/index.html`. The same scores show in the bridge map's hover
+        box (see below).
+     2. to 4. Trend and forecast, average health by age, health by age (3D): still to come,
+        with the health score colour on the bridge map.
+   - **Advanced Analytics:** placeholder. The element type tabs are filled by
      `renderBasicAnalytics(ctx)` and `renderAdvancedAnalytics(ctx)` in `public/index.html`,
      which run whenever the selection changes; `ctx` (documented above the functions)
      carries the state, period, element, the period data (including CS quantities by age
      band) and the decoded profile.
 
 Selections are kept in the URL, for example `/#/TX/2016-2025/107` (state / period /
-element number), with an optional fourth part for the tab: `/#/TX/2016-2025/107/analytics`.
+element number), with an optional fourth part for the tab: `/#/TX/2016-2025/107/analytics`
+(or `bridge` for Basic Analytics (Bridge Level)).
 
 ## How the profiles are computed (`scripts/prepare_nbi.py`)
 
@@ -131,9 +150,12 @@ public/
                         NBI inventory and in the element data (see "Bridge positions" below)
     <ST>/loc/<EN>.json.gz  the bridges with that element and their record for every data year,
                         for the bridge map (see "Bridge locations map" below)
+    <ST>/health.json.gz every bridge's health score for each data year, for Basic Analytics
+                        (Bridge Level) (see "Health scores" below)
 scripts/
   prepare_nbi.py        builds public/data/ from the NBI export (and the NBI inventory, if given)
   nbi_inventory.py      reads the NBI inventory files: positions, year built, deck area
+  health.py             bridge health scores per data year (health.json)
   geo/states-10m.geojson  state outlines (US Census via us-atlas) for checking positions
 vercel.json
 ```
@@ -215,6 +237,19 @@ delta-encoded over the whole list, grouped by state then sorted west to east) an
 year with element data minus `first`). Positions are rounded to 0.01 degree, about 1 km, which is
 finer than a pixel at national scale.
 
+## Health scores (`<ST>/health.json.gz`, `scripts/health.py`)
+
+Written with the inventory folder, one file per state (Texas: about 240 KB, 36,455 bridges).
+An element record counts when its total quantity is positive and it has not failed the quantity
+check, the same records the charts use. Deck area and age are not needed for the score. The
+bridge score is the plain average of its element scores, rounded to 0.1 (stored × 10). Columns:
+`base` (first data year), `row` (each bridge's row in `bridges.json`, delta-encoded), `yb` (year
+built, 0 if unknown), `nrun` (runs per bridge), and per run of consecutive data years with the
+same score and element count: `yy` (first year × 100 + last year, as offsets from `base`), `sc`
+(score × 10) and `ne` (element types counted). Element scores are rounded to 6 decimals and summed
+as exact decimals, so the file is identical byte for byte whenever the input is. Check: Texas
+2016–2025 has 5,344 bridges with data in every year, averaging 96.2 in 2016 and 94.8 in 2025.
+
 ## Bridge locations map (top of step 4, `bridgemap.js`)
 
 When an element type is chosen, step 4 opens with "Where these bridges are": one dot per bridge
@@ -245,6 +280,11 @@ significant figures), `s1`, `s2`, `s3` (CS1–CS3 share in 0.1%; CS4 is the rest
 (exclusion: 0 none, 1 no quantity, 2 quantity check, 3 no deck area, 4 no age). A run is a
 stretch of consecutive years with identical values; most elements are inspected every two years
 and carried over in between, so 14.7 million yearly records fit in 4.7 million runs.
+
+The hover box and the pinned box also show the bridge's **health score** in its latest data year
+of the period, for example "Health score: 98.7 (2025 data)". The scores come from
+`<ST>/health.json.gz`, loaded after the dots are drawn (shared with Basic Analytics (Bridge
+Level) through `healthFor()` in `index.html`, passed to the map as `opts.health`).
 
 ## Bridge positions (`<ST>/bridges.json.gz`)
 
@@ -302,7 +342,7 @@ npx serve public        # or: python -m http.server -d public 8080
    With Node.js instead: `npx.cmd serve public` (use `npx.cmd`, not `npx`, if PowerShell
    says running scripts is disabled). Press Ctrl+C to stop the server.
 5. Check the site: choose a state, a period and an element type, then try the z-axis switch
-   and the three tabs. Press F12 and look at the Console tab for red errors. If you see an
+   and the four tabs. Press F12 and look at the Console tab for red errors. If you see an
    old version, press Ctrl+F5.
 6. Commit and push; Vercel redeploys automatically:
    ```powershell

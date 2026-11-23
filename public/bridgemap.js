@@ -6,6 +6,8 @@
      data/<ST>/loc/<EN>.json(.gz)  the bridges with that element and their record per data year
    A bridge is shown at its latest record inside the period, and left out for the same reasons
    as in the charts, so the count matches the figures above the charts.
+   The hover box also shows the bridge's health score (data/<ST>/health.json, through
+   opts.health) for its latest data year in the period, once the scores have loaded.
 
    Settings (basemap key, credits, state border) are in mapconfig.js, which loads before this
    file. With a CARTO basemaps key the map uses the light grey Positron map; without one it uses
@@ -83,6 +85,7 @@
     let map = null, base = null, outlineLayer = null, outlineRenderer = null, dotLayer = null, otherLayer = null, renderer = null, otherRenderer = null;
     let tileErrors = 0, tileLoads = 0, states = null, othersN = 0, pinRing = null;
     let cur = { st: null, en: null, s: 0, e: 0 }, B = null, L = null, picked = null, token = 0;
+    let health = null; // { st, fn(row, s, e) → { v, y } | null } once opts.health has loaded the state's scores
     const ui = { colour: "cond", others: false, age: "all" };
 
     function ensureMap() {
@@ -183,8 +186,10 @@
       const qLabel = QTY_LABEL[cur.unit] || "Quantity";
       const pos = `${(B.lat[p.row] / 1e5).toFixed(4)}, ${(B.lon[p.row] / 1e5).toFixed(4)}`; // 4 decimals: about 10 m
       const row = (k, v) => `<span class="k">${k}:</span><span>${v}</span>`;
+      // bridge health score (every element type on the bridge) in its latest data year of the period
+      const hv = health && health.st === cur.st ? health.fn(p.row, cur.s, cur.e) : null;
       return `<b>Structure ${fmt.esc(id)}</b>` +
-        `<div class="bm-kv">${row("Built year", p.yb)}${row("Age", `${p.age} years (${p.year} record)`)}${row(qLabel, `${cur.unit === "each" ? fmt.int(Math.round(p.q)) : fmt.sig3(p.q)}${unit}`)}${row("Lat, Long", pos)}</div>` +
+        `<div class="bm-kv">${row("Built year", p.yb)}${row("Age", `${p.age} years (${p.year} record)`)}${row(qLabel, `${cur.unit === "each" ? fmt.int(Math.round(p.q)) : fmt.sig3(p.q)}${unit}`)}${row("Lat, Long", pos)}${hv ? row("Health score", `${hv.v.toFixed(1)}% (${hv.y} data)`) : ""}</div>` +
         `<span class="bm-bar">${p.s.map((v, k) => `<i style="width:${w[k]}%;background:${CS_COLORS[k]}"></i>`).join("")}</span>` +
         `<div class="bm-kv bm-cs">${p.s.map((v, k) => row(`<i style="background:${CS_COLORS[k]}"></i>CS${k + 1}`, pc(v))).join("")}</div>`;
     }
@@ -320,6 +325,11 @@
       cur.key = key;
       fillAgeSelect(); drawSummary(); drawOthers(); drawDots();
       if (opts.onCount) opts.onCount(picked);
+      // health scores load after the dots are drawn, and show in the hover box once they arrive
+      if (opts.health && (!health || health.st !== sel.st)) {
+        const st = sel.st;
+        opts.health(st).then((fn) => { if (cur.st === st) health = { st, fn }; }).catch(() => {});
+      }
     }
     function setAge(v) {
       ui.age = v; if (!picked) return;

@@ -89,8 +89,8 @@
     for (let p = 0; p <= 1.0001; p += 0.2) s += `<line class="d-grid" x1="${mL}" x2="${W - mR}" y1="${y(p)}" y2="${y(p)}"/><text class="d-tick" x="${mL - 6}" y="${y(p) + 4}" text-anchor="end">${p.toFixed(1)}</text>`;
     s += `<line class="d-axis" x1="${mL}" x2="${W - mR}" y1="${mT + ph}" y2="${mT + ph}"/>`;
     for (let t = 0; t <= 100; t += narrow ? 20 : 10) s += `<line class="d-axis" x1="${x(t)}" x2="${x(t)}" y1="${mT + ph}" y2="${mT + ph + 4}"/><text class="d-tick" x="${x(t)}" y="${mT + ph + 16}" text-anchor="${t === 100 ? "end" : "middle"}">${t}</text>`;
-    s += `<text class="d-axlbl" x="${mL + pw / 2}" y="${H - 6}" text-anchor="middle">Element age (years)</text>`;
-    s += `<text class="d-axlbl" transform="translate(13 ${mT + ph / 2}) rotate(-90)" text-anchor="middle">Proportion remaining in CS1</text>`;
+    s += `<text class="d-axlbl" x="${mL + pw / 2}" y="${H - 6}" text-anchor="middle">Bridge age (years)</text>`;
+    s += `<text class="d-axlbl" transform="translate(13 ${mT + ph / 2}) rotate(-90)" text-anchor="middle">Share still in CS1</text>`;
     const m = cfg.model;
     if (m && m.departed) {
       if (m.median <= 100) {
