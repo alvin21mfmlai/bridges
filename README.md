@@ -75,7 +75,7 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
    - **Basic Analytics (Bridge Level):** health scores for whole bridges, from
      `data/<ST>/health.json.gz` (loaded when the tab is first opened). The element type
      chosen in step 3 does not change it, and a note at the top of the tab says so.
-     1. **Health score by data year.** Each bridge gets a score from 0 to 100: element score
+     1. **Health score by data year.** Each bridge gets a score from 0% to 100%: element score
         = 100 × (CS1 + 0.67 CS2 + 0.33 CS3) ÷ total quantity, and the bridge score is the
         average of its element scores, each element type counting equally (the NBI has no
         unit costs). For each data year, the chart shows the average score of every bridge
@@ -84,7 +84,7 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
         own line. Key findings, a facts line, and a note when a year has far fewer bridges
         than the state's other years (under 60% of the usual count, such as Texas 2017).
         Download CSV lists every bridge and data year of the period: structure number, year
-        built, age, score and element types counted. Drawn by `renderBridgeTab()` /
+        built, age, score (%) and element types counted. Drawn by `renderBridgeTab()` /
         `drawHealth()` in `public/index.html`. The same scores show in the bridge map's hover
         box (see below).
      2. to 4. Trend and forecast, average health by age, health by age (3D): still to come,
@@ -242,13 +242,13 @@ finer than a pixel at national scale.
 Written with the inventory folder, one file per state (Texas: about 240 KB, 36,455 bridges).
 An element record counts when its total quantity is positive and it has not failed the quantity
 check, the same records the charts use. Deck area and age are not needed for the score. The
-bridge score is the plain average of its element scores, rounded to 0.1 (stored × 10). Columns:
+bridge score is the plain average of its element scores, as a percentage rounded to 0.1 (stored × 10). Columns:
 `base` (first data year), `row` (each bridge's row in `bridges.json`, delta-encoded), `yb` (year
 built, 0 if unknown), `nrun` (runs per bridge), and per run of consecutive data years with the
 same score and element count: `yy` (first year × 100 + last year, as offsets from `base`), `sc`
 (score × 10) and `ne` (element types counted). Element scores are rounded to 6 decimals and summed
 as exact decimals, so the file is identical byte for byte whenever the input is. Check: Texas
-2016–2025 has 5,344 bridges with data in every year, averaging 96.2 in 2016 and 94.8 in 2025.
+2016–2025 has 5,344 bridges with data in every year, averaging 96.2% in 2016 and 94.8% in 2025.
 
 ## Bridge locations map (top of step 4, `bridgemap.js`)
 
@@ -281,8 +281,12 @@ significant figures), `s1`, `s2`, `s3` (CS1–CS3 share in 0.1%; CS4 is the rest
 stretch of consecutive years with identical values; most elements are inspected every two years
 and carried over in between, so 14.7 million yearly records fit in 4.7 million runs.
 
-The hover box and the pinned box also show the bridge's **health score** in its latest data year
-of the period, for example "Health score: 98.7 (2025 data)". The scores come from
+The hover box and the pinned box also show two scores. **Element score** is the selected element's
+own score, worked out from the CS shares listed below it (100 × (CS1 + 0.67 CS2 + 0.33 CS3)).
+**Bridge health score** is the average over every element type on the bridge in its latest data
+year of the period, for example "Bridge health score: 43.3% (average of 7 element types, 2025 data)" for
+Minnesota bridge L5920, whose wearing surface (element 510) is 100% CS4 and scores 0%. The
+bridge scores come from
 `<ST>/health.json.gz`, loaded after the dots are drawn (shared with Basic Analytics (Bridge
 Level) through `healthFor()` in `index.html`, passed to the map as `opts.health`).
 

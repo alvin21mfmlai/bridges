@@ -445,6 +445,11 @@ footer a{color:var(--text-muted)}
 .bm-cs{grid-template-columns:auto auto;justify-content:start;margin-top:0}
 .bm-cs .k i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
 .bm-bar i{display:block;height:100%}
+/* the two scores in the hover box: value on the row, a short grey line under it saying what it covers */
+.bm-score{margin-top:6px;padding-top:5px;border-top:1px solid var(--border-subtle)}
+.bm-score .k{color:var(--text)}
+.bm-score .v{font-weight:700}
+.bm-score .n{grid-column:1/-1;color:var(--text-muted);font-size:11.5px;line-height:1.3;margin:0 0 3px}
 .bm-reset{font-size:16px;line-height:30px !important;text-align:center;color:var(--text) !important}
 .bm-compact .leaflet-control-attribution{position:relative;width:20px;height:20px;margin:0 6px 6px 0;padding:0;border-radius:10px;overflow:hidden;white-space:nowrap;font-size:0;cursor:pointer;background:rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.15)}
 .bm-compact .leaflet-control-attribution::before{content:"i";position:absolute;top:0;right:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font:italic 700 12px/1 Georgia,serif;color:#5b6670}
@@ -873,7 +878,7 @@ table.data tr.hl td{background:var(--accent-muted)}
           </div>
           <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
             <p class="lead">How healthy are this state's bridges, and is that changing?</p>
-            <p>Each bridge gets a health score from 0 to 100. A score of 100 means all of its elements are in CS1 (good), and 0 means all of them are in CS4 (severe).</p>
+            <p>Each bridge gets a health score from 0% to 100%, averaged over every element type on the bridge. A score of 100% means all of its elements are in CS1 (good), and 0% means all of them are in CS4 (severe).</p>
             <!-- Hidden at Alvin's request (23 Nov):
             <p>An element's score is 100 × (CS1 + 0.67 × CS2 + 0.33 × CS3) ÷ its total quantity. A bridge's score is the average of its element scores, with each element type counting equally for now.</p>
             <p>Most bridges are inspected every two years, so a score often stays the same for a year and then changes in a step.</p>
@@ -1600,10 +1605,10 @@ function healthFor(st) {
   if (!hsCache.has(st)) { const p = loadHealth(st); p.catch(() => hsCache.delete(st)); hsCache.set(st, p); }
   return hsCache.get(st);
 }
-// a bridge's score in the latest data year from s to e that has one: { v, y } or null
+// a bridge's score in the latest data year from s to e that has one: { v, y, n (element types) } or null
 function healthAt(h, row, s, e) {
   const b = h.of.get(row); if (b == null) return null;
-  for (let y = Math.min(e, h.base + h.NY - 1); y >= Math.max(s, h.base); y--) { const x = h.S[b * h.NY + y - h.base]; if (x >= 0) return { v: x / 10, y }; }
+  for (let y = Math.min(e, h.base + h.NY - 1); y >= Math.max(s, h.base); y--) { const i = b * h.NY + y - h.base, x = h.S[i]; if (x >= 0) return { v: x / 10, y, n: h.N[i] }; }
   return null;
 }
 // value at share p of a sorted list, interpolating between neighbours (as a spreadsheet's PERCENTILE)
@@ -1629,7 +1634,7 @@ function healthStats() {
   const counts = D.map((d) => d.n).filter((c) => c > 0).sort((a, c) => a - c), mid = quant(counts, 0.5) || 0;
   return { key: `${sel.st}|${sel.win}`, years, D, mid, thin: D.filter((d) => d.n > 0 && d.n < 0.6 * mid) };
 }
-const f1 = (v) => (v == null ? "—" : v.toFixed(1));
+const f1 = (v) => (v == null ? "—" : `${v.toFixed(1)}%`); // health scores are shown as percentages (0% to 100%)
 const yearList = (ys) => (ys.length < 2 ? String(ys[0]) : `${ys.slice(0, -1).join(", ")} and ${ys[ys.length - 1]}`);
 async function renderBridgeTab() {
   if (!stIdx || !sel.win || sel.en == null) return;
@@ -1690,7 +1695,7 @@ function drawHealth() {
   const every = narrow && years.length > 6 ? 2 : 1;
   years.forEach((yr, i) => { s += `<line class="d-axis" x1="${x(i)}" x2="${x(i)}" y1="${mT + ph}" y2="${mT + ph + 4}"/>`; if ((years.length - 1 - i) % every === 0) s += `<text class="d-tick" x="${x(i)}" y="${mT + ph + 16}" text-anchor="middle">${yr}</text>`; });
   s += `<text class="d-axlbl" x="${mL + pw / 2}" y="${Ht - 4}" text-anchor="middle">Data year</text>`;
-  s += `<text class="d-axlbl" transform="translate(12 ${mT + ph / 2}) rotate(-90)" text-anchor="middle">Health score</text>`;
+  s += `<text class="d-axlbl" transform="translate(12 ${mT + ph / 2}) rotate(-90)" text-anchor="middle">Health score (%)</text>`;
   if (!has) {
     s += `<text class="hs-empty" x="${mL + pw / 2}" y="${mT + ph / 2}" text-anchor="middle">No health scores in this period.</text>`;
   } else {
@@ -1760,7 +1765,7 @@ $("#hsClear").addEventListener("click", () => { hsPick = null; $("#hsFindIn").va
 $("#hsCsv").addEventListener("click", () => {
   if (!hs || !hsStats) return;
   const { S, N, NY, base, n } = hs, H = hsStats;
-  const rows = ["state,structure_number,data_year,year_built,age_years,health_score,element_types_counted"];
+  const rows = ["state,structure_number,data_year,year_built,age_years,health_score_pct,element_types_counted"];
   for (let b = 0; b < n; b++) {
     const id = `"${String(hs.ids[hs.rows[b]]).replace(/"/g, '""')}"`, yb = hs.yb[b];
     for (const yr of H.years) {
