@@ -327,6 +327,21 @@ footer a{color:var(--text-muted)}
 #catSelect{min-width:200px}
 .el-group{margin-bottom:18px}
 .el-top{padding-bottom:16px;border-bottom:1px solid var(--border-subtle)}
+/* step 3: analysis level cards (element type teal, bridge level blue), then the element type list */
+.lvl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.lvl{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px 16px 13px;border:1px solid var(--border-subtle);border-top:4px solid var(--lc);border-radius:10px;background:#fff;cursor:pointer;font:inherit;color:var(--text);transition:border-color .15s,background .15s}
+.lvl:hover{border-color:var(--lc)}
+.lvl[aria-pressed="true"]{border-color:var(--lc);background:var(--lt);box-shadow:inset 0 0 0 1px var(--lc)}
+.lvl-name{font-size:16px;font-weight:600}
+.lvl-txt{font-size:13.5px;color:var(--text-muted);line-height:1.4}
+.lvl-cnt{font-size:12.5px;font-weight:600;color:var(--lc)}
+#lvl-element{--lc:#0a7f86;--lt:#e6f4f4}
+#lvl-bridge{--lc:#1f6fb2;--lt:#e8f1fa}
+.el-wrap{margin-top:18px;padding-top:16px;border-top:1px solid var(--border-subtle)}
+.el-wrap[hidden]{display:none}
+.el-wrap-h{margin:0;font-size:16px;font-weight:600}
+.el-wrap-sub{margin:4px 0 14px;color:var(--text-muted)}
+@media (max-width:600px){.lvl-grid{grid-template-columns:minmax(0,1fr)}}
 .el-picked{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:16px;border:1px solid var(--accent);border-radius:var(--r);background:var(--accent-muted)}
 .el-picked[hidden]{display:none}
 .el-chosen{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -360,7 +375,8 @@ footer a{color:var(--text-muted)}
 #tab-analytics,#pane-analytics{--tc:#4b45b0;--tt:#eeedfa;--tl:#cbc8ef;--tp:#f7f7fd}
 #tab-bridge,#pane-bridge{--tc:#1f6fb2;--tt:#e8f1fa;--tl:#bcd6ee;--tp:#f6f9fd}
 #tab-advanced,#pane-advanced{--tc:#5c6670;--tt:#eff1f3;--tl:#d5dadd;--tp:#f8f9fa}
-.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;border:0;margin:0 0 14px;overflow:visible}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border:0;margin:0 0 14px;overflow:visible}
+.tabs button[hidden]{display:none}
 .tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;border:1px solid var(--border-subtle);border-radius:10px;padding:12px 16px;margin:0;background:#fff;text-align:left;white-space:normal;color:var(--text);transition:border-color .15s,background .15s}
 .tabs button .t-name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
 .tabs button .t-name::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--tc)}
@@ -396,13 +412,22 @@ footer a{color:var(--text-muted)}
 .bm-tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px;color:var(--text-muted)}
 .bm-seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
 .bm-seg button{border:0;border-left:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;font-size:14px;padding:5px 11px;cursor:pointer}
-.bm-seg button:first-child{border-left:0}
+.bm-seg button:first-child,.bm-seg button[hidden] + button{border-left:0}
+.bm-seg button[hidden]{display:none}
+.bm.bm-bridge .bm-elonly{display:none}
+.bm-sbar{background:#e3e7ec}
 .bm-seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .bm-body{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
 .bm-map{position:relative;overflow:hidden;height:520px;border:1px solid var(--backdrop);border-radius:6px;background:#eef3f6;z-index:0}
 .bm-side{font-size:14px}
 .bm-leg-title{margin:0 0 4px;font-size:14px;font-weight:600}
 .bm-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--backdrop)}
+.bm-row-btn{width:100%;background:none;border:0;border-bottom:1px solid var(--backdrop);font:inherit;color:inherit;text-align:left;cursor:pointer}
+.bm-row-btn:hover{background:var(--backdrop)}
+.bm-row-btn[aria-pressed="false"]{color:var(--text-muted)}
+.bm-row-btn[aria-pressed="false"] .bm-dot{background:transparent!important;box-shadow:inset 0 0 0 1.5px #9aa3ad}
+.bm-n small{display:inline-block;min-width:34px;margin-left:6px;text-align:right;font-size:11.5px;color:var(--text-muted)}
+.bm-leg-hint{margin:6px 0 0;font-size:11.5px;color:var(--text-muted)}
 .bm-dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 1px #fff,0 0 0 2px rgba(0,0,0,.08)}
 .bm-n{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text-muted)}
 .bm-opt{display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--text)}
@@ -462,7 +487,7 @@ footer a{color:var(--text-muted)}
 @media (max-width:600px){.bm{padding:12px}.bm-map{height:340px}.bm-seg button{padding:5px 8px;font-size:13px}}
 .wb-method[hidden]{display:none}
 @media (max-width:600px){
-  .tabs{gap:6px;grid-template-columns:repeat(2,minmax(0,1fr))}.tabs button{padding:9px 8px;align-items:center;text-align:center}.tabs button .t-sub{display:none}.tabs button .t-name{font-size:13px}.tabs button .t-lvl{margin-left:0;font-size:11.5px}
+  .tabs{gap:6px;grid-template-columns:repeat(3,minmax(0,1fr))}.tabs button{padding:9px 8px;align-items:center;text-align:center}.tabs button .t-sub{display:none}.tabs button .t-name{font-size:13px}.tabs button .t-lvl{margin-left:0;font-size:11.5px}
   .wb-stat{padding:10px 12px}.wb-stat .v{font-size:18px}
   .tab-pane{padding:8px;border-radius:10px}.feature{padding:0 12px 14px}.feature > .pane-head{margin:0 -12px 12px;padding:12px}
 }
@@ -526,15 +551,15 @@ table.data tr.hl td{background:var(--accent-muted)}
 <section class="intro">
   <div class="wrap">
     <h1>Bridge Deterioration Insights and Modelling</h1>
-    <p>See how the condition of a bridge element type in a US state changes with bridge age.</p>
+    <p>See how the condition of bridges in a US state changes with bridge age, for one element type or for whole bridges.</p>
     <p>(1) Choose a state on the map or from the list.</p>
     <p>(2) Choose a period of at least five years.</p>
-    <p>(3) Choose an element type inspected in that period.</p>
-    <p>(4) Choose a view:</p>
+    <p>(3) Choose an analysis level:</p>
     <ul>
-      <li>Basic Insights: how condition varies with bridge age.</li>
-      <li>Basic Analytics: models that predict how the element deteriorates.</li>
+      <li>Element type analytics: pick an element type inspected in that period, then see how its condition varies with bridge age (Basic Insights) and models that predict how it deteriorates (Basic Analytics).</li>
+      <li>Bridge level analytics: a health score for each whole bridge, from every element type on it.</li>
     </ul>
+    <p>(4) Explore the map and the charts.</p>
     <p class="source">Data: FHWA National Bridge Inventory element data, 2016 to 2025.</p>
   </div>
 </section>
@@ -594,9 +619,16 @@ table.data tr.hl td{background:var(--accent-muted)}
 
   <section class="panel locked" id="panel-type" aria-labelledby="h-type">
     <div class="panel-head">
-      <div><h2 id="h-type"><span class="num">3</span>Choose an element type</h2><p class="sub" id="typeSub">Choose a period first.</p></div>
+      <div><h2 id="h-type"><span class="num">3</span>Choose an analysis level</h2><p class="sub" id="typeSub">Choose a period first.</p></div>
     </div>
     <div class="panel-body">
+      <div class="lvl-grid" role="group" aria-label="Analysis level">
+        <button type="button" class="lvl" id="lvl-element" data-level="element" aria-pressed="false"><span class="lvl-name">Element type analytics</span><span class="lvl-txt">How one element type, such as decks or bearings, changes with bridge age, and models that predict its deterioration.</span><span class="lvl-cnt" id="lvlElCnt"></span></button>
+        <button type="button" class="lvl" id="lvl-bridge" data-level="bridge" aria-pressed="false"><span class="lvl-name">Bridge level analytics</span><span class="lvl-txt">How healthy whole bridges are, with one health score per bridge from every element type on it.</span><span class="lvl-cnt">Every element type on each bridge</span></button>
+      </div>
+      <div class="el-wrap" id="elWrap" hidden>
+      <h3 class="el-wrap-h">Choose an element type</h3>
+      <p class="el-wrap-sub" id="elSub"></p>
       <div class="el-picked" id="elPicked" hidden></div>
       <div id="elBrowse">
         <div class="el-tools">
@@ -606,13 +638,14 @@ table.data tr.hl td{background:var(--accent-muted)}
         </div>
         <div id="elList"></div>
       </div>
+      </div>
     </div>
   </section>
 
   <section class="panel locked" id="panel-profile" aria-labelledby="h-prof">
     <div class="panel-head">
-      <div><h2 id="h-prof"><span class="num">4</span>Analysis</h2><p class="sub" id="profSub">Choose an element type first.</p>
-        <p class="sub change-row" id="profChange" hidden>Change: <button class="linkbtn" data-go="state">state</button> · <button class="linkbtn" data-go="years">period</button> · <button class="linkbtn" data-go="type">element type</button></p></div>
+      <div><h2 id="h-prof"><span class="num">4</span>Analysis</h2><p class="sub" id="profSub">Choose an analysis level first.</p>
+        <p class="sub change-row" id="profChange" hidden>Change: <button class="linkbtn" data-go="state">state</button> · <button class="linkbtn" data-go="years">period</button> · <button class="linkbtn" data-go="type" id="chgLvl">element type</button></p></div>
     </div>
     <div class="panel-body">
       <section class="bm" id="bridgeMap" aria-labelledby="h-bm" hidden>
@@ -621,7 +654,7 @@ table.data tr.hl td{background:var(--accent-muted)}
           <div class="bm-tools">
             <span class="bm-colour">Colour by
               <span class="bm-seg" role="group" aria-label="Colour the bridges by">
-                <button type="button" data-colour="cond" aria-pressed="true">Condition</button><button type="button" data-colour="age" aria-pressed="false">Bridge age</button><button type="button" data-colour="one" aria-pressed="false">One colour</button>
+                <button type="button" data-colour="cond" aria-pressed="true">Condition</button><button type="button" data-colour="bhi" aria-pressed="false" hidden>BHI</button><button type="button" data-colour="age" aria-pressed="false">Bridge age</button><button type="button" data-colour="one" aria-pressed="false">Location</button>
               </span></span>
             <button type="button" class="linkbtn bm-toggle" aria-expanded="true" aria-controls="bridgeMapBody">Hide map</button>
           </div>
@@ -631,13 +664,13 @@ table.data tr.hl td{background:var(--accent-muted)}
           <div class="bm-side">
             <p class="bm-leg-title"></p>
             <div class="bm-leg-rows"></div>
-            <div class="bm-opt"><label><input type="checkbox" class="bm-others"> Show other bridges <span class="bm-dot bm-dot-other" aria-hidden="true"></span></label>
+            <div class="bm-opt bm-elonly"><label><input type="checkbox" class="bm-others"> Show other bridges <span class="bm-dot bm-dot-other" aria-hidden="true"></span></label>
               <button type="button" class="info-i" aria-label="Which bridges are shown in purple" aria-describedby="infoOthers">i</button>
               <div class="sr-only" id="infoOthers"><b>Purple dots: other bridges in the state inspected in this period</b><ul><li>Bridges without the selected element</li><li>Bridges with the element that are left out of the charts (missing quantity, deck area or age, a failed quantity check, or older than 100 years)</li><li>Bridges outside the selected age band</li></ul></div></div>
-            <div class="bm-opt bm-age-row"><label for="bmAge">Age band</label>
+            <div class="bm-opt bm-age-row bm-elonly"><label for="bmAge">Age band</label>
               <button type="button" class="info-i" aria-label="About the age band" aria-describedby="infoBmAge">i</button>
               <div class="sr-only" id="infoBmAge">Shows only bridges in this age band. It also filters the chart "Bridges by condition-state range" below.</div></div>
-            <select class="bm-age" id="bmAge"></select>
+            <select class="bm-age bm-elonly" id="bmAge"></select>
             <form class="bm-find" role="search" autocomplete="off">
               <label for="bmFind">Find a bridge</label>
               <div class="bm-find-row"><input type="search" id="bmFind" class="bm-find-in" placeholder="Structure number" spellcheck="false"><button type="submit" class="btn">Find</button></div>
@@ -653,7 +686,7 @@ table.data tr.hl td{background:var(--accent-muted)}
         <button role="tab" id="tab-insights" data-tab="insights" aria-controls="pane-insights" aria-selected="true"><span class="t-name">Basic Insights</span><span class="t-lvl">Element type level</span><span class="t-sub">How condition varies with bridge age</span></button>
         <!-- <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-sub">Weibull and Markov deterioration models fitted to the data</span></button> -->
          <button role="tab" id="tab-analytics" data-tab="analytics" aria-controls="pane-analytics" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-lvl">Element type level</span><span class="t-sub">Models that predict deterioration with age</span></button>
-        <button role="tab" id="tab-bridge" data-tab="bridge" aria-controls="pane-bridge" aria-selected="false" tabindex="-1"><span class="t-name">Basic Analytics</span><span class="t-lvl">Bridge level</span><span class="t-sub">Health scores for whole bridges</span></button>
+        <button role="tab" id="tab-bridge" data-tab="bridge" aria-controls="pane-bridge" aria-selected="false" tabindex="-1" hidden><span class="t-name">Basic Analytics</span><span class="t-lvl">Bridge level</span><span class="t-sub">Health scores for whole bridges</span></button>
         <button role="tab" id="tab-advanced" data-tab="advanced" aria-controls="pane-advanced" aria-selected="false" tabindex="-1"><span class="t-name">Advanced Analytics</span><span class="t-sub">More models, coming soon</span></button>
       </div>
 
@@ -867,7 +900,6 @@ table.data tr.hl td{background:var(--accent-muted)}
       <!-- Basic Analytics (Bridge Level): health scores for whole bridges. Drawn by drawHealth(), data from
            data/<ST>/health.json (scripts/health.py). -->
       <div class="tab-pane" role="tabpanel" id="pane-bridge" aria-labelledby="tab-bridge" hidden>
-        <p class="tab-note"><b>Bridge level:</b> these scores use every element type on each bridge. They stay the same when you change the element type in step 3.</p>
         <nav class="feat-nav" aria-label="Features in Basic Analytics (Bridge Level)"><span>In this view:</span>
           <button data-go-feat="hsSec"><b>1</b>Health score by data year</button>
         </nav>
@@ -1036,7 +1068,9 @@ async function getJSON(url) {
   try { return await cache.get(url); } catch (e) { cache.delete(url); throw e; }
 }
 let IDX = null;
-const sel = { st: null, win: null, en: null };
+// lvl: the analysis level chosen in step 3, "element" or "bridge" (null until chosen). At bridge level no
+// element type is selected (en is null): the health scores use every element type on every bridge.
+const sel = { st: null, win: null, en: null, lvl: null };
 let stIdx = null, elData = null, mode = "abs";
 
 /* ---------- element categories (by element number) ---------- */
@@ -1202,12 +1236,16 @@ const TOP_TYPES = 8;   // "Most inspected" group at the top of step 3
 let typesOpen = false; // step 3 list open while a type is selected
 function renderTypes() {
   const panel = $("#panel-type");
-  if (!stIdx || !sel.win) { panel.classList.add("locked"); $("#typeSub").textContent = "Choose a period first."; $("#elPicked").hidden = true; $("#elBrowse").hidden = false; return; }
+  $$(".lvl").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.level === sel.lvl)));
+  if (!stIdx || !sel.win) { panel.classList.add("locked"); $("#typeSub").textContent = "Choose a period first."; $("#elWrap").hidden = true; $("#elPicked").hidden = true; $("#elBrowse").hidden = false; return; }
   panel.classList.remove("locked");
   const all = stIdx.elements.map((e) => ({ ...e, n: e.bridges[winIdx()] || 0, cat: catOf(e.en) })).filter((e) => e.n > 0);
   const none = stIdx.elements.length - all.length;
   const [ws, we] = sel.win.split("-");
-  $("#typeSub").textContent = `${all.length} element types were inspected in ${stIdx.name} from ${ws} to ${we}. Each card shows how many bridges have that element.`;
+  $("#typeSub").textContent = `Look at one element type, or at whole bridges using every element type (${stIdx.name}, ${ws} to ${we}).`;
+  $("#lvlElCnt").textContent = `${all.length} element type${all.length === 1 ? "" : "s"} inspected`;
+  $("#elWrap").hidden = sel.lvl !== "element";
+  $("#elSub").textContent = `${all.length} element types were inspected in ${stIdx.name} from ${ws} to ${we}. Each card shows how many bridges have that element.`;
   const counts = {}; all.forEach((e) => (counts[e.cat.id] = (counts[e.cat.id] || 0) + 1));
   if (catFilter !== "all" && !counts[catFilter]) catFilter = "all";
   $("#catSelect").innerHTML = `<option value="all">All categories (${all.length})</option>` +
@@ -1331,7 +1369,12 @@ function applyMode() {
 }
 function renderProfile() {
   const panel = $("#panel-profile");
-  if (!elData || !sel.win) { panel.classList.add("locked"); $("#profSub").textContent = "Choose an element type first."; $("#profChange").hidden = true; prof = null; if (bmap) bmap.update({ en: null }); return; }
+  setLevelView();
+  if (stIdx && sel.win && sel.lvl === "bridge") { renderBridgeLevel(); return; }
+  if (!elData || !sel.win || sel.lvl !== "element") {
+    panel.classList.add("locked"); $("#profChange").hidden = true; prof = null; if (bmap) bmap.update({ en: null, level: null });
+    $("#profSub").textContent = sel.lvl === "element" ? "Choose an element type first." : "Choose an analysis level first."; return;
+  }
   panel.classList.remove("locked");
   prof = buildProfile();
   const el = stIdx.elements.find((e) => e.en === sel.en);
@@ -1339,7 +1382,7 @@ function renderProfile() {
   $("#profChange").hidden = false;
   if (bmap) {
     const [s0, e0] = sel.win.split("-").map(Number);
-    bmap.update({ st: sel.st, stateName: stIdx.name, en: sel.en, name: el ? el.name : elData.name, unit: elData.unit, s: s0, e: e0, age: distAge });
+    bmap.update({ level: "element", st: sel.st, stateName: stIdx.name, en: sel.en, name: el ? el.name : elData.name, unit: elData.unit, s: s0, e: e0, age: distAge });
   }
   if (!prof || !prof.w.bridges) {
     $("#profFacts").innerHTML = `<span class="warn-text">No bridges have usable records for this element in this period.</span>`;
@@ -1363,6 +1406,26 @@ function renderProfile() {
   $("#distAge").value = distAge;
   if (tab === "insights") drawProfiles();
   renderOtherTabs();
+}
+
+/* ---------- step 4 at bridge level: the bridge map coloured by health score, then Basic Analytics
+   (Bridge Level). The element type tabs are hidden and the bridge level view is the only one. */
+function renderBridgeLevel() {
+  $("#panel-profile").classList.remove("locked");
+  $("#profSub").textContent = `Whole bridges in ${stIdx.name}, ${sel.win.replace("-", " to ")}. Each health score uses every element type on the bridge.`;
+  $("#profChange").hidden = false;
+  if (bmap) { const [s0, e0] = sel.win.split("-").map(Number); bmap.update({ level: "bridge", st: sel.st, stateName: stIdx.name, en: null, s: s0, e: e0 }); }
+  renderBridgeTab();
+}
+let elTab = "insights"; // the element type tab to return to after visiting bridge level
+function setLevelView() {
+  const br = sel.lvl === "bridge";
+  $("#tab-bridge").hidden = !br;
+  ["insights", "analytics", "advanced"].forEach((x) => ($(`#tab-${x}`).hidden = br));
+  $("#tabsLbl").textContent = br ? "View" : "Choose a view";
+  $("#chgLvl").textContent = br ? "analysis level" : "element type";
+  if (br && tab !== "bridge") { elTab = tab; setTab("bridge", { hash: false, draw: false }); }
+  else if (!br && tab === "bridge") setTab(elTab, { hash: false, draw: false });
 }
 
 /* ---------- Basic Analytics and Advanced Analytics ----------
@@ -1637,7 +1700,7 @@ function healthStats() {
 const f1 = (v) => (v == null ? "—" : `${v.toFixed(1)}%`); // health scores are shown as percentages (0% to 100%)
 const yearList = (ys) => (ys.length < 2 ? String(ys[0]) : `${ys.slice(0, -1).join(", ")} and ${ys[ys.length - 1]}`);
 async function renderBridgeTab() {
-  if (!stIdx || !sel.win || sel.en == null) return;
+  if (!stIdx || !sel.win || sel.lvl !== "bridge") return;
   if (!hs || hs.st !== sel.st) {
     const st = sel.st;
     $("#hsFacts").innerHTML = "<span>Loading the health scores…</span>";
@@ -1783,7 +1846,7 @@ new ResizeObserver(() => { if (tab === "bridge") { cancelAnimationFrame(hsRz); h
 /* ---------- tabs ---------- */
 const TABS = ["insights", "analytics", "bridge", "advanced"];
 let tab = "insights";
-function setTab(t, { focus = false, hash = true } = {}) {
+function setTab(t, { focus = false, hash = true, draw = true } = {}) {
   if (!TABS.includes(t)) t = "insights";
   tab = t;
   TABS.forEach((x) => {
@@ -1792,6 +1855,7 @@ function setTab(t, { focus = false, hash = true } = {}) {
     if (on && focus) b.focus();
   });
   hideTip();
+  if (!draw) return;
   if (t === "insights") requestAnimationFrame(drawProfiles);
   if (t === "analytics") requestAnimationFrame(() => { drawWeibull(); drawMarkov(); });
   if (t === "bridge") { if (hsStats && hsStats.key === `${sel.st}|${sel.win}`) requestAnimationFrame(drawHealth); else renderBridgeTab(); }
@@ -1804,9 +1868,9 @@ document.addEventListener("click", (ev) => {
   if (t) t.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 });
 $(".tabs").addEventListener("keydown", (ev) => {
-  const i = TABS.indexOf(tab), k = ev.key;
-  const j = k === "ArrowRight" ? (i + 1) % TABS.length : k === "ArrowLeft" ? (i + TABS.length - 1) % TABS.length : k === "Home" ? 0 : k === "End" ? TABS.length - 1 : -1;
-  if (j >= 0) { ev.preventDefault(); setTab(TABS[j], { focus: true }); }
+  const V = TABS.filter((x) => !$(`#tab-${x}`).hidden), i = V.indexOf(tab), k = ev.key; // only the tabs of this level
+  const j = k === "ArrowRight" ? (i + 1) % V.length : k === "ArrowLeft" ? (i + V.length - 1) % V.length : k === "Home" ? 0 : k === "End" ? V.length - 1 : -1;
+  if (j >= 0) { ev.preventDefault(); setTab(V[j], { focus: true }); }
 });
 function profTip(k, c) {
   const cs = CSN[k];
@@ -1999,14 +2063,19 @@ document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") { const 
 
 /* ---------- chrome ---------- */
 function renderChrome() {
-  const el = stIdx && sel.en ? stIdx.elements.find((e) => e.en === sel.en) : null;
-  const parts = [[sel.st && nameOf(sel.st), "state"], [sel.win && sel.win.replace("-", "–"), "years"], [el && el.name, "profile"]].filter((p) => p[0]);
+  const el = stIdx && sel.en != null && sel.lvl === "element" ? stIdx.elements.find((e) => e.en === sel.en) : null;
+  const lv = sel.lvl === "bridge" && sel.win ? "Bridge level" : el && el.name;
+  const parts = [[sel.st && nameOf(sel.st), "state"], [sel.win && sel.win.replace("-", "–"), "years"], [lv, "profile"]].filter((p) => p[0]);
   $("#topCrumbs").innerHTML = parts.map(([t, go]) => `<button data-go="${go}">${esc(t)}</button>`).join('<span aria-hidden="true">/</span>');
-  document.title = el ? `${el.name}, ${nameOf(sel.st)} ${sel.win} | Bridge Deterioration Model` : "Bridge Deterioration Model | Bentley Systems";
+  document.title = lv ? `${lv}, ${nameOf(sel.st)} ${sel.win} | Bridge Deterioration Model` : "Bridge Deterioration Model | Bentley Systems";
 }
 function jump(q) { requestAnimationFrame(() => { const el = $(q); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 76 }); }); }
+// links: #/TX/2016-2025 (no level yet), #/TX/2016-2025/element (no element type yet),
+// #/TX/2016-2025/107 or #/TX/2016-2025/107/analytics (element type), #/TX/2016-2025/bridge (bridge level)
 function writeHash() {
-  const h = "#/" + [sel.st, sel.win, sel.en, sel.en != null && tab !== "insights" ? tab : null].filter((x) => x != null).join("/");
+  const lv = sel.lvl === "bridge" ? "bridge" : sel.lvl === "element" ? (sel.en != null ? sel.en : "element") : null;
+  const t = sel.lvl === "element" && sel.en != null && tab !== "insights" && tab !== "bridge" ? tab : null;
+  const h = "#/" + [sel.st, sel.win, lv, t].filter((x) => x != null).join("/");
   if (location.hash !== h) history.replaceState(null, "", h);
 }
 
@@ -2016,6 +2085,15 @@ const bmap = window.BridgeMap && window.L ? BridgeMap.create({
   el: $("#bridgeMap"), load: getJSON, fmt: { int, sig3, esc }, ageLabel: (u) => BINS.age[u].label,
   // health score for the hover box: the bridge's latest data year in the selected period
   health: (st) => healthFor(st).then((h) => (row, s, e) => healthAt(h, row, s, e)),
+  // bridge level map: every bridge with a score in period [s, e], at its latest score year
+  bridgeScores: (st, s, e) => healthFor(st).then((h) => {
+    const out = [], y1 = Math.min(e, h.base + h.NY - 1), y0 = Math.max(s, h.base);
+    for (let b = 0; b < h.n; b++) for (let y = y1; y >= y0; y--) {
+      const i = b * h.NY + y - h.base, x = h.S[i];
+      if (x >= 0) { out.push({ row: h.rows[b], v: x / 10, y, n: h.N[i], yb: h.yb[b] }); break; }
+    }
+    return out;
+  }),
   onAge: (v) => {
     distAge = v;
     if ([...$("#distAge").options].some((o) => o.value === v)) $("#distAge").value = v; else { distAge = "all"; $("#distAge").value = "all"; }
@@ -2026,19 +2104,31 @@ window.bridgeMap = bmap; // handle for debugging and tests
 
 /* ---------- selection flow ---------- */
 let token = 0;
-async function selectState(st, { win = null, en = null, scroll = true } = {}) {
+async function selectState(st, { win = null, en = null, lvl = null, scroll = true } = {}) {
   if (!IDX.states[st]) return;
   const my = ++token;
-  sel.st = st; sel.win = null; sel.en = null; stIdx = null; elData = null;
+  sel.st = st; sel.win = null; sel.en = null; sel.lvl = null; stIdx = null; elData = null;
   paintSelection(); updateStateInfo(null); renderYears(); renderTypes(); renderProfile(); renderChrome();
   try { stIdx = await getJSON(`data/${st}/index.json`); } catch (e) { showErr("#panel-years", e); return; }
   if (my !== token) return;
   const W = stIdx.windows;
   sel.win = (win && W.some((w) => w.key === win)) ? win : W.length === 1 ? W[0].key : latestKey(stIdx.years); // default: latest five years
   renderYears(); renderTypes(); renderChrome(); writeHash();
-  if (en != null && stIdx.elements.some((e) => e.en === en)) await selectElement(en, { scroll: false });
+  const enOk = en != null && stIdx.elements.some((e) => e.en === en && e.bridges[winIdx()] > 0);
+  if (lvl === "bridge") await selectLevel("bridge", { scroll: false });
+  else if (enOk) await selectElement(en, { scroll: false });
+  else if (lvl === "element") await selectLevel("element", { scroll: false });
   else renderProfile();
-  if (scroll) jump(en != null ? "#panel-profile" : "#panel-years");
+  if (scroll) jump(lvl === "bridge" || enOk ? "#panel-profile" : lvl === "element" ? "#panel-type" : "#panel-years");
+}
+// step 3: element type analytics (then pick an element type) or bridge level analytics
+async function selectLevel(lvl, { scroll = true } = {}) {
+  if (!stIdx || !sel.win || (lvl !== "element" && lvl !== "bridge")) return;
+  if (lvl === sel.lvl) { if (scroll) jump(lvl === "bridge" || elData ? "#panel-profile" : "#elWrap"); return; }
+  sel.lvl = lvl;
+  if (lvl === "bridge") { sel.en = null; elData = null; typesOpen = false; } // no element type at bridge level
+  renderTypes(); renderChrome(); renderProfile(); writeHash();
+  if (scroll) jump(lvl === "bridge" || elData ? "#panel-profile" : "#elWrap");
 }
 function selectWindow(key, scroll = false) {
   if (!stIdx || !stIdx.windows.some((w) => w.key === key)) return;
@@ -2050,7 +2140,8 @@ function selectWindow(key, scroll = false) {
 }
 async function selectElement(en, { scroll = true } = {}) {
   const my = ++token;
-  sel.en = en; typesOpen = false; renderTypes(); renderChrome(); writeHash();
+  sel.en = en; sel.lvl = "element"; elData = null; typesOpen = false; renderTypes(); renderChrome(); writeHash();
+  setLevelView();
   $("#panel-profile").classList.remove("locked");
   $("#profSub").textContent = "Loading…";
   try { elData = await getJSON(`data/${sel.st}/${en}.json`); } catch (e) { showErr("#panel-profile", e); return; }
@@ -2202,22 +2293,29 @@ $("#yAll").addEventListener("click", () => { const ys = stIdx.years; selectWindo
 $("#catSelect").addEventListener("change", (ev) => { catFilter = ev.target.value; renderTypes(); });
 $("#elSearch").addEventListener("input", () => renderTypes());
 $("#elList").addEventListener("click", (ev) => { const b = ev.target.closest(".el"); if (b) selectElement(+b.dataset.en); });
+$(".lvl-grid").addEventListener("click", (ev) => { const b = ev.target.closest("[data-level]"); if (b) selectLevel(b.dataset.level); });
 $("#elPicked").addEventListener("click", (ev) => {
   if (!ev.target.closest("#elToggle")) return;
   typesOpen = !typesOpen; renderTypes();
   if (typesOpen) $("#elSearch").focus({ preventScroll: true });
 });
-document.addEventListener("click", (ev) => { const g = ev.target.closest("[data-go]"); if (g && g.dataset.go === "type" && !typesOpen && sel.en != null) { typesOpen = true; renderTypes(); } if (g) jump({ state: "#panel-state", years: "#panel-years", type: "#panel-type", profile: "#panel-profile", method: "#method" }[g.dataset.go]); });
+document.addEventListener("click", (ev) => { const g = ev.target.closest("[data-go]"); if (g && g.dataset.go === "type" && !typesOpen && sel.en != null && sel.lvl === "element") { typesOpen = true; renderTypes(); } if (g) jump({ state: "#panel-state", years: "#panel-years", type: "#panel-type", profile: "#panel-profile", method: "#method" }[g.dataset.go]); });
 window.addEventListener("hashchange", () => route(false));
 
 function route(scroll) {
-  const [st, win, en, t] = location.hash.replace(/^#\/?/, "").split("/");
-  if (TABS.includes(t || "insights") && (t || "insights") !== tab) setTab(t || "insights", { hash: false });
+  const [st, win, x, t] = location.hash.replace(/^#\/?/, "").split("/");
+  const isEn = /^\d+$/.test(x || "");
+  // older links: #/TX/2016-2025/107/bridge opened the bridge level tab, so they open bridge level
+  const lvl = x === "bridge" || (isEn && t === "bridge") ? "bridge" : x === "element" || isEn ? "element" : null;
+  const en = isEn ? +x : null;
+  if (lvl === "element") { const want = TABS.includes(t) && t !== "bridge" ? t : "insights"; if (want !== tab) setTab(want, { hash: false }); }
   const S = (st || "").toUpperCase();
   if (!S || !IDX.states[S]) return;
-  if (S !== sel.st) selectState(S, { win, en: en ? +en : null, scroll });
-  else if (win && win !== sel.win) { selectWindow(win); if (en) selectElement(+en, { scroll }); }
-  else if (en && +en !== sel.en) selectElement(+en, { scroll });
+  if (S !== sel.st) { selectState(S, { win, en, lvl, scroll }); return; }
+  if (win && win !== sel.win) selectWindow(win);
+  if (lvl === "bridge") selectLevel("bridge", { scroll });
+  else if (en != null && (en !== sel.en || sel.lvl !== "element")) selectElement(en, { scroll });
+  else if (lvl === "element") selectLevel("element", { scroll });
 }
 
 /* ---------- start ---------- */

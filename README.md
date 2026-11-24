@@ -17,14 +17,22 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
    5 years. A state with 5 or fewer data years uses all of them. The bar chart shows how
    many bridges have records in each year.
    **Switching state starts afresh.** Picking a state on the map, a button or the list
-   resets the period to the latest 5 years, clears the element type, the element search and
-   the category filter, and returns the z-axis to Non-normalized and the analysis to Basic
+   resets the period to the latest 5 years, clears the analysis level, the element type, the
+   element search and the category filter, and returns the z-axis to Non-normalized and the analysis to Basic
    Insights (`resetFilters()` in `index.html`). Links that name a period and element, such
    as `/#/TX/2016-2025/107`, still open exactly that.
-3. **Element type.** Every element type with records in that state and period, grouped by
-   category, with a search box and the number of bridges.
-4. **Analysis**, in four tabs. The first two work at element type level (the element chosen in
-   step 3), the third at bridge level (every element type on each bridge):
+3. **Analysis level.** Two cards (`.lvl`, `selectLevel()` in `index.html`):
+   - **Element type analytics** opens the element type list below the cards: every element
+     type with records in that state and period, grouped by category, with a search box and
+     the number of bridges.
+   - **Bridge level analytics** needs nothing more. No element type is selected at this level:
+     the health scores use every element type on every bridge (choosing it clears any element
+     type picked before).
+4. **Analysis.** Both levels open with the bridge locations map (see below). Then:
+   - at element type level, three tabs: Basic Insights, Basic Analytics and Advanced Analytics
+   - at bridge level, Basic Analytics (Bridge Level) as the only view
+
+   The views in detail:
    - **Basic Insights (Element Type Level):** four 3D bar charts (CS1 Good, CS2 Fair, CS3 Poor, CS4 Severe).
      The floor axes are bridge age (5-year bands, 1–100) and CS% (5% bands). The z-axis
      (deck area) can be **non-normalized** (sq ft) or **normalized** (%), either by all
@@ -73,8 +81,7 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
         a table by age band and a CSV.
      3. CS quantity propagation: still to come.
    - **Basic Analytics (Bridge Level):** health scores for whole bridges, from
-     `data/<ST>/health.json.gz` (loaded when the tab is first opened). The element type
-     chosen in step 3 does not change it, and a note at the top of the tab says so.
+     `data/<ST>/health.json.gz` (loaded when bridge level is first opened).
      1. **Health score by data year.** Each bridge gets a score from 0% to 100%: element score
         = 100 × (CS1 + 0.67 CS2 + 0.33 CS3) ÷ total quantity, and the bridge score is the
         average of its element scores, each element type counting equally (the NBI has no
@@ -95,9 +102,14 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
      carries the state, period, element, the period data (including CS quantities by age
      band) and the decoded profile.
 
-Selections are kept in the URL, for example `/#/TX/2016-2025/107` (state / period /
-element number), with an optional fourth part for the tab: `/#/TX/2016-2025/107/analytics`
-(or `bridge` for Basic Analytics (Bridge Level)).
+Selections are kept in the URL (`writeHash()` and `route()` in `index.html`):
+- `/#/TX/2016-2025`: state and period, no analysis level yet
+- `/#/TX/2016-2025/element`: element type analytics, no element type yet
+- `/#/TX/2016-2025/107`: element type 107, with an optional fourth part for the tab, such as
+  `/#/TX/2016-2025/107/analytics`
+- `/#/TX/2016-2025/bridge`: bridge level analytics
+
+Older links of the form `/#/TX/2016-2025/107/bridge` open bridge level.
 
 ## How the profiles are computed (`scripts/prepare_nbi.py`)
 
@@ -252,15 +264,55 @@ as exact decimals, so the file is identical byte for byte whenever the input is.
 
 ## Bridge locations map (top of step 4, `bridgemap.js`)
 
-When an element type is chosen, step 4 opens with "Where these bridges are": one dot per bridge
-that has the element in the period, at its latest record in the period, left out for the same
-reasons as the charts (so the count matches the figures above the charts). Colour by condition
-(share of the element in CS3 or CS4: none, above 0% to 5%, above 5%), bridge age (20-year
-groups) or one colour. Hover or tap a dot for the structure number, built year, age at the record, the
+Step 4 opens with the map at both analysis levels. The colour buttons depend on the level, and
+each level remembers its own choice:
+
+| Level | Colour by |
+| --- | --- |
+| Element type | Condition, Bridge age, Location |
+| Bridge | BHI, Bridge age, Location |
+
+"Location" is a single colour, so only the positions stand out.
+
+At both levels:
+- **Dot size follows the zoom** (`dotR()`, `dotW()` in `bridgemap.js`). At state zoom the dots
+  are small (radius 1.6 to 2 px) with no white outline, so crowded areas show their real mix of
+  colours. They grow to full size (3.6 px with an outline) by zoom 9. Hovering still works on
+  small dots, because the map accepts a hover within 4 px.
+- **The legend groups are buttons.** Click or tap a group to hide or show its dots. At least one
+  group stays on. Each group shows its count and its share of the bridges shown, for example
+  "2,498 17%". Hidden groups show again when the colour, state, period, element type or level
+  changes, and when Find a bridge picks a bridge in a hidden group.
+
+**Element type level.** One dot per bridge that has the element in the period, at its latest
+record in the period, left out for the same reasons as the charts (so the count matches the
+figures above the charts). Condition is the share of the element in CS3 or CS4 (none, above
+0% to 5%, above 5%). Bridge age uses 20-year groups. Dots with more of the element in CS3 or
+CS4 (or older bridges) are drawn last, so they stay visible. Most dots are in the "None" group,
+so this does not swamp the map the way it did for BHI. Hover or tap a dot for the structure number, built year, age at the record, the
 element's quantity (labelled Length, Area or Count by its unit), latitude and longitude, and a
 bar with the CS1–CS4 shares listed under it. "Show other bridges" adds, in purple, the state's other bridges with element data in the
 period: those without the element, those left out of the charts and those outside the age band. The map's age band and the age filter of "Bridges by condition-state range" follow
-each other. "Hide map" folds the card away and is remembered in the browser.
+each other. "Hide map" folds the card away and is remembered in the browser. A change of
+selection made while the map is hidden is drawn when it is shown again.
+
+**Bridge level.** One dot per bridge with a health score in the period, at its latest score
+year in the period (`opts.bridgeScores` in `index.html`, from `health.json`, and
+`pickBridges()` in `bridgemap.js`). Every bridge with a score is kept, so the count can be a
+little higher than any single year's count in Basic Analytics (Bridge Level). Minnesota
+2018–2025: 14,704 bridges, 261 of them without a recorded position.
+- **BHI** (Bridge Health Index, legend title "Bridge Health Index (BHI)"): 95% or more (green), 85% to below 95% (yellow), 70% to below 85% (orange)
+  and below 70% (red), in the CS1 to CS4 colours, with counts. The bands are finer at the top
+  because most bridges score high (half of Texas bridges score above 97%). The dots are drawn
+  in a fixed shuffled order (by bridge row), so in crowded areas each band shows in proportion
+  to its share. Drawing the lowest scores on top made red look far more common than it is
+  (17% in Minnesota). To see only the lowest scores, click the other three groups off.
+- **Bridge age:** the same 20-year groups, with age at the latest score year. Two more groups
+  show only when they hold bridges: "Over 100 years" and "Year built unknown".
+- **Hover box:** structure number, built year, age, latitude and longitude, then the bridge
+  health score with the number of element types and the data year, and a bar in the band
+  colour. Find a bridge works the same way.
+- "Show other bridges" and the age band filter are element type level only.
 
 **Map settings: `public/mapconfig.js`.** This file holds your own settings, and site updates
 leave it out, so they stay as you set them:
@@ -345,8 +397,9 @@ npx serve public        # or: python -m http.server -d public 8080
    ```
    With Node.js instead: `npx.cmd serve public` (use `npx.cmd`, not `npx`, if PowerShell
    says running scripts is disabled). Press Ctrl+C to stop the server.
-5. Check the site: choose a state, a period and an element type, then try the z-axis switch
-   and the four tabs. Press F12 and look at the Console tab for red errors. If you see an
+5. Check the site: choose a state and a period, then try both analysis levels. At element type
+   level, pick an element type and try the z-axis switch and the three tabs. At bridge level,
+   try the three map colours. Press F12 and look at the Console tab for red errors. If you see an
    old version, press Ctrl+F5.
 6. Commit and push; Vercel redeploys automatically:
    ```powershell
