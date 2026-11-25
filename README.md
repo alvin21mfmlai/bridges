@@ -83,9 +83,11 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
    - **Basic Analytics (Bridge Level):** health scores for whole bridges, from
      `data/<ST>/health.json.gz` (loaded when bridge level is first opened).
      1. **Health score by data year.** Each bridge gets a score from 0% to 100%: element score
-        = 100 × (CS1 + 0.67 CS2 + 0.33 CS3) ÷ total quantity, and the bridge score is the
-        average of its element scores, each element type counting equally (the NBI has no
-        unit costs). For each data year, the chart shows the average score of every bridge
+        = 100 × (CS1 + 0.67 CS2 + 0.33 CS3) ÷ total quantity, and the bridge score is
+        Σ(quantity × unit cost × element score) ÷ Σ(quantity × unit cost) over its element
+        types. The NBI has no unit costs, so the defaults are placeholders: $40 per sq ft,
+        $1,200 per ft and $16,000 each. Visitors can change them in the **BHI unit costs** bar
+        above the bridge level map (see "Health scores" below). For each data year, the chart shows the average score of every bridge
         with a score that year, and a shaded band for the interquartile range (25th to 75th
         percentile, so half of those bridges score inside it), with a hover box per year. **Find a bridge** adds that bridge's
         own line. Key findings, a facts line, and a note when a year has far fewer bridges
@@ -251,16 +253,66 @@ finer than a pixel at national scale.
 
 ## Health scores (`<ST>/health.json.gz`, `scripts/health.py`)
 
-Written with the inventory folder, one file per state (Texas: about 240 KB, 36,455 bridges).
+Written with the inventory folder, one file per state (Texas: about 1.1 MB, 36,455 bridges;
+all states about 11.3 MB, so the data folder is about 61.5 MB).
 An element record counts when its total quantity is positive and it has not failed the quantity
-check, the same records the charts use. Deck area and age are not needed for the score. The
-bridge score is the plain average of its element scores, as a percentage rounded to 0.1 (stored × 10). Columns:
-`base` (first data year), `row` (each bridge's row in `bridges.json`, delta-encoded), `yb` (year
+check, the same records the charts use. Deck area and age are not needed for the score.
+
+The bridge score follows Alvin's formula Σ(Qₑ × cₑ × EHIₑ) ÷ Σ(Qₑ × cₑ), where Qₑ is the
+element's total quantity, cₑ its unit cost and EHIₑ its element score. Since EHIₑ divides by
+Qₑ, Qₑ × EHIₑ = 100 × (CS1 + 0.67 CS2 + 0.33 CS3). The score is a percentage rounded to 0.1.
+
+**Unit costs.** One cost per unit of quantity: sq ft, ft and each. The NBI has no unit costs, so
+the defaults are placeholders (`UNIT_COST_BY_UNIT` in `scripts/health.py`, also `COST_DEFAULT`
+in `index.html`):
+
+| Unit | Placeholder cost | Typical element in 2025 (median) | Typical weight |
+| --- | --- | --- | --- |
+| sq ft | $40 | 5,100 sq ft | about 204,000 |
+| ft | $1,200 | 162 ft | about 194,000 |
+| each | $16,000 | 12 each | about 192,000 |
+
+The costs follow the typical element size in each unit, so a typical element weighs about the
+same whatever its unit, and a bigger element weighs more than a smaller one in the same unit.
+Shares of the weight now roughly follow shares of the records. In Texas (2025), elements in ft
+are 62% of records and 71% of the weight, "each" 22% and 16%, sq ft 16% and 14% (Minnesota: ft
+56% and 65%, sq ft 26% and 24%, each 17% and 11%). With every cost at 1, sq ft elements take
+85% of the Texas weight and 92% in Minnesota.
+
+**Changing the costs on the site.** At bridge level, the **BHI unit costs** bar above the map
+shows the costs in use, marked "placeholders" or "your costs". "Change" opens three inputs ($ per
+sq ft, $ per ft, $ each). "Apply" rescores every bridge, then redraws the chart, key findings,
+facts, map colours, legend counts and hover boxes. Every cost must be above $0. "Reset to
+placeholders" goes back to the defaults. A visitor's costs apply to every state, including the
+bridge health score in the element type level hover box, and are kept in their browser
+(`localStorage` key `bhiUnitCosts`). They are not part of the link, so a shared link always
+opens with the costs of whoever opens it.
+
+**How the browser rescores.** With one cost per unit, a bridge's score only needs two totals per
+unit u: Q_u, the total quantity of its elements in that unit, and N_u = Σ(100 CS1 + 67 CS2 +
+33 CS3) over those elements. Then score = Σ(c_u × N_u) ÷ Σ(c_u × Q_u). NBI quantities are whole
+numbers, so Q_u and N_u are whole numbers too. `healthScores()` in `index.html` works this out
+in double precision, the same way as `bridge_score()` in `scripts/health.py`, so the browser
+gets exactly the same score as the script for any costs. All states loaded so far are rescored
+when the costs change (a few milliseconds for Texas).
+
+**Units.** A record with no unit takes its element type's usual unit. Fifteen element types
+never have a unit (2,380 records, mostly agency elements 600 to 610 in one state, plus a few
+approach slabs, 321). No unit cost can apply to them, so they are left out of the BHI. At a cost
+of 1 they carried almost no weight anyway: 4 of the 2,134,329 bridge-year scores move by 0.1
+(3 in Minnesota, 1 in Alaska), and no bridge loses its score.
+
+Columns:
+`base` (first data year), `units` (`["sq ft", "ft", "each"]`), `cost` (the default cost per
+unit, same order), `row` (each bridge's row in `bridges.json`, delta-encoded), `yb` (year
 built, 0 if unknown), `nrun` (runs per bridge), and per run of consecutive data years with the
-same score and element count: `yy` (first year × 100 + last year, as offsets from `base`), `sc`
-(score × 10) and `ne` (element types counted). Element scores are rounded to 6 decimals and summed
-as exact decimals, so the file is identical byte for byte whenever the input is. Check: Texas
-2016–2025 has 5,344 bridges with data in every year, averaging 96.2% in 2016 and 94.8% in 2025.
+same element count and per-unit totals: `yy` (first year × 100 + last year, as offsets from
+`base`), `ne` (element types counted), `q` (one list per unit: Q_u, 0 when none) and `n` (one
+list per unit: N_u). Sums are exact, so the file is identical byte for byte whenever the input
+is. Checks at the default costs: Texas 2016–2025 averages 95.8% in 2016 and 96.4% in 2025 (all
+bridges with a score each year), median 98.2% and 5th percentile 86.8% in 2025. Minnesota
+bridge L5920 scores 40.3% in 2025. At costs of 1, 1, 1: Minnesota 2016–2025 94.5% → 89.5%,
+L5920 27.2%.
 
 ## Bridge locations map (top of step 4, `bridgemap.js`)
 
@@ -311,7 +363,11 @@ little higher than any single year's count in Basic Analytics (Bridge Level). Mi
   show only when they hold bridges: "Over 100 years" and "Year built unknown".
 - **Hover box:** structure number, built year, age, latitude and longitude, then the bridge
   health score with the number of element types and the data year, and a bar in the band
-  colour. Find a bridge works the same way.
+  colour. Below that, the total quantity of the bridge's elements in each unit: "Total sq ft",
+  "Total ft" and "Total units (each)", 0 when it has none in that unit. These are the elements
+  counted in the health score in that data year (the Q_u totals in `health.json`, looked up per
+  bridge and year through the run index `R` in `loadHealth()`). Minnesota bridge L5920 in 2025:
+  1,198 sq ft, 304 ft, 0 each. Find a bridge works the same way.
 - "Show other bridges" and the age band filter are element type level only.
 
 **Map settings: `public/mapconfig.js`.** This file holds your own settings, and site updates
@@ -335,9 +391,11 @@ and carried over in between, so 14.7 million yearly records fit in 4.7 million r
 
 The hover box and the pinned box also show two scores. **Element score** is the selected element's
 own score, worked out from the CS shares listed below it (100 × (CS1 + 0.67 CS2 + 0.33 CS3)).
-**Bridge health score** is the average over every element type on the bridge in its latest data
-year of the period, for example "Bridge health score: 43.3% (average of 7 element types, 2025 data)" for
-Minnesota bridge L5920, whose wearing surface (element 510) is 100% CS4 and scores 0%. The
+**Bridge health score** uses every element type on the bridge, weighted by quantity × unit
+cost, in its latest data year of the period, for example "Bridge health score: 40.3%" with the
+note "Weighted by quantity × unit cost over 7 element types on this bridge, 2025 data" for
+Minnesota bridge L5920. Its wearing surface (510) and steel coating (515) are 100% CS4 and score
+0%, but carry only 2% and 4% of the weight. Its steel girders (107, 168 ft, 24.2%) carry 49%. The
 bridge scores come from
 `<ST>/health.json.gz`, loaded after the dots are drawn (shared with Basic Analytics (Bridge
 Level) through `healthFor()` in `index.html`, passed to the map as `opts.health`).

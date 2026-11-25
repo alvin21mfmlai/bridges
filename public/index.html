@@ -136,6 +136,25 @@ select:hover{border-color:#6b6b6b}
 .wb-box{width:100%;min-height:280px}
 /* Basic Analytics (Bridge Level): health score by data year */
 .tab-note{margin:0 0 14px;padding:10px 14px;background:#fff;border:1px solid var(--tl);border-left:3px solid var(--tc);border-radius:var(--r);font-size:14px;line-height:1.5}
+/* BHI unit costs (bridge level, above the map) */
+.cost-bar{margin:0 0 14px;padding:10px 14px;border:1px solid var(--border-subtle);border-left:4px solid #1f6fb2;border-radius:10px;background:#f6f9fd}
+.cost-bar[hidden],.cost-form[hidden],.cost-err[hidden]{display:none}
+.cost-sum{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:14px}
+.cost-k{font-weight:600}
+.cost-now b{font-weight:600}
+.cost-tag{font-size:12.5px;color:var(--text-muted)}
+.cost-tag.mine{color:#1f6fb2;font-weight:600}
+.cost-form{margin-top:10px}
+.cost-help{margin:0 0 10px;font-size:13px;color:var(--text-muted);line-height:1.45}
+.cost-fields{display:flex;flex-wrap:wrap;gap:10px 16px}
+.cost-fields label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--text-muted)}
+.cost-fields input{height:34px;width:140px;padding:0 10px;border:1px solid var(--border-fg);border-radius:var(--r);font:inherit;font-size:14px;color:var(--text)}
+.cost-fields input[aria-invalid="true"]{border-color:#c4302b}
+.cost-err{margin:8px 0 0;font-size:13px;color:#c4302b}
+.cost-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn-go{background:#1f6fb2;border-color:#1f6fb2;color:#fff}
+.btn-go:hover{background:#185a92;border-color:#185a92}
+@media (max-width:600px){.cost-fields input{width:100%}.cost-fields label{flex:1 1 100px}}
 .hs-find{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 12px}
 .hs-find .lbl{font-size:12px;font-weight:600;color:var(--text-muted);margin:0}
 .hs-find input{height:32px;width:200px;padding:0 10px;border:1px solid var(--border-fg);border-radius:var(--r);font:inherit;font-size:14px}
@@ -648,6 +667,19 @@ table.data tr.hl td{background:var(--accent-muted)}
         <p class="sub change-row" id="profChange" hidden>Change: <button class="linkbtn" data-go="state">state</button> · <button class="linkbtn" data-go="years">period</button> · <button class="linkbtn" data-go="type" id="chgLvl">element type</button></p></div>
     </div>
     <div class="panel-body">
+      <section class="cost-bar" id="costBar" aria-labelledby="h-cost" hidden>
+        <div class="cost-sum"><span class="cost-k" id="h-cost">BHI unit costs</span><span class="cost-now" id="costNow"></span><span class="cost-tag" id="costTag"></span><button type="button" class="linkbtn" id="costEdit" aria-expanded="false" aria-controls="costForm">Change</button></div>
+        <form class="cost-form" id="costForm" hidden novalidate>
+          <p class="cost-help">Each element's weight in the BHI is its quantity × its unit cost. The NBI has no costs, so the defaults are placeholders. Your costs apply to every state and are kept in this browser.</p>
+          <div class="cost-fields">
+            <label for="cost0">$ per sq ft<input type="number" id="cost0" min="0" step="any" inputmode="decimal"></label>
+            <label for="cost1">$ per ft<input type="number" id="cost1" min="0" step="any" inputmode="decimal"></label>
+            <label for="cost2">$ each<input type="number" id="cost2" min="0" step="any" inputmode="decimal"></label>
+          </div>
+          <p class="cost-err" id="costErr" role="alert" hidden></p>
+          <div class="cost-btns"><button type="submit" class="btn btn-go">Apply</button><button type="button" class="btn" id="costReset">Reset to placeholders</button><button type="button" class="btn" id="costCancel">Cancel</button></div>
+        </form>
+      </section>
       <section class="bm" id="bridgeMap" aria-labelledby="h-bm" hidden>
         <div class="bm-head">
           <div><h3 id="h-bm">Bridge locations</h3><p class="bm-sub" aria-live="polite"></p></div>
@@ -910,9 +942,9 @@ table.data tr.hl td{background:var(--accent-muted)}
           </div>
           <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
             <p class="lead">How healthy are this state's bridges, and is that changing?</p>
-            <p>Each bridge gets a health score from 0% to 100%, averaged over every element type on the bridge. A score of 100% means all of its elements are in CS1 (good), and 0% means all of them are in CS4 (severe).</p>
+            <p>Each bridge gets a health score from 0% to 100%, from every element type on the bridge, weighted by each element's quantity × unit cost. You can change the unit costs above the map. The defaults are placeholders: $40 per sq ft, $1,200 per ft and $16,000 each. A score of 100% means all of its elements are in CS1 (good), and 0% means all of them are in CS4 (severe).</p>
             <!-- Hidden at Alvin's request (23 Nov):
-            <p>An element's score is 100 × (CS1 + 0.67 × CS2 + 0.33 × CS3) ÷ its total quantity. A bridge's score is the average of its element scores, with each element type counting equally for now.</p>
+            <p>An element's score is 100 × (CS1 + 0.67 × CS2 + 0.33 × CS3) ÷ its total quantity. A bridge's score is Σ(quantity × unit cost × element score) ÷ Σ(quantity × unit cost), with placeholder unit costs for now ($40 per sq ft, $1,200 per ft, $16,000 each).</p>
             <p>Most bridges are inspected every two years, so a score often stays the same for a year and then changes in a step.</p>
             -->
           </div></div>
@@ -1412,6 +1444,7 @@ function renderProfile() {
    (Bridge Level). The element type tabs are hidden and the bridge level view is the only one. */
 function renderBridgeLevel() {
   $("#panel-profile").classList.remove("locked");
+  $("#costBar").hidden = false; showCosts();
   $("#profSub").textContent = `Whole bridges in ${stIdx.name}, ${sel.win.replace("-", " to ")}. Each health score uses every element type on the bridge.`;
   $("#profChange").hidden = false;
   if (bmap) { const [s0, e0] = sel.win.split("-").map(Number); bmap.update({ level: "bridge", st: sel.st, stateName: stIdx.name, en: null, s: s0, e: e0 }); }
@@ -1420,6 +1453,7 @@ function renderBridgeLevel() {
 let elTab = "insights"; // the element type tab to return to after visiting bridge level
 function setLevelView() {
   const br = sel.lvl === "bridge";
+  if (!br) { $("#costBar").hidden = true; costForm(false); }
   $("#tab-bridge").hidden = !br;
   ["insights", "analytics", "advanced"].forEach((x) => ($(`#tab-${x}`).hidden = br));
   $("#tabsLbl").textContent = br ? "View" : "Choose a view";
@@ -1642,36 +1676,95 @@ function renderOtherTabs() {
 
 /* ---------- Basic Analytics (Bridge Level): health score by data year ----------
    data/<ST>/health.json (scripts/health.py) holds every bridge's health score for each data year.
-   It is unpacked once per state into a table of bridges × years: S[b * NY + (year - base)] is the
-   score × 10, or -1 when the bridge has no element data that year. The structure numbers come from
+   Each run holds, per unit (sq ft, ft, each), the bridge's total quantity Q and N = Σ(100 CS1 +
+   67 CS2 + 33 CS3). healthScores() turns them into scores for the current unit costs:
+   score = Σ(cost × N) ÷ Σ(cost × Q), the same as scripts/health.py. The scores fill a table of
+   bridges × years: S[b * NY + (year - base)] is the score × 10, or -1 when the bridge has no
+   element data that year. When the costs change, every loaded state is scored again. The structure numbers come from
    data/<ST>/bridges.json, which the bridge map also uses. healthFor(st) shares one copy per state
    between this tab and the bridge map's hover box. */
 let hs = null, hsPick = null, hsStats = null, hsRz = 0;
 const hsCache = new Map();
+/* BHI unit costs, one per unit in the order sq ft, ft, each. null means the placeholder defaults
+   from the data files (the same as COST_DEFAULT). A visitor's own costs are kept in this browser. */
+const COST_DEFAULT = [40, 1200, 16000], COST_KEY = "bhiUnitCosts";
+let costs = null, costVer = 0;
+try { const v = JSON.parse(localStorage.getItem(COST_KEY)); if (Array.isArray(v) && v.length === 3 && v.every((x) => Number.isFinite(x) && x > 0)) costs = v; } catch (e) { /* storage off */ }
+const costNow = () => costs || COST_DEFAULT;
+function setCosts(c) {
+  costs = c && c.some((x, i) => x !== COST_DEFAULT[i]) ? c : null;
+  try { if (costs) localStorage.setItem(COST_KEY, JSON.stringify(costs)); else localStorage.removeItem(COST_KEY); } catch (e) { /* storage off */ }
+  costVer++; showCosts();
+  if (sel.lvl === "bridge" && stIdx && sel.win) renderBridgeLevel(); // chart, findings and map with the new scores
+}
+// the unit cost bar above the bridge level map
+const money = (x) => `$${x.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+function showCosts() {
+  const c = costNow();
+  $("#costNow").innerHTML = `<b>${money(c[0])}</b> per sq ft · <b>${money(c[1])}</b> per ft · <b>${money(c[2])}</b> each`;
+  const tg = $("#costTag"); tg.textContent = costs ? "your costs" : "placeholders"; tg.classList.toggle("mine", !!costs);
+}
+function costForm(open) {
+  $("#costForm").hidden = !open; $("#costEdit").hidden = open; $("#costEdit").setAttribute("aria-expanded", String(open));
+  if (!open) return;
+  costNow().forEach((x, i) => { const el = $(`#cost${i}`); el.value = x; el.removeAttribute("aria-invalid"); });
+  $("#costErr").hidden = true; $("#cost0").focus();
+}
+$("#costEdit").addEventListener("click", () => costForm(true));
+$("#costCancel").addEventListener("click", () => { costForm(false); $("#costEdit").focus(); });
+$("#costReset").addEventListener("click", () => { costForm(false); setCosts(null); $("#costEdit").focus(); });
+$("#costForm").addEventListener("keydown", (ev) => { if (ev.key === "Escape") { costForm(false); $("#costEdit").focus(); } });
+$("#costForm").addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  const v = [0, 1, 2].map((i) => Number($(`#cost${i}`).value)), bad = v.map((x) => !(Number.isFinite(x) && x > 0 && x <= 1e9));
+  bad.forEach((b, i) => $(`#cost${i}`).setAttribute("aria-invalid", String(b)));
+  if (bad.some(Boolean)) { $("#costErr").textContent = "Enter a cost above $0 for each unit."; $("#costErr").hidden = false; return; }
+  costForm(false); setCosts(v); $("#costEdit").focus();
+});
+showCosts();
+// score every bridge and year of one state for the current costs
+function healthScores(h) {
+  const c = costs || h.cost, U = c.length, { S, NY, rb, yy, q, nn } = h;
+  S.fill(-1);
+  for (let k = 0; k < rb.length; k++) {
+    let w = 0, x = 0;
+    for (let u = 0; u < U; u++) { w += c[u] * q[u][k]; x += c[u] * nn[u][k]; }
+    const v = w > 0 ? Math.round((x / w) * 10) : -1, o = rb[k] * NY, y0 = Math.floor(yy[k] / 100), y1 = yy[k] % 100;
+    for (let y = y0; y <= y1; y++) S[o + y] = v;
+  }
+  h.ver = costVer;
+}
 async function loadHealth(st) {
   const [d, B] = await Promise.all([getJSON(`data/${st}/health.json`), getJSON(`data/${st}/bridges.json`)]);
-  const n = d.row.length; let maxY = 0;
+  const n = d.row.length, K = d.yy.length; let maxY = 0;
   d.yy.forEach((v) => { if (v % 100 > maxY) maxY = v % 100; });
-  const NY = maxY + 1, S = new Int16Array(n * NY).fill(-1), N = new Uint8Array(n * NY), rows = new Int32Array(n);
+  const NY = maxY + 1, S = new Int16Array(n * NY), N = new Uint8Array(n * NY), R = new Int32Array(n * NY).fill(-1), rows = new Int32Array(n), rb = new Int32Array(K);
   let r = 0, k = 0;
   for (let i = 0; i < n; i++) {
     r += d.row[i]; rows[i] = r;
     for (let j = 0; j < d.nrun[i]; j++, k++) {
+      rb[k] = i;
       const y0 = Math.floor(d.yy[k] / 100), y1 = d.yy[k] % 100;
-      for (let y = y0; y <= y1; y++) { S[i * NY + y] = d.sc[k]; N[i * NY + y] = d.ne[k]; }
+      for (let y = y0; y <= y1; y++) { N[i * NY + y] = d.ne[k]; R[i * NY + y] = k; }
     }
   }
   const of = new Map(); rows.forEach((row, i) => of.set(row, i));
-  return { st, base: d.base, NY, n, S, N, rows, yb: d.yb, ids: B.id, of };
+  const h = { st, base: d.base, NY, n, S, N, R, rows, yb: d.yb, ids: B.id, of, rb, yy: d.yy, q: d.q, nn: d.n, cost: d.cost || COST_DEFAULT, units: d.units };
+  healthScores(h);
+  return h;
 }
+// one copy per state, scored for the current costs
 function healthFor(st) {
   if (!hsCache.has(st)) { const p = loadHealth(st); p.catch(() => hsCache.delete(st)); hsCache.set(st, p); }
-  return hsCache.get(st);
+  return hsCache.get(st).then((h) => { if (h.ver !== costVer) healthScores(h); return h; });
 }
-// a bridge's score in the latest data year from s to e that has one: { v, y, n (element types) } or null
+// a bridge's score in the latest data year from s to e that has one: { v, y, n (element types),
+// q (total quantity per unit: sq ft, ft, each) } or null
+const qtyAt = (h, i) => h.q.map((a) => (h.R[i] >= 0 ? a[h.R[i]] : 0));
 function healthAt(h, row, s, e) {
+  if (h.ver !== costVer) healthScores(h);
   const b = h.of.get(row); if (b == null) return null;
-  for (let y = Math.min(e, h.base + h.NY - 1); y >= Math.max(s, h.base); y--) { const i = b * h.NY + y - h.base, x = h.S[i]; if (x >= 0) return { v: x / 10, y, n: h.N[i] }; }
+  for (let y = Math.min(e, h.base + h.NY - 1); y >= Math.max(s, h.base); y--) { const i = b * h.NY + y - h.base, x = h.S[i]; if (x >= 0) return { v: x / 10, y, n: h.N[i], q: qtyAt(h, i) }; }
   return null;
 }
 // value at share p of a sorted list, interpolating between neighbours (as a spreadsheet's PERCENTILE)
@@ -1684,8 +1777,10 @@ const hsYears = () => {
   const [s, e] = sel.win.split("-").map(Number);
   return stIdx.years.filter((y) => y >= s && y <= e && y >= hs.base && y - hs.base < hs.NY);
 };
+const hsKey = () => `${sel.st}|${sel.win}|${costVer}`;
 // for each data year: the average and spread of every bridge with a score that year
 function healthStats() {
+  if (hs.ver !== costVer) healthScores(hs);
   const { S, NY, n, base } = hs, years = hsYears();
   const D = years.map((y) => {
     const v = [];
@@ -1695,7 +1790,7 @@ function healthStats() {
   });
   // a "thin" year holds far fewer bridges than the state's other years (such as Texas 2017)
   const counts = D.map((d) => d.n).filter((c) => c > 0).sort((a, c) => a - c), mid = quant(counts, 0.5) || 0;
-  return { key: `${sel.st}|${sel.win}`, years, D, mid, thin: D.filter((d) => d.n > 0 && d.n < 0.6 * mid) };
+  return { key: hsKey(), years, D, mid, thin: D.filter((d) => d.n > 0 && d.n < 0.6 * mid) };
 }
 const f1 = (v) => (v == null ? "—" : `${v.toFixed(1)}%`); // health scores are shown as percentages (0% to 100%)
 const yearList = (ys) => (ys.length < 2 ? String(ys[0]) : `${ys.slice(0, -1).join(", ")} and ${ys[ys.length - 1]}`);
@@ -1858,7 +1953,7 @@ function setTab(t, { focus = false, hash = true, draw = true } = {}) {
   if (!draw) return;
   if (t === "insights") requestAnimationFrame(drawProfiles);
   if (t === "analytics") requestAnimationFrame(() => { drawWeibull(); drawMarkov(); });
-  if (t === "bridge") { if (hsStats && hsStats.key === `${sel.st}|${sel.win}`) requestAnimationFrame(drawHealth); else renderBridgeTab(); }
+  if (t === "bridge") { if (hsStats && hsStats.key === hsKey()) requestAnimationFrame(drawHealth); else renderBridgeTab(); }
   if (hash) writeHash();
 }
 $(".tabs").addEventListener("click", (ev) => { const b = ev.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
@@ -2090,7 +2185,7 @@ const bmap = window.BridgeMap && window.L ? BridgeMap.create({
     const out = [], y1 = Math.min(e, h.base + h.NY - 1), y0 = Math.max(s, h.base);
     for (let b = 0; b < h.n; b++) for (let y = y1; y >= y0; y--) {
       const i = b * h.NY + y - h.base, x = h.S[i];
-      if (x >= 0) { out.push({ row: h.rows[b], v: x / 10, y, n: h.N[i], yb: h.yb[b] }); break; }
+      if (x >= 0) { out.push({ row: h.rows[b], v: x / 10, y, n: h.N[i], yb: h.yb[b], q: qtyAt(h, i) }); break; }
     }
     return out;
   }),

@@ -94,7 +94,7 @@
     for (const q of P) {
       const lat = B.lat[q.row], lon = B.lon[q.row];
       if (lat == null || lon == null) { noPos++; continue; }
-      out.push({ row: q.row, lat: lat / 1e5, lon: lon / 1e5, year: q.y, yb: q.yb || null, age: q.yb ? q.y - q.yb : null, v: q.v, n: q.n });
+      out.push({ row: q.row, lat: lat / 1e5, lon: lon / 1e5, year: q.y, yb: q.yb || null, age: q.yb ? q.y - q.yb : null, v: q.v, n: q.n, q: q.q || [0, 0, 0] });
     }
     return { pts: out, excluded: {}, noPos };
   }
@@ -215,13 +215,16 @@
     }
     const scoreRow = (k, v, note) => `<span class="k">${k}:</span><span class="v">${v.toFixed(1)}%</span><span class="n">${note}</span>`;
     const posOf = (r) => `${(B.lat[r] / 1e5).toFixed(4)}, ${(B.lon[r] / 1e5).toFixed(4)}`; // 4 decimals: about 10 m
-    // hover box at bridge level: the bridge's facts, then its health score with a bar in its band colour
+    // hover box at bridge level: the bridge's facts, its health score with a bar in its band colour,
+    // then the total quantity of its elements in each unit (0 when it has none in that unit)
     function tipBridge(p) {
-      const row = (k, v) => `<span class="k">${k}:</span><span>${v}</span>`;
+      const row = (k, v) => `<span class="k">${k}:</span><span>${v}</span>`, q = p.q;
       return `<b>Structure ${fmt.esc(B.id[p.row])}</b>` +
         `<div class="bm-kv">${row("Built year", p.yb || "Unknown")}${p.age != null ? row("Age", `${p.age} years (${p.year} data)`) : ""}${row("Lat, Long", posOf(p.row))}</div>` +
-        `<div class="bm-kv bm-score">${scoreRow("Bridge health score", p.v, `Average of ${p.n} element type${p.n === 1 ? "" : "s"} on this bridge, ${p.year} data`)}</div>` +
-        `<span class="bm-bar bm-sbar"><i style="width:${p.v.toFixed(1)}%;background:${BHI[bhiClass(p)].c}"></i></span>`;
+        `<div class="bm-kv bm-score">${scoreRow("Bridge health score", p.v, `Weighted by quantity × unit cost over ${p.n} element type${p.n === 1 ? "" : "s"} on this bridge, ${p.year} data`)}</div>` +
+        `<span class="bm-bar bm-sbar"><i style="width:${p.v.toFixed(1)}%;background:${BHI[bhiClass(p)].c}"></i></span>` +
+        `<div class="bm-kv bm-score bm-qty">${row("Total sq ft", fmt.int(q[0]))}${row("Total ft", fmt.int(q[1]))}${row("Total units (each)", fmt.int(q[2]))}` +
+        `<span class="n">Elements counted in the health score, ${p.year} data</span></div>`;
     }
     // hover box (and pinned popup) for one bridge: its facts, then the condition bar and CS shares
     function tipHtml(p) {
@@ -240,7 +243,7 @@
       const hv = health && health.st === cur.st ? health.fn(p.row, cur.s, cur.e) : null;
       return `<b>Structure ${fmt.esc(id)}</b>` +
         `<div class="bm-kv">${row("Built year", p.yb)}${row("Age", `${p.age} years (${p.year} record)`)}${row(qLabel, `${cur.unit === "each" ? fmt.int(Math.round(p.q)) : fmt.sig3(p.q)}${unit}`)}${row("Lat, Long", pos)}</div>` +
-        `<div class="bm-kv bm-score">${hv ? `${score("Bridge health score", hv.v, `Average of ${hv.n} element type${hv.n === 1 ? "" : "s"} on this bridge, ${hv.y} data`)}` : ""}${score("Element score", es, "This element type only, from the CS shares below")}</div>` +
+        `<div class="bm-kv bm-score">${hv ? `${score("Bridge health score", hv.v, `Weighted by quantity × unit cost over ${hv.n} element type${hv.n === 1 ? "" : "s"} on this bridge, ${hv.y} data`)}` : ""}${score("Element score", es, "This element type only, from the CS shares below")}</div>` +
         `<span class="bm-bar">${p.s.map((v, k) => `<i style="width:${w[k]}%;background:${CS_COLORS[k]}"></i>`).join("")}</span>` +
         `<div class="bm-kv bm-cs">${p.s.map((v, k) => row(`<i style="background:${CS_COLORS[k]}"></i>CS${k + 1}`, pc(v))).join("")}</div>`;
     }
