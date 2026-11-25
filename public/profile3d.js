@@ -26,7 +26,8 @@
   const DEFAULT_VIEW = { az: 42, el: 26 };
   const view = { ...DEFAULT_VIEW };
 
-  /* cfg: { cells:[{u,v,value}], bins, zTop, zStep, cMax, csName, zLabel, fmtValue, fmtTick, tipFor(cell) } */
+  /* cfg: { cells:[{u,v,value}], bins, zTop, zStep, cMax, csName, zLabel, fmtValue, fmtTick, tipFor(cell),
+          vLabel (optional title of the second floor axis, default "<csName> quantity (%)") } */
   function render(box, cfg) {
     const W = Math.max(240, Math.round(box.clientWidth));
     const narrow = W < 480, fs = narrow ? 10 : 11;
@@ -93,7 +94,7 @@
       const a = at(0, 4.4), b = at(N, 4.4), m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
       let ang = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
       if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
-      const title = axis === "u" ? "Bridge age (years)" : `${cfg.csName} quantity (%)`;
+      const title = axis === "u" ? "Bridge age (years)" : cfg.vLabel || `${cfg.csName} quantity (%)`;
       s += `<text transform="translate(${m[0].toFixed(1)} ${(m[1] + 4).toFixed(1)}) rotate(${ang.toFixed(1)})" text-anchor="middle" font-size="${fs + 0.5}" font-weight="600" fill="${text}">${esc(title)}</text>`;
       return s;
     };
@@ -122,7 +123,7 @@
         faces.push(`<polygon points="${pts([f(ua, va, 0), f(ub, vb, 0), f(ub, vb, z), f(ua, va, z)])}" fill="${rgb(col, shade)}"/>`);
       }
       faces.push(`<polygon points="${pts([f(b.u0, b.v0, z), f(b.u1, b.v0, z), f(b.u1, b.v1, z), f(b.u0, b.v1, z)])}" fill="${rgb(col)}"/>`);
-      barsSvg += `<g class="bar3d" data-u="${b.c.u}" data-tip="${esc(cfg.tipFor(b.c))}" stroke="rgba(36,43,46,.55)" stroke-width=".7" stroke-linejoin="round">${faces.join("")}</g>`;
+      barsSvg += `<g class="bar3d" data-u="${b.c.u}" data-v="${b.c.v}" data-tip="${esc(cfg.tipFor(b.c))}" stroke="rgba(36,43,46,.55)" stroke-width=".7" stroke-linejoin="round">${faces.join("")}</g>`;
       const top = P((b.u0 + b.u1) / 2, (b.v0 + b.v1) / 2, z);
       labels += `<text x="${top[0].toFixed(1)}" y="${(top[1] - 9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="#242424" stroke="#fff" stroke-width="3" paint-order="stroke" pointer-events="none">${cfg.fmtValue(z)}</text>`;
     }

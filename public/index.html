@@ -172,6 +172,36 @@ select:hover{border-color:#6b6b6b}
 .hs-empty{font-size:13px;fill:#5c6670}
 .hs-note{margin:10px 0 0;font-size:13.5px;line-height:1.5;color:var(--text-muted)}
 .hs-note .linkbtn{font-size:13.5px}
+.fc-zone{fill:#eef3f8}
+.fc-zlbl{font-size:11.5px;fill:#5c6670;font-weight:600}
+.fc-band{fill:#1f6fb2;fill-opacity:.07;stroke:#1f6fb2;stroke-opacity:.4;stroke-width:1;stroke-dasharray:3 3}
+.fc-avg{fill:none;stroke:#1f6fb2;stroke-width:2.6;stroke-dasharray:7 5;stroke-linejoin:round}
+.fc-dot{fill:#fff;stroke:#1f6fb2;stroke-width:2}
+.fc-br{fill:none;stroke:#c2561a;stroke-width:2;stroke-dasharray:2 4;stroke-linecap:round}
+.fc-brdot{fill:#fff;stroke:#c2561a;stroke-width:1.8}
+.fc-dot.on,.fc-brdot.on{stroke:#1d3047;stroke-width:2.4}
+.fc-bk{margin-top:12px}
+.fc-bk[hidden]{display:none}
+.fc-bk h4{margin:0;font-size:15px;font-weight:600}
+.bk-box{width:100%;min-height:200px}
+.bk-box svg{display:block;width:100%;height:auto;overflow:visible}
+.bk-gap{fill:#0a7f86;fill-opacity:.1}
+.bk-act{fill:none;stroke:#0a7f86;stroke-width:2.4;stroke-linejoin:round}
+.bk-adot{fill:#0a7f86;stroke:#fff;stroke-width:1.5}
+.bk-pred{fill:none;stroke:#0a7f86;stroke-width:2.4;stroke-dasharray:7 5;stroke-linejoin:round}
+.bk-pdot{fill:#fff;stroke:#0a7f86;stroke-width:2}
+.bk-adot.on,.bk-pdot.on{stroke:#1d3047;stroke-width:2.4}
+.bk-lbl{font-size:12px;font-weight:600;fill:#3c4650}
+@media (max-width:600px){.bk-lbl{font-size:11px}}
+.fc-pick{margin:0 0 10px;font-size:13.5px;color:var(--text-muted)}
+.fc-pick b{color:var(--text)}
+.ba-bar{fill:#1f6fb2;fill-opacity:.8}
+.ba-bar.on{fill-opacity:1}
+.ba-iqr{stroke:#1d3047;stroke-width:1.5;fill:none}
+.ba-avg{stroke:#5c6670;stroke-width:1.5;stroke-dasharray:5 4}
+.ba-hit{fill:transparent;cursor:pointer}
+.prof-grid.one{grid-template-columns:minmax(0,1fr)}
+.prof-grid .bar3d.pick polygon{stroke:#c2561a;stroke-width:2.6}
 @media (max-width:600px){.hs-find input{width:100%;flex:1 1 160px}}
 .wb-box svg{display:block;width:100%;height:auto;overflow:visible}
 .wb-fit{fill:none;stroke:#0071b8;stroke-width:2.6;stroke-linejoin:round}
@@ -735,9 +765,10 @@ table.data tr.hl td{background:var(--accent-muted)}
         </div>
         <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
           <p class="lead">How is deck area spread across bridge age and element condition?</p>
-          <p>Each bar is one age band and one CS% band (the share of the element in that condition state).</p>
-          <p>Every bridge appears once in each chart, with its full deck area.</p>
-          <p>Drag a chart to rotate all four. Hover a bar to see its values and highlight its age band in every chart.</p>
+          <p>Each bar is one age band and one CS% band.</p>
+          <p>Bar height is their total deck area.</p>
+          <p>Drag to rotate all four charts.</p>
+          <p>Hover a bar for its values.</p>
         </div></div>
         <div class="findings" id="profFind" hidden></div>
         <div class="mode-row">
@@ -781,7 +812,7 @@ table.data tr.hl td{background:var(--accent-muted)}
           </div>
           <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
             <p class="lead">How much of each bridge's element is in each condition state?</p>
-            <p id="distHelp"></p>
+            <div id="distHelp"></div>
           </div></div>
         <div class="findings" id="distFind" hidden></div>
           <div class="mode-row">
@@ -830,7 +861,8 @@ table.data tr.hl td{background:var(--accent-muted)}
             </div>
             <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
               <p class="lead">How long does the element stay in CS1 (good) before moving to CS2?</p>
-              <p>Each dot is the share of the element still in CS1 for bridges in one 5-year age band. Bigger dots mean more bridges.</p>
+              <p>Each dot is the share of the element still in CS1, for one 5-year age band.</p>
+              <p>Bigger dots mean more bridges.</p>
               <!-- <p>The blue line is the fitted Weibull curve, S(t) = exp(−(t/η)<sup>β</sup>).</p> -->
               <p>The blue line is the prediction curve.</p>
             </div></div>
@@ -874,8 +906,9 @@ table.data tr.hl td{background:var(--accent-muted)}
             </div>
             <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
               <p class="lead">How quickly does the element move from CS2 to CS3, and from CS3 to CS4?</p>
-              <p>Each line is the yearly chance that part of the element moves to the next condition state.</p>
-              <p>CS1 → CS2 comes from Prediction Method #1. CS2 → CS3 and CS3 → CS4 are fitted for each 20-year age group.</p>
+              <p>Each line is the yearly chance of moving to the next condition state.</p>
+              <p>CS1 → CS2 comes from Prediction Method #1.</p>
+              <p>The others are fitted for each 20-year age group.</p>
             </div></div>
         <div class="findings" id="mkFind" hidden></div>
             <p class="wb-warn" id="mkWarn" hidden></p>
@@ -934,6 +967,9 @@ table.data tr.hl td{background:var(--accent-muted)}
       <div class="tab-pane" role="tabpanel" id="pane-bridge" aria-labelledby="tab-bridge" hidden>
         <nav class="feat-nav" aria-label="Features in Basic Analytics (Bridge Level)"><span>In this view:</span>
           <button data-go-feat="hsSec"><b>1</b>Health score by data year</button>
+          <button data-go-feat="fcSec"><b>2</b>Health score forecast</button>
+          <button data-go-feat="baSec"><b>3</b>Average health by age</button>
+          <button data-go-feat="b3Sec"><b>4</b>Health by age (3D)</button>
         </nav>
         <section class="feature" id="hsSec" aria-labelledby="h-hs">
           <div class="pane-head">
@@ -942,7 +978,9 @@ table.data tr.hl td{background:var(--accent-muted)}
           </div>
           <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
             <p class="lead">How healthy are this state's bridges, and is that changing?</p>
-            <p>Each bridge gets a health score from 0% to 100%, from every element type on the bridge, weighted by each element's quantity × unit cost. You can change the unit costs above the map. The defaults are placeholders: $40 per sq ft, $1,200 per ft and $16,000 each. A score of 100% means all of its elements are in CS1 (good), and 0% means all of them are in CS4 (severe).</p>
+            <p>Each bridge's score combines its element types, weighted by quantity × unit cost.</p>
+            <p>100% means every element is in CS1 (good).</p>
+            <p>You can change the unit costs above the map.</p>
             <!-- Hidden at Alvin's request (23 Nov):
             <p>An element's score is 100 × (CS1 + 0.67 × CS2 + 0.33 × CS3) ÷ its total quantity. A bridge's score is Σ(quantity × unit cost × element score) ÷ Σ(quantity × unit cost), with placeholder unit costs for now ($40 per sq ft, $1,200 per ft, $16,000 each).</p>
             <p>Most bridges are inspected every two years, so a score often stays the same for a year and then changes in a step.</p>
@@ -961,6 +999,77 @@ table.data tr.hl td{background:var(--accent-muted)}
             <div class="hs-box" id="hsBox"></div>
           </div>
           <p class="hs-note" id="hsNote" hidden></p>
+        </section>
+        <section class="feature" id="fcSec" aria-labelledby="h-fc">
+          <div class="pane-head">
+            <div><p class="feat-kicker"><span class="feat-badge">2</span>Basic Analytics (Bridge Level)</p><h3 class="pane-title" id="h-fc">Health score forecast</h3><div class="prof-facts" id="fcFacts"></div></div>
+            <div class="tools"><button class="btn" id="fcCsv" disabled>Download CSV</button></div>
+          </div>
+          <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
+            <p class="lead">Where are the health scores heading if no repairs are made?</p>
+            <p>Elements age yearly with Prediction Methods #1 and #2, without repairs.</p>
+            <p>The lower chart tests it from the period's first year.</p>
+            <p>Find a bridge in section 1 to follow it.</p>
+          </div></div>
+          <div class="findings" id="fcFind" hidden></div>
+          <p class="fc-pick" id="fcPick" hidden></p>
+          <div class="chart-card">
+            <div class="wb-legend" id="fcLegend"></div>
+            <div class="hs-box" id="fcBox"></div>
+          </div>
+          <!-- back-check in its own chart (Alvin, 25 Nov), so the same-bridge lines are not read against the all-bridge average -->
+          <div class="chart-card fc-bk" id="fcBkCard" hidden>
+            <h4 id="fcBkTitle"></h4>
+            <p class="csub" id="fcBkSub"></p>
+            <div class="wb-legend" id="fcBkLegend"></div>
+            <div class="bk-box" id="fcBkBox"></div>
+          </div>
+          <p class="hs-note" id="fcNote" hidden></p>
+        </section>
+        <section class="feature" id="baSec" aria-labelledby="h-ba">
+          <div class="pane-head">
+            <div><p class="feat-kicker"><span class="feat-badge">3</span>Basic Analytics (Bridge Level)</p><h3 class="pane-title" id="h-ba">Average health by age</h3><div class="prof-facts" id="baFacts"></div></div>
+            <div class="tools"><button class="btn" id="baCsv" disabled>Download CSV</button></div>
+          </div>
+          <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
+            <p class="lead">Do older bridges have lower health scores?</p>
+            <p>Each bar is the average score of one 5-year age band.</p>
+            <p>The line on each bar spans the interquartile range.</p>
+            <p>It uses the period's last data year.</p>
+          </div></div>
+          <div class="findings" id="baFind" hidden></div>
+          <p class="fc-pick" id="baPick" hidden></p>
+          <div class="chart-card">
+            <div class="wb-legend" id="baLegend"></div>
+            <div class="hs-box" id="baBox"></div>
+          </div>
+        </section>
+        <section class="feature" id="b3Sec" aria-labelledby="h-b3">
+          <div class="pane-head">
+            <div><p class="feat-kicker"><span class="feat-badge">4</span>Basic Analytics (Bridge Level)</p><h3 class="pane-title" id="h-b3">Health by age (3D)</h3><div class="prof-facts" id="b3Facts"></div></div>
+            <div class="tools"><button class="btn" id="b3Reset">Reset view</button><button class="btn" id="b3Csv" disabled>Download CSV</button></div>
+          </div>
+          <div class="feat-intro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="5.2" r="1.6" fill="currentColor"/><rect x="8.6" y="8.2" width="2.8" height="8.4" rx="1.2" fill="currentColor"/></svg></span><div>
+            <p class="lead">How are the health scores spread within each age band?</p>
+            <p>Each bar is one age band and one 5-point score band.</p>
+            <p>Bar height is the number of bridges.</p>
+            <p>Drag to rotate, and hover a bar for its values.</p>
+          </div></div>
+          <div class="findings" id="b3Find" hidden></div>
+          <div class="mode-row">
+            <span class="lbl" id="b3Lbl">Bar height</span>
+            <div class="seg" id="b3Seg" role="group" aria-labelledby="b3Lbl">
+              <button data-b3="n" aria-pressed="true">Number of bridges</button>
+              <button data-b3="band" aria-pressed="false">Share of each age band (%)</button>
+            </div>
+          </div>
+          <p class="mode-help" id="b3Help"></p>
+          <div class="colorbar">
+            <span class="lbl" id="b3CbLabel">Number of bridges</span>
+            <div class="scale"><div class="bar"></div><div class="ticks" id="b3Ticks"></div></div>
+          </div>
+          <p class="fc-pick" id="b3Pick" hidden></p>
+          <div class="prof-grid one" id="b3Grid"><div class="chart-card"><div class="prof-box" id="b3Box"></div></div></div>
         </section>
       </div>
 
@@ -1044,6 +1153,7 @@ table.data tr.hl td{background:var(--accent-muted)}
 <script src="csdist.js"></script>
 <script src="weibull.js"></script>
 <script src="markov.js"></script>
+<script src="forecast.js"></script>
 <script src="bridgedots.js"></script>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="mapconfig.js"></script>
@@ -1323,12 +1433,13 @@ function profileFindings() {
   const B = prof.bands, tot = B.reduce((a, b) => a + b.area, 0); if (!tot) return [];
   let top = 0; B.forEach((b, u) => { if (b.area > B[top].area) top = u; });
   const over50 = (B.reduce((a, b, u) => a + (BINS.age[u].lo > 50 ? b.area : 0), 0) / tot) * 100;
-  const out = [`The ${BINS.age[top].label}-year age band holds the most deck area (${fpct((B[top].area / tot) * 100)} of the total), and bridges over 50 years old carry ${fpct(over50)} of it.`];
+  const out = [`Ages ${BINS.age[top].label} years hold the most deck area: ${fpct((B[top].area / tot) * 100)} of the total.`,
+    `Bridges over 50 years old carry ${fpct(over50)} of the deck area.`];
   if (prof.w.qty) {
     const yng = qtyGroup(prof.w.qty, 1, 40), old = qtyGroup(prof.w.qty, 61, 100);
     if (yng.n >= FIND_MIN && old.n >= FIND_MIN) {
-      out.push(`On bridges up to 40 years old, ${fpct(yng.s[0])} of the element is in CS1 (good), compared with ${fpct(old.s[0])} on bridges over 60.`);
-      out.push(`CS3 or CS4 (poor or severe) makes up ${fpct(old.s[2] + old.s[3])} of the element on bridges over 60, against ${fpct(yng.s[2] + yng.s[3])} on bridges up to 40.`);
+      out.push(`${fpct(yng.s[0])} of the element is in CS1 (good) up to age 40, ${fpct(old.s[0])} over 60.`);
+      out.push(`${fpct(old.s[2] + old.s[3])} of the element is in CS3 or CS4 over 60, ${fpct(yng.s[2] + yng.s[3])} up to 40.`);
     }
   }
   return out;
@@ -1530,12 +1641,12 @@ function drawWeibull() {
       tile("Scale η", m.eta > 1000 ? "Over 1,000 years" : ages(m.eta), "Age by which 63.2% has left CS1.");
     const S = (t) => WB.S(t, m.beta, m.eta), rate = (a) => (1 - S(a + 1) / S(a)) * 100;
     setFindings("#wbFind", [
-      beyond ? "More than half of the element is predicted to still be in CS1 (good) at age 100."
+      beyond ? "Over half of the element is predicted to stay in CS1 past age 100."
         : `Half of the element is predicted to have left CS1 (good) by age ${sig3(m.median)} years.`,
-      `Predicted share still in CS1: ${pct(S(25) * 100)} at age 25, ${pct(S(50) * 100)} at 50 and ${pct(S(75) * 100)} at 75.`,
-      m.beta > 1.05 ? `The loss from CS1 speeds up with age: each year, ${pct(rate(10))} of what is left moves to CS2 at age 10, rising to ${pct(rate(60))} at age 60.`
-        : m.beta < 0.95 ? `The loss from CS1 slows down with age: each year, ${pct(rate(10))} of what is left moves to CS2 at age 10, falling to ${pct(rate(60))} at age 60.`
-        : `The loss from CS1 is steady, at about ${pct(rate(50))} of what is left each year.`,
+      `Predicted in CS1: ${pct(S(25) * 100)} at age 25, ${pct(S(50) * 100)} at 50 and ${pct(S(75) * 100)} at 75.`,
+      m.beta > 1.05 ? `Yearly CS1 → CS2 rate rises with age: ${pct(rate(10))} at age 10, ${pct(rate(60))} at 60.`
+        : m.beta < 0.95 ? `Yearly CS1 → CS2 rate falls with age: ${pct(rate(10))} at age 10, ${pct(rate(60))} at 60.`
+        : `Yearly CS1 → CS2 rate is steady, at about ${pct(rate(50))} of what is left.`,
       `The curve's typical gap from the observed shares is ${sig3(m.rmse * 100)} percentage points.`,
     ]);
     // $("#wbNote").textContent = `For this selection: mean time in CS1 ${m.mean > 1000 ? "over 1,000 years" : ages(m.mean)}; fit error (weighted RMSE) ${sig3(m.rmse)}.`;
@@ -1598,11 +1709,11 @@ function drawMarkov() {
     const L = MK.CAT_LABELS, c = m.p12c.length - 1, r = m.p12c[c] / Math.max(1e-12, m.p12c[0]);
     const bad = (t) => m.x[t][2] + m.x[t][3];
     setFindings("#mkFind", [
-      r > 1.1 ? `The yearly chance of moving from CS1 to CS2 rises with age, from ${p(m.p12c[0])} at ages ${L[0]} to ${p(m.p12c[c])} at ages ${L[c]}.`
-        : r < 0.9 ? `The yearly chance of moving from CS1 to CS2 falls with age, from ${p(m.p12c[0])} at ages ${L[0]} to ${p(m.p12c[c])} at ages ${L[c]}.`
-        : `The yearly chance of moving from CS1 to CS2 stays about the same with age, near ${p(m.p12c[mid])}.`,
-      `At ages ${L[mid]}, about ${p(m.p23c[mid])} of the CS2 quantity moves on to CS3 each year, and ${p(m.p34c[mid])} of the CS3 quantity to CS4.`,
-      `The model predicts ${p(bad(50))} of the element in CS3 or CS4 (poor or severe) by age 50, and ${p(bad(100))} by age 100.`,
+      r > 1.1 ? `Yearly CS1 → CS2 chance rises with age: ${p(m.p12c[0])} at ages ${L[0]}, ${p(m.p12c[c])} at ${L[c]}.`
+        : r < 0.9 ? `Yearly CS1 → CS2 chance falls with age: ${p(m.p12c[0])} at ages ${L[0]}, ${p(m.p12c[c])} at ${L[c]}.`
+        : `Yearly CS1 → CS2 chance stays near ${p(m.p12c[mid])} at all ages.`,
+      `At ages ${L[mid]}, ${p(m.p23c[mid])} of CS2 moves to CS3 yearly, ${p(m.p34c[mid])} of CS3 to CS4.`,
+      `Predicted in CS3 or CS4: ${p(bad(50))} by age 50, ${p(bad(100))} by age 100.`,
     ]);
   }
   const tile = (k, v, sub) => `<div class="wb-stat"><p class="k">${k}</p><p class="v">${v}</p><p class="s">${sub}</p></div>`;
@@ -1817,12 +1928,14 @@ async function renderBridgeTab() {
     const lowest = D.reduce((a, c) => (c.mean < a.mean ? c : a));
     if (lowest !== last && lowest !== first) fx.push(`The lowest average was ${f1(lowest.mean)}, in ${lowest.y}.`);
   }
-  if (last && last.n >= 30) fx.push(`In ${last.y}, across the ${int(last.n)} bridges with data, the median health score is ${f1(last.p50)} and the 5th percentile is ${f1(last.p05)}.`);
+  if (last && last.n >= 30) fx.push(`In ${last.y}, the median score is ${f1(last.p50)} and the 5th percentile ${f1(last.p05)}.`);
   setFindings("#hsFind", fx);
   const note = H.thin.length ? `${yearList(H.thin.map((d) => d.y))} ${H.thin.length === 1 ? "has" : "have"} data for only ${H.thin.map((d) => int(d.n)).join(" and ")} ${esc(stIdx.name)} bridges, far fewer than the other years (about ${int(Math.round(H.mid / 1000) * 1000)}), so ${H.thin.length === 1 ? "its average is" : "their averages are"} less comparable.` : "";
   $("#hsNote").hidden = !note; $("#hsNote").textContent = note;
   if (hsPick) hsPickMsg();
   if (tab === "bridge") drawHealth();
+  renderAgeSections();
+  renderForecast();
 }
 function hsBridgeVals() {
   if (!hsPick) return null;
@@ -1837,8 +1950,8 @@ function drawHealth() {
   const Ht = narrow ? 270 : 330, mL = 46, mR = 16, mT = 14, mB = 40, pw = W - mL - mR, ph = Ht - mT - mB;
   const has = D.some((d) => d.n > 0);
   const vals = D.flatMap((d) => (d.n ? [d.p25, d.mean] : [])).concat((bv || []).filter((v) => v != null));
-  // the scale starts a little below the lowest value shown, on a multiple of 5, so small changes stay visible
-  const yLo = Math.max(0, Math.min(90, Math.floor((Math.min(...vals, 100) - 2) / 5) * 5)), yHi = 100, step = yHi - yLo > 40 ? 10 : yHi - yLo > 15 ? 5 : 2;
+  // the scale starts a little below the lowest value shown, on a multiple of the grid step, so small changes stay visible
+  const yLo0 = Math.max(0, Math.min(90, Math.floor((Math.min(...vals, 100) - 2) / 5) * 5)), yHi = 100, step = yHi - yLo0 > 40 ? 10 : yHi - yLo0 >= 15 ? 5 : 2, yLo = Math.floor(yLo0 / step) * step;
   const inset = years.length > 1 ? Math.min(28, pw / (years.length * 2)) : 0;
   const x = (i) => (years.length > 1 ? mL + inset + (i * (pw - 2 * inset)) / (years.length - 1) : mL + pw / 2);
   const y = (v) => mT + ph - ((v - yLo) / (yHi - yLo)) * ph;
@@ -1907,7 +2020,7 @@ function hsFindBridge(q) {
   if (b == null) { out.innerHTML = `Bridge <b>${esc(id)}</b> has no usable element records, so it has no health score.`; return; }
   hsPick = { b, id };
   $("#hsFindIn").value = id; $("#hsClear").hidden = false;
-  hsPickMsg(); drawHealth();
+  hsPickMsg(); drawHealth(); fcPickMsg(); drawForecast(); haPickMsg(); drawAgeAvg(); drawAge3D();
 }
 // the line under the find box: the bridge's first and last score in the period
 function hsPickMsg() {
@@ -1918,7 +2031,7 @@ function hsPickMsg() {
 }
 $("#hsFindForm").addEventListener("submit", (ev) => { ev.preventDefault(); hsFindBridge($("#hsFindIn").value); });
 $("#hsFindOut").addEventListener("click", (ev) => { const b = ev.target.closest("[data-hsid]"); if (b) hsFindBridge(b.dataset.hsid); });
-$("#hsClear").addEventListener("click", () => { hsPick = null; $("#hsFindIn").value = ""; $("#hsFindOut").textContent = ""; $("#hsClear").hidden = true; drawHealth(); });
+$("#hsClear").addEventListener("click", () => { hsPick = null; $("#hsFindIn").value = ""; $("#hsFindOut").textContent = ""; $("#hsClear").hidden = true; drawHealth(); fcPickMsg(); drawForecast(); haPickMsg(); drawAgeAvg(); drawAge3D(); });
 // CSV: every bridge and data year in the period, with its score
 $("#hsCsv").addEventListener("click", () => {
   if (!hs || !hsStats) return;
@@ -1938,6 +2051,519 @@ $("#hsCsv").addEventListener("click", () => {
 });
 new ResizeObserver(() => { if (tab === "bridge") { cancelAnimationFrame(hsRz); hsRz = requestAnimationFrame(drawHealth); } }).observe($("#hsBox"));
 
+/* ---------- Basic Analytics (Bridge Level): health score forecast ----------
+   forecast.js does the modelling (see the notes at its top). For a state and period:
+   1. Prediction Methods #1 and #2 are fitted for every element type from data/<ST>/fit.json, the
+      same way as in Basic Analytics (Element type level).
+   2. Every element record of the bridges with a score in the period's last data year E
+      (data/<ST>/loc/<EN>.json) is stepped FC.YEARS years ahead.
+   The result keeps per-unit totals for every bridge and year, so new unit costs only rescore it
+   (FC.stats). One forecast is kept per state and period (fcCache, the last four). */
+let fc = null, fcStats = null, fcRz = 0, fcGen = 0;
+const fcCache = new Map(), FC_STOP = new Error("stopped"), fcKey = () => `${sel.st}|${sel.win}`;
+const pause = () => new Promise((r) => setTimeout(r, 0));
+async function buildForecast(st, win, h, progress, s0) {
+  const [s, e] = win.split("-").map(Number), fit = await getJSON(`data/${st}/fit.json`);
+  const ens = Object.keys(fit.qty), models = {};
+  for (let i = 0; i < ens.length; i++) {
+    if (i % 3 === 0) { progress(`Fitting the prediction methods: ${i} of ${ens.length} element types`); await pause(); }
+    models[ens[i]] = FC.fitElement(fit.qty[ens[i]], s, e, WB, MK);
+  }
+  // element types without a unit are left out of the health score, so they are left out here too
+  const F = FC.start(h, e), todo = ens.filter((en) => h.units.indexOf(fit.unit[en]) >= 0);
+  // back-check: the same forecast started at the period's first year s0, from the same records
+  const B = s0 != null && s0 < e ? FC.start(h, s0) : null;
+  let done = 0, next = 0;
+  progress(`Loading the element records: 0 of ${todo.length} element types`);
+  const worker = async () => {
+    while (next < todo.length) {
+      const en = todo[next++], url = `data/${st}/loc/${en}.json`;
+      let d = null;
+      try { d = await (cache.has(url) ? getJSON(url) : loadJSON(url)); } catch (err) { if (!/^404 /.test(err.message)) throw err; }
+      progress(`Loading the element records: ${++done} of ${todo.length} element types`);
+      if (d) { FC.addElement(F, h, d, h.units.indexOf(fit.unit[en]), models[en], MK); if (B) FC.addElement(B, h, d, h.units.indexOf(fit.unit[en]), models[en], MK); }
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, worker));
+  return Object.assign(F, { st, win, s, h, models, back: B });
+}
+// fills section 2 for the current state, period and costs, building the forecast first if needed
+async function renderForecast() {
+  if (!hs || !sel.win || sel.lvl !== "bridge") return;
+  const key = fcKey();
+  if (!fc || fc.key !== key) {
+    fc = null; fcStats = null;
+    $("#fcFind").hidden = true; $("#fcPick").hidden = true; $("#fcNote").hidden = true; $("#fcCsv").disabled = true;
+    $("#fcLegend").innerHTML = ""; $("#fcBox").innerHTML = "";
+    $("#fcBkCard").hidden = true; $("#fcBkLegend").innerHTML = ""; $("#fcBkBox").innerHTML = "";
+    let p = fcCache.get(key);
+    if (!p) {
+      const gen = ++fcGen, h = hs;
+      $("#fcFacts").innerHTML = "<span>Preparing the forecast…</span>";
+      // the back-check always starts at the period's first year (with any bridges), at Alvin's request (25 Nov)
+      const first = hsStats && hsStats.key === hsKey() ? hsStats.D.find((d) => d.n > 0) : null;
+      p = buildForecast(sel.st, sel.win, h, (msg) => {
+        if (gen !== fcGen) throw FC_STOP; // another state or period was chosen meanwhile
+        if (fcKey() === key) $("#fcFacts").innerHTML = `<span>${msg}…</span>`;
+      }, first ? first.y : null);
+      p.catch(() => fcCache.delete(key));
+      fcCache.set(key, p);
+      if (fcCache.size > 4) fcCache.delete(fcCache.keys().next().value);
+    }
+    let F;
+    try { F = await p; } catch (e) {
+      if (e !== FC_STOP && fcKey() === key) $("#fcFacts").innerHTML = `<span>The forecast could not be made (${esc(e.message)}).</span>`;
+      return;
+    }
+    if (fcKey() !== key || sel.lvl !== "bridge") return;
+    F.key = key; fc = F;
+  }
+  if (fc.h.ver !== costVer) healthScores(fc.h);
+  const R = FC.stats(fc, fc.h, costs || fc.h.cost), D = R.D, a = D[0], z = D[D.length - 1];
+  const back = fc.back ? FC.backcheck(fc.back, fc.h, costs || fc.h.cost, fc.E) : null;
+  fcStats = { key: hsKey(), D, heldShare: R.heldShare, back: back && back.m >= FIND_MIN && back.D.length > 1 ? back : null };
+  $("#fcCsv").disabled = !a.n;
+  if (!a.n) {
+    $("#fcFacts").innerHTML = `<span>No bridges have data in ${fc.E}, so there is nothing to forecast.</span>`;
+    setFindings("#fcFind", []); $("#fcNote").hidden = true; $("#fcPick").hidden = true;
+    if (tab === "bridge") drawForecast();
+    return;
+  }
+  $("#fcFacts").innerHTML = `<span><b>${int(a.n)}</b> bridges with ${a.y} data</span><span>Average <b>${f1(a.mean)} → ${f1(z.mean)}</b></span><span><b>${a.y} to ${z.y}</b></span>`;
+  // compare the values as shown, so "fall from 0.8% to 0.8%" never appears
+  const move = (x, y, fmt, verb) => (fmt(x) === fmt(y) ? `stay at about ${fmt(x)}` : `${y < x ? "fall" : "rise"} from ${fmt(x)} ${verb ? `in ${a.y} ` : ""}to ${fmt(y)}${verb ? ` in ${z.y}` : ""}`);
+  const sh = (v) => fpct(v * 100);
+  setFindings("#fcFind", [
+    f1(a.mean) === f1(z.mean) ? `With no repairs, the average is predicted to stay at about ${f1(a.mean)} until ${z.y}.`
+      : `With no repairs, the average is predicted to ${move(a.mean, z.mean, f1)} by ${z.y}.`,
+    `The share below 70% is predicted to ${move(a.below, z.below, sh)}.`,
+    `The share at 95% or more is predicted to ${move(a.bands[0], z.bands[0], sh)}.`,
+    z.n >= 30 ? `In ${z.y}, the predicted median is ${f1(z.p50)} and the 5th percentile ${f1(z.p05)}.` : "",
+    ...backFindings(fcStats.back),
+  ], `${FC.YEARS}-year forecast, no repairs`);
+  const held = fcStats.heldShare;
+  const note = held > 0 ? `${fpct(held * 100)} of the element quantity, weighted by unit cost, keeps its ${a.y} condition in this forecast. Its element type has too little data in this period (fewer than ${FC.MIN_BRIDGES} bridges), or its age is unknown.` : "";
+  // hidden at Alvin's request (25 Nov). To show the note again: $("#fcNote").hidden = !note;
+  $("#fcNote").hidden = true; $("#fcNote").textContent = note;
+  fcPickMsg();
+  if (tab === "bridge") drawForecast();
+}
+// back-check findings: predicted against actual, same bridges, from the period's first year
+function backFindings(bk) {
+  if (!bk) return [];
+  const B = bk.D, a = B[0], z = B[B.length - 1], d = z.act - z.pred;
+  return [`Same ${int(bk.m)} bridges from ${a.y} (${f1(a.act)}): predicted ${f1(z.pred)} by ${z.y}, actual ${f1(z.act)}.`,
+    d < -0.2 ? "Actual scores fell faster than predicted, so this forecast may be optimistic."
+      : d > 0.2 ? "Actual scores stayed higher than predicted, as repairs would explain."
+      : "The prediction tracks the actual scores closely over the period."];
+}
+// the picked bridge's forecast (from Find a bridge in section 1), or null
+function fcBridgeVals() {
+  if (!hsPick || !fc) return null;
+  const j = fc.idx[hsPick.b];
+  return j >= 0 ? Array.from(FC.bridge(fc, fc.h, j, costs || fc.h.cost, new Float64Array(FC.YEARS + 1))) : null;
+}
+function fcPickMsg() {
+  const el = $("#fcPick");
+  if (!hsPick || !fc) { el.hidden = true; return; }
+  const v = fcBridgeVals();
+  el.hidden = false;
+  el.innerHTML = v ? `Bridge <b>${esc(hsPick.id)}</b>: ${f1(v[0])} in ${fc.E}, predicted ${f1(v[FC.YEARS])} in ${fc.E + FC.YEARS} if no repairs are made.`
+    : `Bridge <b>${esc(hsPick.id)}</b> has no element data in ${fc.E}, so it has no forecast.`;
+}
+function drawForecast() {
+  const box = $("#fcBox"); if (!box || !fc || !fcStats || !hsStats || fcStats.key !== hsKey()) return;
+  drawBackcheck();
+  const H = hsStats, F = fcStats.D, E = fc.E, Y = FC.YEARS;
+  const past = H.D.filter((d) => d.n > 0 && d.y <= E), bv = hsBridgeVals(), fv = fcBridgeVals();
+  const pastB = bv ? H.years.map((y, i) => [y, bv[i]]).filter(([y, v]) => v != null && y <= E) : [];
+  const y0 = Math.min(H.years[0], E), y1 = E + Y;
+  const NS = "http://www.w3.org/2000/svg";
+  const W = Math.max(300, box.clientWidth || 700), narrow = W < 520;
+  const Ht = narrow ? 270 : 330, mL = 46, mR = 16, mT = 22, mB = 40, pw = W - mL - mR, ph = Ht - mT - mB;
+  const has = F[0].n > 0;
+  const vals = past.flatMap((d) => [d.p25, d.mean]).concat(has ? F.flatMap((d) => [d.p25, d.mean]) : [], pastB.map(([, v]) => v), fv || []);
+  const yLo0 = Math.max(0, Math.min(90, Math.floor((Math.min(...vals, 100) - 2) / 5) * 5)), yHi = 100, step = yHi - yLo0 > 40 ? 10 : yHi - yLo0 >= 15 ? 5 : 2, yLo = Math.floor(yLo0 / step) * step;
+  const inset = Math.min(20, pw / ((y1 - y0 + 1) * 2));
+  const x = (yr) => mL + inset + ((yr - y0) * (pw - 2 * inset)) / Math.max(1, y1 - y0);
+  const y = (v) => mT + ph - ((v - yLo) / (yHi - yLo)) * ph;
+  const legend = [`<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1f6fb2" stroke-width="2.6"/><circle cx="14" cy="6" r="4" fill="#1f6fb2"/></svg>Average score</span>`,
+    `<span><svg width="20" height="12" aria-hidden="true"><rect x="1" y="1" width="18" height="10" fill="#1f6fb2" fill-opacity=".15"/></svg>Interquartile range</span>`,
+    `<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#1f6fb2" stroke-width="2.6" stroke-dasharray="7 5"/><circle cx="14" cy="6" r="3.4" fill="#fff" stroke="#1f6fb2" stroke-width="2"/></svg>Forecast average</span>`,
+    `<span><svg width="20" height="12" aria-hidden="true"><rect x="1" y="1" width="18" height="10" fill="#1f6fb2" fill-opacity=".07" stroke="#1f6fb2" stroke-opacity=".4" stroke-dasharray="3 3"/></svg>Forecast interquartile range</span>`];
+  if (bv || fv) legend.push(`<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#c2561a" stroke-width="2" stroke-dasharray="6 4"/><rect x="10.5" y="2.5" width="7" height="7" fill="#c2561a"/></svg>Bridge ${esc(hsPick.id)}</span>`);
+  $("#fcLegend").innerHTML = legend.join("");
+  const aria = has ? `Health score forecast, ${E} to ${y1}, if no repairs are made: average ${f1(F[0].mean)} to ${f1(F[Y].mean)}` : "No forecast for this selection";
+  let s = `<svg xmlns="${NS}" viewBox="0 0 ${W} ${Ht}" width="${W}" height="${Ht}" role="img" aria-label="${esc(aria)}">`;
+  s += `<rect class="fc-zone" x="${x(E)}" y="${mT}" width="${x(y1) - x(E) + inset}" height="${ph}"/>`;
+  s += `<text class="fc-zlbl" x="${x(E) + 6}" y="${mT - 7}">Forecast, no repairs</text>`;
+  for (let v = yLo; v <= yHi + 1e-9; v += step) s += `<line class="d-grid" x1="${mL}" x2="${W - mR}" y1="${y(v)}" y2="${y(v)}"/><text class="d-tick" x="${mL - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  s += `<line class="d-axis" x1="${mL}" x2="${W - mR}" y1="${mT + ph}" y2="${mT + ph}"/>`;
+  const every = narrow ? 5 : y1 - y0 > 14 ? 2 : 1;
+  for (let yr = y0; yr <= y1; yr++) {
+    s += `<line class="d-axis" x1="${x(yr)}" x2="${x(yr)}" y1="${mT + ph}" y2="${mT + ph + 4}"/>`;
+    if ((yr - E) % every === 0) s += `<text class="d-tick" x="${x(yr)}" y="${mT + ph + 16}" text-anchor="middle">${yr}</text>`;
+  }
+  s += `<text class="d-axlbl" x="${mL + pw / 2}" y="${Ht - 4}" text-anchor="middle">Data year</text>`;
+  s += `<text class="d-axlbl" transform="translate(12 ${mT + ph / 2}) rotate(-90)" text-anchor="middle">Health score (%)</text>`;
+  const line = (pts) => pts.map(([X, Y_], j) => `${j ? "L" : "M"}${x(X).toFixed(1)} ${y(Y_).toFixed(1)}`).join("");
+  const band = (D) => `${D.map((d, j) => `${j ? "L" : "M"}${x(d.y).toFixed(1)} ${y(d.p75).toFixed(1)}`).join("")}${D.slice().reverse().map((d) => `L${x(d.y).toFixed(1)} ${y(d.p25).toFixed(1)}`).join("")}Z`;
+  if (!has) {
+    s += `<text class="hs-empty" x="${mL + pw / 2}" y="${mT + ph / 2}" text-anchor="middle">No bridges have data in ${E}.</text>`;
+  } else {
+    if (past.length) s += `<path class="hs-band" d="${band(past)}"/>`;
+    s += `<path class="fc-band" d="${band(F)}"/>`;
+    if (past.length > 1) s += `<path class="hs-avg" d="${line(past.map((d) => [d.y, d.mean]))}"/>`;
+    s += `<path class="fc-avg" d="${line(F.map((d) => [d.y, d.mean]))}"/>`;
+    past.forEach((d) => (s += `<circle class="hs-dot" data-y="${d.y}" cx="${x(d.y).toFixed(1)}" cy="${y(d.mean).toFixed(1)}" r="4"/>`));
+    F.slice(1).forEach((d) => (s += `<circle class="fc-dot" data-y="${d.y}" cx="${x(d.y).toFixed(1)}" cy="${y(d.mean).toFixed(1)}" r="3.4"/>`));
+  }
+  if (pastB.length) {
+    s += `<path class="hs-br" d="${line(pastB)}"/>`;
+    pastB.forEach(([yr, v]) => (s += `<rect class="hs-brdot" data-y="${yr}" x="${(x(yr) - 3.5).toFixed(1)}" y="${(y(v) - 3.5).toFixed(1)}" width="7" height="7"/>`));
+  }
+  if (fv) {
+    s += `<path class="fc-br" d="${line(fv.map((v, k) => [E + k, v]))}"/>`;
+    fv.forEach((v, k) => { if (k) s += `<rect class="fc-brdot" data-y="${E + k}" x="${(x(E + k) - 3).toFixed(1)}" y="${(y(v) - 3).toFixed(1)}" width="6" height="6"/>`; });
+  }
+  s += `<line class="d-guide" x1="0" x2="0" y1="${mT}" y2="${mT + ph}" visibility="hidden"/>`;
+  s += `<rect class="d-over" x="${mL}" y="${mT}" width="${pw}" height="${ph}"/></svg>`;
+  box.innerHTML = s;
+  if (!has) return;
+  const svg = box.firstChild, over = svg.querySelector(".d-over"), guide = svg.querySelector(".d-guide");
+  const pastOf = new Map(H.D.map((d) => [d.y, d])), bOf = new Map(pastB);
+  const pickYear = (ev) => {
+    const r = svg.getBoundingClientRect(), px = ((ev.clientX - r.left) / r.width) * W;
+    const yr = Math.max(y0, Math.min(y1, Math.round(y0 + ((px - mL - inset) * Math.max(1, y1 - y0)) / (pw - 2 * inset))));
+    guide.setAttribute("x1", x(yr)); guide.setAttribute("x2", x(yr)); guide.setAttribute("visibility", "visible");
+    svg.querySelectorAll(".hs-dot,.hs-brdot,.fc-dot,.fc-brdot").forEach((c) => c.classList.toggle("on", c.dataset.y === String(yr)));
+    let h;
+    if (yr < E) {
+      const dd = pastOf.get(yr);
+      h = `<b>${yr} data</b>` + (dd && dd.n ? `<br><span class="m">Average:</span> ${f1(dd.mean)}<br><span class="m">Interquartile range:</span> ${f1(dd.p25)} to ${f1(dd.p75)}<br><span class="m">Bridges counted:</span> ${int(dd.n)}` : "<br>No bridges counted");
+      if (bv) h += `<br><span class="m">Bridge ${esc(hsPick.id)}:</span> ${bOf.has(yr) ? f1(bOf.get(yr)) : "no data this year"}`;
+    } else {
+      const k = yr - E, dd = F[k];
+      h = `<b>${k ? `${yr} forecast` : `${yr} data, where the forecast starts`}</b><br><span class="m">Average:</span> ${f1(dd.mean)}<br><span class="m">Interquartile range:</span> ${f1(dd.p25)} to ${f1(dd.p75)}<br><span class="m">Below 70%:</span> ${fpct(dd.below * 100)} of bridges`;
+      if (!k) h += `<br><span class="m">Bridges counted:</span> ${int(dd.n)}`;
+      if (hsPick) h += `<br><span class="m">Bridge ${esc(hsPick.id)}:</span> ${fv ? f1(fv[k]) : "no forecast"}`;
+    }
+    showTip(h, ev.clientX, ev.clientY);
+  };
+  over.addEventListener("mousemove", pickYear);
+  over.addEventListener("click", pickYear);
+  over.addEventListener("mouseleave", () => { guide.setAttribute("visibility", "hidden"); svg.querySelectorAll(".on").forEach((c) => c.classList.remove("on")); hideTip(); });
+}
+/* Back-check chart (under the forecast chart, Alvin's choice of 25 Nov): one fixed set of bridges,
+   those with a score in both the period's first year and its last year (FC.backcheck). Their
+   average predicted from the first year with no repairs, against their actual average each year.
+   It sits in its own chart because it follows a different set of bridges from the average line
+   above (that one counts every bridge with a score each year). */
+function drawBackcheck() {
+  const card = $("#fcBkCard"), box = $("#fcBkBox"), bk = fcStats && fcStats.back;
+  card.hidden = !bk || !fcStats.D[0].n;
+  if (card.hidden) { box.innerHTML = ""; $("#fcBkLegend").innerHTML = ""; return; }
+  const B = bk.D, a = B[0], z = B[B.length - 1], y0 = a.y, y1 = z.y;
+  $("#fcBkTitle").textContent = `Back-check: the same ${int(bk.m)} bridges, ${y0} to ${y1}`;
+  $("#fcBkSub").textContent = `Their average predicted from ${y0} with no repairs, against their actual average.`;
+  $("#fcBkLegend").innerHTML = [`<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0a7f86" stroke-width="2.4"/><circle cx="14" cy="6" r="3.6" fill="#0a7f86"/></svg>Actual average</span>`,
+    `<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#0a7f86" stroke-width="2.4" stroke-dasharray="7 5"/><circle cx="14" cy="6" r="3.4" fill="#fff" stroke="#0a7f86" stroke-width="2"/></svg>Predicted from ${y0}, no repairs</span>`,
+    `<span><svg width="20" height="12" aria-hidden="true"><rect x="1" y="1" width="18" height="10" fill="#0a7f86" fill-opacity=".18"/></svg>Difference</span>`].join("");
+  const NS = "http://www.w3.org/2000/svg";
+  const W = Math.max(300, box.clientWidth || $("#fcBox").clientWidth || 700), narrow = W < 520;
+  const Ht = narrow ? 210 : 230, mL = 46, mR = narrow ? 104 : 112, mT = 12, mB = 40, pw = W - mL - mR, ph = Ht - mT - mB;
+  // the scale spans at least 5 points around the lines, so a small gap is not blown up
+  const vals = B.flatMap((d) => [d.pred, d.act]), vmin = Math.min(...vals), vmax = Math.max(...vals), mid = (vmin + vmax) / 2, half = Math.max(2.5, (vmax - vmin) / 2 + 1);
+  let yLo = Math.max(0, mid - half), yHi = Math.min(100, mid + half);
+  const step = yHi - yLo > 40 ? 10 : yHi - yLo > 16 ? 5 : yHi - yLo > 6 ? 2 : 1;
+  yLo = Math.floor(yLo / step) * step; yHi = Math.min(100, Math.ceil(yHi / step) * step);
+  const inset = Math.min(20, pw / ((y1 - y0 + 1) * 2));
+  const x = (yr) => mL + inset + ((yr - y0) * (pw - 2 * inset)) / Math.max(1, y1 - y0);
+  const y = (v) => mT + ph - ((v - yLo) / (yHi - yLo)) * ph;
+  const aria = `Back-check, the same ${int(bk.m)} bridges: predicted ${f1(z.pred)} by ${y1} with no repairs, actual ${f1(z.act)}`;
+  let s = `<svg xmlns="${NS}" viewBox="0 0 ${W} ${Ht}" width="${W}" height="${Ht}" role="img" aria-label="${esc(aria)}">`;
+  for (let v = yLo; v <= yHi + 1e-9; v += step) s += `<line class="d-grid" x1="${mL}" x2="${W - mR}" y1="${y(v)}" y2="${y(v)}"/><text class="d-tick" x="${mL - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  s += `<line class="d-axis" x1="${mL}" x2="${W - mR}" y1="${mT + ph}" y2="${mT + ph}"/>`;
+  // label every k-th year, choosing k so the first and last years are both labelled when possible
+  const span = y1 - y0, maxL = narrow ? 4 : 11, every = [1, 2, 3, 4, 5].find((k) => span % k === 0 && span / k <= maxL) || Math.ceil(span / maxL);
+  for (let yr = y0; yr <= y1; yr++) {
+    s += `<line class="d-axis" x1="${x(yr)}" x2="${x(yr)}" y1="${mT + ph}" y2="${mT + ph + 4}"/>`;
+    if ((yr - y0) % every === 0) s += `<text class="d-tick" x="${x(yr)}" y="${mT + ph + 16}" text-anchor="middle">${yr}</text>`;
+  }
+  s += `<text class="d-axlbl" x="${mL + pw / 2}" y="${Ht - 4}" text-anchor="middle">Data year</text>`;
+  s += `<text class="d-axlbl" transform="translate(12 ${mT + ph / 2}) rotate(-90)" text-anchor="middle">Health score (%)</text>`;
+  const pts = (k) => B.map((d, j) => `${j ? "L" : "M"}${x(d.y).toFixed(1)} ${y(d[k]).toFixed(1)}`).join("");
+  s += `<path class="bk-gap" d="${pts("pred")}${B.slice().reverse().map((d) => `L${x(d.y).toFixed(1)} ${y(d.act).toFixed(1)}`).join("")}Z"/>`;
+  s += `<path class="bk-pred" d="${pts("pred")}"/><path class="bk-act" d="${pts("act")}"/>`;
+  B.forEach((d) => (s += `<circle class="bk-pdot" data-y="${d.y}" cx="${x(d.y).toFixed(1)}" cy="${y(d.pred).toFixed(1)}" r="3.4"/>`));
+  B.forEach((d) => (s += `<circle class="bk-adot" data-y="${d.y}" cx="${x(d.y).toFixed(1)}" cy="${y(d.act).toFixed(1)}" r="3.8"/>`));
+  // end labels, pushed apart when the two lines finish close together
+  let yp = y(z.pred), ya = y(z.act);
+  if (Math.abs(yp - ya) < 15) { const m = (yp + ya) / 2, up = z.pred >= z.act ? -1 : 1; yp = m + up * 7.5; ya = m - up * 7.5; }
+  s += `<text class="bk-lbl" x="${x(y1) + 9}" y="${(yp + 4).toFixed(1)}">Predicted ${f1(z.pred)}</text>`;
+  s += `<text class="bk-lbl" x="${x(y1) + 9}" y="${(ya + 4).toFixed(1)}">Actual ${f1(z.act)}</text>`;
+  s += `<line class="d-guide" x1="0" x2="0" y1="${mT}" y2="${mT + ph}" visibility="hidden"/>`;
+  s += `<rect class="d-over" x="${mL}" y="${mT}" width="${pw}" height="${ph}"/></svg>`;
+  box.innerHTML = s;
+  const svg = box.firstChild, over = svg.querySelector(".d-over"), guide = svg.querySelector(".d-guide"), of = new Map(B.map((d) => [d.y, d]));
+  const pickYear = (ev) => {
+    const r = svg.getBoundingClientRect(), px = ((ev.clientX - r.left) / r.width) * W;
+    const yr = Math.max(y0, Math.min(y1, Math.round(y0 + ((px - mL - inset) * Math.max(1, y1 - y0)) / (pw - 2 * inset))));
+    guide.setAttribute("x1", x(yr)); guide.setAttribute("x2", x(yr)); guide.setAttribute("visibility", "visible");
+    svg.querySelectorAll(".bk-pdot,.bk-adot").forEach((c) => c.classList.toggle("on", c.dataset.y === String(yr)));
+    const d = of.get(yr);
+    if (!d) { showTip(`<b>${yr}</b><br>None of these bridges have data this year`, ev.clientX, ev.clientY); return; }
+    const g = Math.round(d.act * 10) / 10 - Math.round(d.pred * 10) / 10; // from the values as shown, so it always adds up
+    const diff = Math.abs(g) < 0.05 ? "Actual equals the prediction" : `Actual is ${Math.abs(g).toFixed(1)} points ${g < 0 ? "below" : "above"} the prediction`;
+    showTip(`<b>${yr}</b><br><span class="m">Bridges counted:</span> ${int(d.n)}<br><span class="m">Actual average:</span> ${f1(d.act)}<br><span class="m">Predicted from ${y0}:</span> ${f1(d.pred)}<br>${diff}`, ev.clientX, ev.clientY);
+  };
+  over.addEventListener("mousemove", pickYear);
+  over.addEventListener("click", pickYear);
+  over.addEventListener("mouseleave", () => { guide.setAttribute("visibility", "hidden"); svg.querySelectorAll(".on").forEach((c) => c.classList.remove("on")); hideTip(); });
+}
+// CSV: one row per bridge in the forecast, with its score in year E and the forecast for each later year
+$("#fcCsv").addEventListener("click", () => {
+  if (!fc || !fcStats) return;
+  const c = costs || fc.h.cost, E = fc.E, Y = FC.YEARS, v = new Float64Array(Y + 1), h = fc.h;
+  const head = ["state", "structure_number", "year_built", `score_${E}_pct`];
+  for (let k = 1; k <= Y; k++) head.push(`forecast_${E + k}_pct`);
+  const rows = [head.join(",")];
+  for (let j = 0; j < fc.pop.length; j++) {
+    const b = fc.pop[j], id = `"${String(h.ids[h.rows[b]]).replace(/"/g, '""')}"`;
+    FC.bridge(fc, h, j, c, v);
+    rows.push([fc.st, id, h.yb[b] || "", ...Array.from(v, (x) => x.toFixed(1))].join(","));
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
+  a.download = `${fc.st}_${fc.win}_health_forecast.csv`; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+new ResizeObserver(() => { if (tab === "bridge") { cancelAnimationFrame(fcRz); fcRz = requestAnimationFrame(drawForecast); } }).observe($("#fcBox"));
+
+/* ---------- Basic Analytics (Bridge Level): health by age (sections 3 and 4) ----------
+   Both sections use the bridges with a score in the period's last data year E, at their age in E
+   (E − year built, from health.json). Age bands are Basic Insights' 5-year bands (BINS.age, 1 to
+   100 years). Bridges older than 100 years, built in year E or later, or with no year built are
+   left out and counted. Score bands are 5 points wide and include their lower end, like the map's
+   bands: 0% to below 5% … 90% to below 95%, then 95% to 100%. Scores follow the current unit
+   costs (hs.S), so both sections are worked out again when the costs change (healthByAge). */
+const BHI_BINS = [];
+for (let lo = 0; lo < 100; lo += 5) BHI_BINS.push({ lo, label: lo === 95 ? "95% to 100%" : `${lo}% to below ${lo + 5}%` });
+const B3_MODES = {
+  n: { label: "Number of bridges", z: "Number of bridges", help: "Bar height is the number of bridges in each age band and score band.", fmt: (v) => int(v), tick: (v) => shortNum(v) },
+  band: { label: "Share of the age band's bridges (%)", z: "Bridges, % of age band", help: "Bar height is each bar's share of its age band's bridges, so each age band adds up to 100%. Useful for comparing age bands with very different numbers of bridges.", fmt: (v) => pct(v), tick: (v) => `${+v.toFixed(1)}%` },
+};
+let ha = null, b3Mode = "n", baRz = 0, b3Rz = 0;
+function healthByAge() {
+  if (hs.ver !== costVer) healthScores(hs);
+  const { S, NY, n, base, yb } = hs, E = +sel.win.split("-")[1], y = E - base, NU = BINS.age.length, NV = BHI_BINS.length;
+  const vals = BINS.age.map(() => []), cells = new Int32Array(NU * NV), left = { over: 0, young: 0, unknown: 0 };
+  let all = 0, sumAll = 0;
+  if (y >= 0 && y < NY) for (let b = 0; b < n; b++) {
+    const x = S[b * NY + y]; if (x < 0) continue;
+    all++; sumAll += x / 10;
+    if (!yb[b]) { left.unknown++; continue; }
+    const age = E - yb[b];
+    if (age < BINS.aMin) { left.young++; continue; }
+    if (age > BINS.aMax) { left.over++; continue; }
+    const u = Math.floor((age - BINS.aMin) / BINS.aw);
+    vals[u].push(x / 10); cells[u * NV + Math.min(NV - 1, Math.floor(x / 50))]++; // x is the score × 10
+  }
+  const bands = vals.map((v, u) => {
+    v.sort((a, c) => a - c);
+    const sum = v.reduce((a, c) => a + c, 0);
+    return { u, n: v.length, sum, mean: v.length ? sum / v.length : null, p05: quant(v, 0.05), p25: quant(v, 0.25), p50: quant(v, 0.5), p75: quant(v, 0.75) };
+  });
+  const counted = bands.reduce((a, b) => a + b.n, 0), sumC = bands.reduce((a, b) => a + b.sum, 0);
+  return { key: hsKey(), E, bands, cells, NV, left, all, counted, mean: counted ? sumC / counted : null, allMean: all ? sumAll / all : null };
+}
+// pooled average of the age bands whose lower bound is within lo..hi
+function haGroup(lo, hi) {
+  let n = 0, sum = 0;
+  ha.bands.forEach((b) => { const a = BINS.age[b.u].lo; if (a >= lo && a <= hi) { n += b.n; sum += b.sum; } });
+  return { n, mean: n ? sum / n : null, label: `${lo}–${hi + 4}` };
+}
+// where the picked bridge sits in sections 3 and 4: { v, age, u, sv } or { why }
+function haPick() {
+  if (!hsPick || !ha) return null;
+  const b = hsPick.b, x = hs.S[b * hs.NY + ha.E - hs.base];
+  if (!(x >= 0)) return { why: `has no element data in ${ha.E}` };
+  const yb = hs.yb[b]; if (!yb) return { why: "has no year built" };
+  const age = ha.E - yb;
+  if (age < BINS.aMin || age > BINS.aMax) return { why: `is ${age} years old in ${ha.E}, outside the 1 to 100 year age bands` };
+  return { v: x / 10, age, u: Math.floor((age - BINS.aMin) / BINS.aw), sv: Math.min(ha.NV - 1, Math.floor(x / 50)) };
+}
+function renderAgeSections() {
+  ha = healthByAge();
+  const { E, bands, counted, left } = ha, out = left.over + left.young + left.unknown;
+  $("#baCsv").disabled = !counted; $("#b3Csv").disabled = !counted;
+  const facts = counted ? `<span><b>${int(counted)}</b> bridges with ${E} data, aged 1 to 100 years</span><span>Average <b>${f1(ha.mean)}</b></span>` +
+    (out ? `<span><b>${int(out)}</b> left out (older than 100 years or no year built)</span>` : "") : `<span>No bridges with a known age have data in ${E}.</span>`;
+  $("#baFacts").innerHTML = facts;
+  // section 3 findings, from age bands with at least FIND_MIN bridges
+  const fx = [], ok = bands.filter((b) => b.n >= FIND_MIN);
+  if (ok.length >= 2) {
+    const hi = ok.reduce((a, c) => (c.mean > a.mean ? c : a)), lo = ok.reduce((a, c) => (c.mean < a.mean ? c : a));
+    fx.push(`Highest average is ${f1(hi.mean)} at ages ${BINS.age[hi.u].label}, lowest ${f1(lo.mean)} at ages ${BINS.age[lo.u].label}.`);
+    const g1 = haGroup(1, 16);
+    let gOld = haGroup(81, 96); if (gOld.n < FIND_MIN) gOld = haGroup(61, 76);
+    if (g1.n >= FIND_MIN && gOld.n >= FIND_MIN) fx.push(`Ages 1–20 average ${f1(g1.mean)}, against ${f1(gOld.mean)} for ages ${gOld.label}.`);
+    const young = haGroup(1, 46), old = haGroup(51, 96);
+    if (young.n && old.n) fx.push(`Bridges over 50 (${fpct((old.n / counted) * 100)}) average ${f1(old.mean)}, against ${f1(young.mean)} for younger ones.`);
+  }
+  setFindings("#baFind", fx, `${E} data`);
+  // section 4 findings
+  const NV = ha.NV, cells = ha.cells, gx = [];
+  if (counted) {
+    let top = 0, low = 0;
+    for (let u = 0; u < bands.length; u++) { top += cells[u * NV + NV - 1]; for (let v = 0; v < 14; v++) low += cells[u * NV + v]; }
+    gx.push(`${fpct((top / counted) * 100)} of these bridges score 95% or more, and ${fpct((low / counted) * 100)} score below 70%.`);
+    let best = null;
+    bands.forEach((b) => {
+      if (b.n < FIND_MIN) return;
+      let k = 0; for (let v = 0; v < 14; v++) k += cells[b.u * NV + v];
+      if (k && (!best || k / b.n > best.s)) best = { u: b.u, k, n: b.n, s: k / b.n };
+    });
+    if (best) gx.push(`Scores below 70% are most common at ages ${BINS.age[best.u].label}: ${int(best.k)} of ${int(best.n)} bridges (${fpct(best.s * 100)}).`);
+    const busy = bands.reduce((a, c) => (c.n > a.n ? c : a));
+    gx.push(`The largest age band is ${BINS.age[busy.u].label} years, with ${int(busy.n)} bridges (${fpct((busy.n / counted) * 100)}).`);
+  }
+  setFindings("#b3Find", gx, `${E} data`);
+  let tall = 0; for (let i = 0; i < cells.length; i++) if (cells[i] > tall) tall = cells[i];
+  $("#b3Facts").innerHTML = counted ? `<span><b>${int(counted)}</b> bridges with ${E} data</span><span><b>20</b> age bands × <b>20</b> score bands</span><span>Tallest bar <b>${int(tall)}</b> bridges</span>` : facts;
+  haPickMsg();
+  if (tab === "bridge") { drawAgeAvg(); drawAge3D(); }
+}
+function haPickMsg() {
+  const p = haPick(), a = $("#baPick"), c = $("#b3Pick");
+  if (!p) { a.hidden = true; c.hidden = true; return; }
+  a.hidden = false; c.hidden = false;
+  if (p.why) { a.innerHTML = c.innerHTML = `Bridge <b>${esc(hsPick.id)}</b> ${p.why}, so it is not in this chart.`; return; }
+  const bd = ha.bands[p.u], k = ha.cells[p.u * ha.NV + p.sv];
+  a.innerHTML = `Bridge <b>${esc(hsPick.id)}</b>: ${f1(p.v)} at age ${p.age} in ${ha.E}. The average for ages ${BINS.age[p.u].label} years is ${f1(bd.mean)}.`;
+  c.innerHTML = `Bridge <b>${esc(hsPick.id)}</b> (${f1(p.v)} at age ${p.age} in ${ha.E}) is in the bar for ages ${BINS.age[p.u].label} years and ${BHI_BINS[p.sv].label}, outlined in orange, with ${int(k)} bridge${k === 1 ? "" : "s"}.`;
+}
+function drawAgeAvg() {
+  const box = $("#baBox"); if (!box || !ha || ha.key !== hsKey()) return;
+  const B = ha.bands, NU = B.length, p = haPick(), pk = p && !p.why ? p : null;
+  const NS = "http://www.w3.org/2000/svg";
+  const W = Math.max(300, box.clientWidth || 700), narrow = W < 520;
+  const Ht = narrow ? 270 : 330, mL = 46, mR = 16, mT = 14, mB = 44, pw = W - mL - mR, ph = Ht - mT - mB;
+  const has = B.some((b) => b.n > 0);
+  const vals = B.flatMap((b) => (b.n ? [b.p25, b.mean] : [])).concat(pk ? [pk.v] : []);
+  const yLo0 = Math.max(0, Math.min(90, Math.floor((Math.min(...vals, 100) - 2) / 5) * 5)), yHi = 100, step = yHi - yLo0 > 40 ? 10 : yHi - yLo0 >= 15 ? 5 : 2, yLo = Math.floor(yLo0 / step) * step;
+  const slot = pw / NU, bw = Math.max(4, Math.min(34, slot * 0.68));
+  const x = (u) => mL + slot * (u + 0.5), y = (v) => mT + ph - ((v - yLo) / (yHi - yLo)) * ph;
+  const legend = [`<span><svg width="20" height="12" aria-hidden="true"><rect x="3" y="1" width="14" height="10" rx="2" fill="#1f6fb2" fill-opacity=".8"/></svg>Average score</span>`,
+    `<span><svg width="20" height="12" aria-hidden="true"><line x1="10" x2="10" y1="1" y2="11" stroke="#1d3047" stroke-width="1.5"/><line x1="6" x2="14" y1="1" y2="1" stroke="#1d3047" stroke-width="1.5"/><line x1="6" x2="14" y1="11" y2="11" stroke="#1d3047" stroke-width="1.5"/></svg>Interquartile range</span>`,
+    `<span><svg width="28" height="12" aria-hidden="true"><line x1="1" x2="27" y1="6" y2="6" stroke="#5c6670" stroke-width="1.5" stroke-dasharray="5 4"/></svg>Average of all these bridges (${f1(ha.mean)})</span>`];
+  if (pk) legend.push(`<span><svg width="14" height="12" aria-hidden="true"><rect x="3" y="2" width="8" height="8" fill="#c2561a"/></svg>Bridge ${esc(hsPick.id)}</span>`);
+  $("#baLegend").innerHTML = has ? legend.join("") : "";
+  const aria = has ? `Average health score by bridge age in ${ha.E}: ${f1(B[0].mean)} at ages ${BINS.age[0].label} years` : "No health scores for this selection";
+  let s = `<svg xmlns="${NS}" viewBox="0 0 ${W} ${Ht}" width="${W}" height="${Ht}" role="img" aria-label="${esc(aria)}">`;
+  for (let v = yLo; v <= yHi + 1e-9; v += step) s += `<line class="d-grid" x1="${mL}" x2="${W - mR}" y1="${y(v)}" y2="${y(v)}"/><text class="d-tick" x="${mL - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  s += `<line class="d-axis" x1="${mL}" x2="${W - mR}" y1="${mT + ph}" y2="${mT + ph}"/>`;
+  const every = slot >= 44 ? 1 : slot >= 22 ? 2 : 4;
+  B.forEach((b, u) => { if (u % every === 0) s += `<text class="d-tick" x="${x(u)}" y="${mT + ph + 16}" text-anchor="middle">${BINS.age[u].label}</text>`; });
+  s += `<text class="d-axlbl" x="${mL + pw / 2}" y="${Ht - 4}" text-anchor="middle">Bridge age (years)</text>`;
+  s += `<text class="d-axlbl" transform="translate(12 ${mT + ph / 2}) rotate(-90)" text-anchor="middle">Health score (%)</text>`;
+  if (!has) {
+    s += `<text class="hs-empty" x="${mL + pw / 2}" y="${mT + ph / 2}" text-anchor="middle">No bridges with a known age have data in ${ha.E}.</text>`;
+  } else {
+    B.forEach((b, u) => {
+      if (!b.n) return;
+      const top = y(b.mean), cx = x(u);
+      s += `<rect class="ba-bar" data-u="${u}" x="${(cx - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, mT + ph - top).toFixed(1)}" rx="2"/>`;
+      const c = Math.min(5, bw / 2 - 1);
+      s += `<path class="ba-iqr" d="M${cx.toFixed(1)} ${y(b.p75).toFixed(1)}V${y(b.p25).toFixed(1)}M${(cx - c).toFixed(1)} ${y(b.p75).toFixed(1)}h${(2 * c).toFixed(1)}M${(cx - c).toFixed(1)} ${y(b.p25).toFixed(1)}h${(2 * c).toFixed(1)}"/>`;
+    });
+    s += `<line class="ba-avg" x1="${mL}" x2="${W - mR}" y1="${y(ha.mean).toFixed(1)}" y2="${y(ha.mean).toFixed(1)}"/>`;
+    if (pk) s += `<rect class="hs-brdot" x="${(x(pk.u) + bw / 2 + 2).toFixed(1)}" y="${(y(pk.v) - 4).toFixed(1)}" width="8" height="8"/>`;
+    B.forEach((b, u) => (s += `<rect class="ba-hit" data-u="${u}" x="${(mL + slot * u).toFixed(1)}" y="${mT}" width="${slot.toFixed(1)}" height="${ph}"/>`));
+  }
+  s += `</svg>`;
+  box.innerHTML = s;
+  if (!has) return;
+  const svg = box.firstChild;
+  const tip = (ev) => {
+    const r = ev.target.closest(".ba-hit"); if (!r) return;
+    const u = +r.dataset.u, b = B[u];
+    svg.querySelectorAll(".ba-bar").forEach((e) => e.classList.toggle("on", e.dataset.u === String(u)));
+    let h = `<b>Age ${BINS.age[u].label} years, ${ha.E} data</b>`;
+    h += b.n ? `<br><span class="m">Average:</span> ${f1(b.mean)}<br><span class="m">Interquartile range:</span> ${f1(b.p25)} to ${f1(b.p75)}<br><span class="m">Median:</span> ${f1(b.p50)}<br><span class="m">5th percentile:</span> ${f1(b.p05)}<br><span class="m">Bridges counted:</span> ${int(b.n)}` : "<br>No bridges in this age band";
+    if (pk && pk.u === u) h += `<br><span class="m">Bridge ${esc(hsPick.id)}:</span> ${f1(pk.v)} at age ${pk.age}`;
+    showTip(h, ev.clientX, ev.clientY);
+  };
+  svg.addEventListener("mousemove", tip);
+  svg.addEventListener("click", tip);
+  svg.addEventListener("mouseleave", () => { svg.querySelectorAll(".ba-bar.on").forEach((e) => e.classList.remove("on")); hideTip(); });
+}
+function drawAge3D() {
+  const box = $("#b3Box"); if (!box || !ha || ha.key !== hsKey()) return;
+  const M = B3_MODES[b3Mode], NV = ha.NV, cells = [];
+  $("#b3CbLabel").textContent = M.label; $("#b3Help").textContent = M.help;
+  $$("#b3Seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.b3 === b3Mode)));
+  ha.bands.forEach((b) => {
+    for (let v = 0; v < NV; v++) {
+      const k = ha.cells[b.u * NV + v]; if (!k) continue;
+      const pBand = (k / b.n) * 100, pTot = (k / ha.counted) * 100;
+      cells.push({ u: b.u, v, n: k, pBand, pTot, value: b3Mode === "n" ? k : pBand });
+    }
+  });
+  if (!cells.length) { box.innerHTML = `<p class="hs-note">No bridges with a known age have data in ${ha.E}.</p>`; $("#b3Ticks").innerHTML = ""; return; }
+  const max = Math.max(...cells.map((c) => c.value)), z = P3D.niceTop(max, 5);
+  if (b3Mode !== "n" && z.top > 100) { z.top = 100; z.step = 20; } // shares never exceed 100%
+  const cStep = P3D.niceTop(max, 4).step;
+  let ticks = ""; for (let v = 0; v < max - cStep * 0.35; v += cStep) ticks += `<span style="left:${(v / max) * 100}%">${M.tick(v)}</span>`;
+  $("#b3Ticks").innerHTML = ticks + `<span style="left:100%">${M.fmt(max)}</span>`;
+  P3D.render(box, {
+    cells, bins: { ...BINS, cs: BHI_BINS }, zTop: z.top, zStep: z.step, cMax: max, csName: "Health score", vLabel: "Health score (%)", zLabel: M.z,
+    fmtValue: M.fmt, fmtTick: M.tick,
+    tipFor: (c) => `<b>Age ${BINS.age[c.u].label} years, health score ${BHI_BINS[c.v].label}</b><br><span class="m">Bridges:</span> ${int(c.n)}<br><span class="m">Share of age band:</span> ${pct(c.pBand)}<br><span class="m">Share of all these bridges:</span> ${pct(c.pTot)}`,
+    ariaLabel: `Bridges by age band and health score band in ${ha.E}, ${cells.length} bars. Download the CSV for exact values.`,
+  });
+  const p = haPick();
+  if (p && !p.why) { const g = box.querySelector(`.bar3d[data-u="${p.u}"][data-v="${p.sv}"]`); if (g) g.classList.add("pick"); }
+}
+P3D.attachRotate([$("#b3Box")], drawAge3D);
+$("#b3Reset").addEventListener("click", () => { P3D.resetView(); drawAge3D(); });
+$("#b3Seg").addEventListener("click", (ev) => { const b = ev.target.closest("button[data-b3]"); if (!b) return; b3Mode = b.dataset.b3; drawAge3D(); });
+function b3Band(u) {
+  const g = $("#b3Grid");
+  g.classList.toggle("hovering", u != null);
+  $$(".bar3d", g).forEach((b) => { const hit = u != null && b.dataset.u === String(u); b.classList.toggle("hl", hit); b.classList.toggle("dim", u != null && !hit); });
+}
+$("#b3Grid").addEventListener("mousemove", (ev) => {
+  const g = ev.target.closest(".bar3d");
+  if (!g || ev.buttons) { if ($("#b3Grid").classList.contains("hovering")) { b3Band(null); hideTip(); } return; }
+  b3Band(+g.dataset.u); showTip(g.dataset.tip, ev.clientX, ev.clientY);
+});
+$("#b3Grid").addEventListener("mouseleave", () => { b3Band(null); hideTip(); });
+$("#b3Grid").addEventListener("click", (ev) => { const g = ev.target.closest(".bar3d"); if (g) { b3Band(+g.dataset.u); const r = g.getBoundingClientRect(); showTip(g.dataset.tip, r.left + r.width / 2, r.top); } });
+function csvDownload(rows, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+// CSV: one row per age band
+$("#baCsv").addEventListener("click", () => {
+  if (!ha || !ha.counted) return;
+  const r = (v) => (v == null ? "" : v.toFixed(1));
+  const rows = ["state,data_year,age_band_years,bridges,average_pct,p05_pct,p25_pct,median_pct,p75_pct"];
+  ha.bands.forEach((b) => rows.push([sel.st, ha.E, BINS.age[b.u].label.replace("–", "-"), b.n, r(b.mean), r(b.p05), r(b.p25), r(b.p50), r(b.p75)].join(",")));
+  csvDownload(rows, `${sel.st}_${sel.win}_health_by_age.csv`);
+});
+// CSV: one row per age band and score band with bridges in it
+$("#b3Csv").addEventListener("click", () => {
+  if (!ha || !ha.counted) return;
+  const rows = ["state,data_year,age_band_years,health_score_band,bridges,share_of_age_band_pct,share_of_all_bridges_pct"];
+  ha.bands.forEach((b) => { for (let v = 0; v < ha.NV; v++) { const k = ha.cells[b.u * ha.NV + v]; if (k) rows.push([sel.st, ha.E, BINS.age[b.u].label.replace("–", "-"), `"${BHI_BINS[v].label}"`, k, ((k / b.n) * 100).toFixed(2), ((k / ha.counted) * 100).toFixed(2)].join(",")); } });
+  csvDownload(rows, `${sel.st}_${sel.win}_health_by_age_3d.csv`);
+});
+new ResizeObserver(() => { if (tab === "bridge") { cancelAnimationFrame(baRz); baRz = requestAnimationFrame(drawAgeAvg); } }).observe($("#baBox"));
+new ResizeObserver(() => { if (tab === "bridge") { cancelAnimationFrame(b3Rz); b3Rz = requestAnimationFrame(drawAge3D); } }).observe($("#b3Box"));
+
 /* ---------- tabs ---------- */
 const TABS = ["insights", "analytics", "bridge", "advanced"];
 let tab = "insights";
@@ -1953,7 +2579,7 @@ function setTab(t, { focus = false, hash = true, draw = true } = {}) {
   if (!draw) return;
   if (t === "insights") requestAnimationFrame(drawProfiles);
   if (t === "analytics") requestAnimationFrame(() => { drawWeibull(); drawMarkov(); });
-  if (t === "bridge") { if (hsStats && hsStats.key === hsKey()) requestAnimationFrame(drawHealth); else renderBridgeTab(); }
+  if (t === "bridge") { if (hsStats && hsStats.key === hsKey()) requestAnimationFrame(() => { drawHealth(); drawForecast(); drawAgeAvg(); drawAge3D(); }); else renderBridgeTab(); }
   if (hash) writeHash();
 }
 $(".tabs").addEventListener("click", (ev) => { const b = ev.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
@@ -2064,9 +2690,10 @@ function drawDist() {
   $("#distViewCtl").hidden = !SHOW_MORE_THAN;
   const hist = distView === "hist";
   $("#distGrid").hidden = !hist; $("#excCard").hidden = hist;
-  $("#distHelp").textContent = hist
-    ? `Each bar is the share of ${unit} with that much of the element in the condition state. The grey bar is ${unit} with none of the element in that state (0%), and a white break means it runs past the top of the axis. Each chart has its own scale.`
-    : `Share of ${unit} with more than x% of the element quantity in each condition state. For example, the CS3 line at 10 shows the share of ${unit} with more than 10% of the element in CS3.`;
+  // one sentence per line
+  $("#distHelp").innerHTML = (hist
+    ? [`Each bar is the share of ${unit} with that much of the element in that condition state.`, "Grey bars show 0%.", "Each chart has its own scale."]
+    : [`Each line is the share of ${unit} with more than x% of the element in each condition state.`, "For example, CS3 at 10 means more than 10% in CS3."]).map((s) => `<p>${s}</p>`).join("");
   $("#distNote").textContent = byArea
     ? "Each bridge is weighted by its deck area, as in the 3D charts. A range such as >5–10% means more than 5%, up to 10%."
     : "Each bridge counts once, at its latest inspection in the period. A range such as >5–10% means more than 5%, up to 10%.";
@@ -2076,13 +2703,15 @@ function drawDist() {
     const all1 = sh(0, 20), some3 = 100 - sh(2, 0), some4 = 100 - sh(3, 0), small3 = some3 > 0 ? (sh(2, 1) / some3) * 100 : 0;
     const note = distAge === "all" ? "" : `bridges aged ${BINS.age[+distAge].label} years`;
     setFindings("#distFind", byArea ? [
-      `${fpct(all1)} of the deck area is on bridges with more than 95% of the element in CS1 (good).`,
-      `${fpct(some3)} of the deck area is on bridges with some of the element in CS3 (poor), and ${fpct(some4)} on bridges with some in CS4 (severe).`,
-      some3 > 0 && `Of that CS3 deck area, ${fpct(small3)} is on bridges with 5% or less of the element in CS3.`,
+      `${fpct(all1)} of the deck area is on bridges with over 95% in CS1 (good).`,
+      `${fpct(some3)} of the deck area is on bridges with some CS3 (poor).`,
+      `${fpct(some4)} of the deck area is on bridges with some CS4 (severe).`,
+      some3 > 0 && `Of that CS3 deck area, ${fpct(small3)} is on bridges with 5% or less in CS3.`,
     ] : [
       `${fpct(all1)} of the bridges have more than 95% of the element in CS1 (good).`,
-      `${fpct(some3)} of the bridges have some of the element in CS3 (poor), and ${fpct(some4)} have some in CS4 (severe).`,
-      some3 > 0 && `Of the bridges with some CS3, ${fpct(small3)} have 5% or less of the element in it.`,
+      `${fpct(some3)} of the bridges have some of the element in CS3 (poor).`,
+      `${fpct(some4)} of the bridges have some of the element in CS4 (severe).`,
+      some3 > 0 && `Of the bridges with some CS3, ${fpct(small3)} have 5% or less in it.`,
     ], note);
   }
   if (hist) {

@@ -96,8 +96,46 @@ is no database, no server code and no build step, so it runs on the Vercel Hobby
         built, age, score (%) and element types counted. Drawn by `renderBridgeTab()` /
         `drawHealth()` in `public/index.html`. The same scores show in the bridge map's hover
         box (see below).
-     2. to 4. Trend and forecast, average health by age, health by age (3D): still to come,
-        with the health score colour on the bridge map.
+     2. **Health score forecast.** Where the scores are heading over the next 10 years if no
+        repairs are made. Every element on the bridges with a score in the period's last data
+        year starts from its condition in that year and ages one year at a time with
+        Prediction Methods #1 and #2, fitted to the state's data for the selected period as in
+        Basic Analytics (Element type level). The chart continues section 1's average and
+        interquartile range as a dashed forecast in a shaded zone, with a hover box per year.
+        A bridge picked with **Find a bridge** in section 1 gets its own forecast line and a
+        line of text. A **back-check** starts the same forecast at the period's first year
+        and shows it in its own small chart under the forecast chart, next to the actual
+        average of the same bridges, with two key findings. Key findings (average, share below 70%, share at 95% or more, median and
+        5th percentile in the last forecast year), a facts line, and a CSV with one row per bridge (score in the last
+        data year, then the forecast for each of the next 10 years). New unit costs rescore
+        the forecast too. The note under the chart on the share of element quantity kept as it is
+        is hidden at Alvin's request (25 Nov). One line in `renderForecast()` brings it back.
+        Drawn by `renderForecast()` / `drawForecast()` in
+        `public/index.html`, modelled by `public/forecast.js` (see "Health score forecast"
+        below).
+     3. **Average health by age.** One bar per 5-year age band (1–5 … 96–100 years, the same
+        bands as Basic Insights): the average health score of the bridges with a score in the
+        period's last data year, at their age in that year (that year − year built, from
+        `health.json`). A line on each bar spans the interquartile range, and a dashed line
+        marks the average of all these bridges. Bridges older than 100 years, built in that
+        year or later, or with no year built are left out and counted in the facts line. Hover
+        a band for its average, interquartile range, median, 5th percentile and bridge count.
+        Key findings: the highest and lowest band, ages 1–20 against 81–100 (61–80 when fewer
+        than 10 bridges are 81–100), and the share and average of bridges older than 50 years.
+        A picked bridge (Find a bridge) shows as an orange square beside its age band, with a
+        line of text. CSV: one row per age band. The scale starts a little below the lowest
+        value shown, on a multiple of the grid step, so small differences stay visible.
+     4. **Health by age (3D).** The same bridges, counted by age band and 5-point score band
+        (0% to below 5% … 90% to below 95%, then 95% to 100%, closed at the bottom like the map's
+        bands), drawn with `profile3d.js` like Basic Insights. Bar height is the number of
+        bridges, or each bar's share of its age band ("Share of each age band (%)"). Drag to
+        rotate, hover a bar for its counts and to highlight its age band, Reset view. Key
+        findings: the shares at 95% or more and below 70%, the age band where scores below 70%
+        are most common, and the age band with the most bridges. A picked bridge's bar is
+        outlined in orange. CSV: one row per bar.
+        Sections 3 and 4 are worked out together by `healthByAge()` in `public/index.html`
+        (drawn by `drawAgeAvg()` and `drawAge3D()`) and follow the unit costs.
+     5. Trend (improved, steady, declined): still to come.
    - **Advanced Analytics:** placeholder. The element type tabs are filled by
      `renderBasicAnalytics(ctx)` and `renderAdvancedAnalytics(ctx)` in `public/index.html`,
      which run whenever the selection changes; `ctx` (documented above the functions)
@@ -143,10 +181,13 @@ For each state × element type × period:
 ```
 public/
   index.html            the site (HTML, CSS and app script)
-  profile3d.js          3D bar chart renderer (SVG, drag to rotate)
+  profile3d.js          3D bar chart renderer (SVG, drag to rotate), for Basic Insights and the
+                        bridge level "Health by age (3D)"
   csdist.js             condition-state range histograms and "more than x%" curves (SVG)
   weibull.js            CS1 → CS2 Weibull fit and chart (also runs in Node for testing)
   markov.js             CS2 → CS3 → CS4 Markov fit, TPMs and line charts (also runs in Node)
+  forecast.js           health score forecast: fits both methods per element type and steps
+                        every element ahead (also runs in Node for testing)
   bridgedots.js         "Every bridge" view of the step 1 map (projection, insets, dot drawing)
   bridgemap.js          bridge locations map at the top of step 4 (Leaflet)
   mapconfig.js          your map settings: CARTO key, credits, state border (left out of updates)
@@ -166,6 +207,9 @@ public/
                         for the bridge map (see "Bridge locations map" below)
     <ST>/health.json.gz every bridge's health score for each data year, for Basic Analytics
                         (Bridge Level) (see "Health scores" below)
+    <ST>/fit.json.gz    the inputs of Prediction Methods #1 and #2 for every element type (each
+                        element file's CS quantities by age band) and its unit, for the health
+                        score forecast (Texas about 81 KB, all states about 2.4 MB)
 scripts/
   prepare_nbi.py        builds public/data/ from the NBI export (and the NBI inventory, if given)
   nbi_inventory.py      reads the NBI inventory files: positions, year built, deck area
@@ -174,7 +218,7 @@ scripts/
 vercel.json
 ```
 
-The data files are stored gzip-compressed: about 50 MB across roughly 7,690 files (the
+The data files are stored gzip-compressed: about 64 MB across roughly 7,790 files (the
 `loc/` files for the bridge map are about 25 MB of that), well inside the Hobby plan's 100 MB limit for static files. The site asks
 for `<file>.json.gz` and unpacks it in the browser with `DecompressionStream`
 (`loadJSON()` in `index.html`; current Chrome, Edge, Firefox and Safari). If a server
@@ -313,6 +357,73 @@ is. Checks at the default costs: Texas 2016–2025 averages 95.8% in 2016 and 96
 bridges with a score each year), median 98.2% and 5th percentile 86.8% in 2025. Minnesota
 bridge L5920 scores 40.3% in 2025. At costs of 1, 1, 1: Minnesota 2016–2025 94.5% → 89.5%,
 L5920 27.2%.
+
+## Health score forecast (`forecast.js`, `<ST>/fit.json.gz`)
+
+Section 2 of Basic Analytics (Bridge Level). It answers: if no repairs, rehabilitation or
+replacement are made, where are this state's health scores heading over the next 10 years?
+
+**Models.** For every element type of the state, `FC.fitElement()` fits Prediction Method #1
+(time in CS1) and Prediction Method #2 (CS2 → CS3 → CS4) with exactly the same inputs as Basic
+Analytics (Element type level): the element quantity in CS1 to CS4 per 5-year age band, for the
+selected period. These come from `<ST>/fit.json.gz`, which holds just those lists for every
+element type, so one small file replaces loading every element file. An element type keeps its
+condition (no model) when the period has fewer than 20 bridges with it, fewer than 3 age bands,
+none of it has left CS1, or Prediction Method #2 cannot be fitted. Fitting takes about 1.4 s for
+Texas and runs in short steps, so the page stays responsive. A progress line shows meanwhile.
+
+**Start.** The forecast covers every bridge with a health score in the period's last data year
+E (Texas 2016–2025: 18,243 bridges). Each of its element records in year E
+(`<ST>/loc/<EN>.json.gz`) starts from its CS1 to CS4 quantities at its age in E. These are the
+same records the health score counts: positive quantity, quantity check passed, and a unit. An
+element with no year built takes the bridge's year built from `health.json`, and an element of
+unknown age keeps its condition.
+
+**Stepping.** Each year, the element ages by one year, in the same way as `propagate()` in
+`markov.js`:
+- CS1 → CS2 with chance p12(a) = 1 − S(a+1) ÷ S(a), from Prediction Method #1
+- CS2 → CS3 with chance p23, and CS3 → CS4 with chance p34, of the element's 20-year age group,
+  from Prediction Method #2 (ages over 100 use the 81–100 group)
+
+where a is the element's age in that year. Nothing moves back to a better state, so a forecast
+score never goes up.
+
+**Scores.** For each bridge, year and unit, the forecast keeps N = Σ(100 CS1 + 67 CS2 + 33 CS3)
+and the total quantity Q, like `health.json`, so new unit costs only rescore it. The loc files
+keep CS shares in steps of 0.1% and quantities to 3 significant figures, so the score rebuilt
+from them (F₀) is close to, but not exactly, the bridge's health score (Texas: 0.03 points apart
+on average, at most 0.13). The forecast therefore adds the predicted change to the exact score:
+forecast in year E + k = score in E + (F_k − F₀), rounded to 0.1 like the health scores. One
+forecast is kept per state and period (the last four), about 5 MB in memory for Texas.
+
+**Back-check.** The same forecast also starts at the period's first year (with any bridges),
+even when section 1 flags it as thin, so the start is never in doubt (Alvin, 25 Nov). It follows
+one fixed set of bridges, those with a score in
+both that year and the last year, so the set never changes from year to year, and compares the
+average predicted score with the average actual score of those bridges each year
+(`FC.backcheck()`). It has its own small chart under the forecast chart (`drawBackcheck()`,
+Alvin, 25 Nov), titled with the number of bridges, because it follows a different set of bridges
+from the forecast chart's average line, which counts every bridge with a score each year. In
+Minnesota 2016–2025 that average jumps from 1,995 bridges in 2017 to 13,299 in 2018, so the two
+cannot be read against each other. Both lines are teal: actual solid with filled dots, predicted
+dashed with open dots, the gap between them lightly shaded, the 2025 values written at the line
+ends, and a hover box per year with the number of bridges and the difference in points. Two key
+findings give the numbers and a reading: "fell faster than predicted, so this forecast may be
+optimistic", "stayed higher than predicted, as repairs would explain", or "tracks closely" (a
+gap of more than 0.2 points decides). The models are fitted to the same period, so this checks
+how well they reproduce history, not an independent test. A fixed set matters: Texas reported
+31,058 bridges in 2016 but only 13,273 of them by 2025, and a changing set made the prediction
+seem to rise. A thin first year gives a small set: Minnesota 2016 holds only 1,257 bridges, of
+which 1,140 also have 2025 data. Checks (2016–2025, default costs): Minnesota, 1,140 bridges from
+2016, 94.2% → predicted 92.2%, actual 88.4%. Texas, 13,273 from 2016, 96.8% → 96.2%, actual 95.9%.
+New York, 116 from 2016, 89.2% → 87.3%, actual 86.0%. Minnesota 2021–2025, 13,061 from 2021,
+89.6% → 88.5%, actual 87.9%. The same numbers come from Node.
+
+**Checks** (default unit costs, 2016–2025, from 2025 to 2035): Texas 96.4% → 95.8%, share below
+70% 0.84% → 0.95%, median 97.6% and 5th percentile 85.8% in 2035, 0.18% of the weighted element
+quantity kept as it is. Minnesota 88.4% → 85.8%, below 70% 15.7% → 17.5% (4.1% kept). Delaware
+92.1% → 90.9% (19.4% kept, since many of its element types have fewer than 20 bridges).
+California 95.8% → 95.2%. The same numbers come from Node (`forecast.js` runs there too).
 
 ## Bridge locations map (top of step 4, `bridgemap.js`)
 

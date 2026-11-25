@@ -11,6 +11,8 @@ are ignored) and writes small JSON files to public/data/:
     All files are written gzip-compressed (<name>.json.gz); the site decompresses them.
     public/data/<ST>/<EN>.json        condition-state profile cells and (0, 5]% counts, grouped by end year
                                       and record year
+    public/data/<ST>/fit.json         the inputs of Prediction Methods #1 and #2 for every element type
+                                      (each element file's qty lists), for the BHI forecast
     public/data/<ST>/bridges.json     (with the inventory folder) every bridge's position and the years it
                                       appears in the NBI inventory and in the element data
     public/data/all-bridges.json      (with the inventory folder) every bridge with a position, in one file,
@@ -117,6 +119,16 @@ def write_json(path, obj):
     data = json.dumps(obj, separators=(",", ":")).encode("utf-8")
     with open(path + ".gz", "wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", compresslevel=9, mtime=0, filename="") as gz:
         gz.write(data)
+
+
+def fit_inputs(st, files):
+    """data/<ST>/fit.json: for every element type, the qty lists of its own file (ends[e][g] =
+    [ageBin, bridges, qCS1, qCS2, qCS3, qCS4, ...]) and its unit. The browser fits Prediction
+    Methods #1 and #2 from these for the BHI forecast, the same way as Basic Analytics does."""
+    return {"state": st,
+            "unit": {str(en): f["unit"] for en, f in sorted(files.items())},
+            "qty": {str(en): {e: {g: grp[5] for g, grp in ge.items()} for e, ge in f["ends"].items()}
+                    for en, f in sorted(files.items())}}
 
 
 def main(src, inv_dir=None):
@@ -301,6 +313,9 @@ def main(src, inv_dir=None):
                         "bridges": [sum(grp[0] for gy, grp in f["ends"].get(str(e), {}).items() if int(gy) >= s)
                                     for _, s, e in sw]})
             write_json(os.path.join(OUT, st, f"{en}.json"), f)
+        # the BHI forecast fits Prediction Methods #1 and #2 for every element type in the browser.
+        # fit.json holds just their inputs, each element's qty lists, so it loads as one small file.
+        write_json(os.path.join(OUT, st, "fit.json"), fit_inputs(st, files))
         els.sort(key=lambda x: x["en"])
         write_json(os.path.join(OUT, st, "index.json"),
                    {"state": st, "name": STATE_NAMES.get(st, st), "years": years[st],
